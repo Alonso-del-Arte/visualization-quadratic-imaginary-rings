@@ -133,6 +133,32 @@ public class NumberTheoreticFunctionsCalculator {
     }
     
     /**
+     * Computes the greatest common divisor (GCD) of two integers by using the Euclidean algorithm. Haven't tested it with a or b or both equal to 0 yet.
+     * @param a One of the two integers. May be negative, need not be greater than the other.
+     * @param b One of the two integers. May be negative, need not be greater than the other.
+     * @return The GCD as an integer.
+     */
+    public static int euclideanGCD(int a, int b) {
+        int currA, currB, currRemainder;
+        if (a < b) {
+            currA = b;
+            currB = a;
+        } else {
+            currA = a;
+            currB = b;
+        }
+        while (currB != 0) {
+            currRemainder = currA % currB;
+            currA = currB;
+            currB = currRemainder;
+        }
+        if (currA < 0) {
+            currA *= -1;
+        }
+        return currA;
+    }
+    
+    /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
@@ -185,6 +211,7 @@ public class NumberTheoreticFunctionsCalculator {
                     }
                     System.out.println("\u03BC(" + enteredInteger + ") = " + moebiusMu(enteredInteger));
                     System.out.println(enteredInteger + " is congruent to " + (enteredInteger % 4) + " modulo 4.");
+                    System.out.println("gcd(" + enteredInteger + ", 30) = " + euclideanGCD(enteredInteger, 30));
                     System.out.println(" ");
                     break;
             }

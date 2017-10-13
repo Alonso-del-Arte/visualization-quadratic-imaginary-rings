@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 AL
+ * Copyright (C) 2017 Alonso del Arte
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 package imaginaryquadraticinteger;
 
 /**
- *
+ * An exception to indicate when the result of an arithmetical operation results in an algebraic integer of higher algebraic degree than the implementation of AlgebraicInteger was designed for.
  * @author Alonso del Arte
  */
 public class AlgebraicDegreeOverflowException extends Exception {
@@ -26,10 +26,18 @@ public class AlgebraicDegreeOverflowException extends Exception {
     private final int maxExpectedAlgebraicDegree;
     private final int necessaryAlgebraicDegree;
     
+    /**
+     * Tells what is the maximum algebraic degree the function that threw the exception was expecting.
+     * @return An integer greater than 1 but less than the necessary algebraic degree. For example, this would be 2 if thrown by ImaginaryQuadraticInteger.plus().
+     */
     public int getMaxExpectedAlgebraicDegree() {
         return maxExpectedAlgebraicDegree;
     }
     
+    /**
+     * Tells what is the algebraic degree an object implementing AlgebraicInteger would need to handle to properly represent the result of the operation.
+     * @return An integer greater than the expected algebraic degree. For example, this could be 4 if thrown by ImaginaryQuadraticInteger.plus().
+     */
     public int getNecessaryAlgebraicDegree() {
         return necessaryAlgebraicDegree;
     }

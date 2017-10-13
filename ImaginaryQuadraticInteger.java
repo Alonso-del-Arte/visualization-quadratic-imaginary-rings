@@ -55,7 +55,6 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
      * Calculates the trace of the imaginary quadratic integer (real part plus real integer times square root of a negative integer)
      * @return Twice the real part
      */
-    
     @Override
     public int trace() {
         if (imagQuadRing.d1mod4 && denominator == 2) {
@@ -176,14 +175,30 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         return IQIString;
     }
     
+    public String toStringAlt() {
+
+        String altIQIString = this.toString();
+        if (this.imagQuadRing.negRad == -1) {
+            altIQIString = altIQIString.replace("\u221A(-1)", "i");
+        }
+        if (this.imagQuadRing.d1mod4) {
+            // TO DO: Conversion logic for theta notation
+        }
+        if (this.imagQuadRing.negRad == -3) {
+            altIQIString = altIQIString.replace("\u03B8", "\u03C9");
+        }
+        return altIQIString;
+ 
+    }
+    
     /**
-     * Addition operation, since operator + (plus) can't be overloaded.
+     * Addition operation, since operator+ (plus) can't be overloaded.
      * @param summand The imaginary quadratic integer to be added.
      * @return A new ImaginaryQuadraticInteger object with the result of the operation.
      * @throws AlgebraicDegreeOverflowException If the algebraic integers come from different quadratic rings, the result of the sum will be an algebraic integer of degree 4 and this exception will be thrown.
      */
     public ImaginaryQuadraticInteger plus(ImaginaryQuadraticInteger summand) throws AlgebraicDegreeOverflowException {
-        if (this.imagQuadRing.negRad != summand.imagQuadRing.negRad) {
+        if (((this.imagPartMult != 0) && (summand.imagPartMult != 0)) && (this.imagQuadRing.negRad != summand.imagQuadRing.negRad)) {
             throw new AlgebraicDegreeOverflowException("This operation would result in an algebraic integer of degree 4.", 2, 4);
         }
         int sumRealPart = 0;
@@ -211,6 +226,43 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
             sumDenom = 1;
         }
         return new ImaginaryQuadraticInteger(sumRealPart, sumImagPart, this.imagQuadRing, sumDenom);
+    }
+
+    /**
+     * Subtraction operation, since operator- can't be overloaded
+     * @param subtrahend The imaginary quadratic integer to be subtracted
+     * @return A new ImaginaryQuadraticInteger object with the result of the operation.
+     * @throws AlgebraicDegreeOverflowException If the algebraic integers come from different quadratic rings, the result of the sum will be an algebraic integer of degree 4 and this exception will be thrown.
+     */
+    public ImaginaryQuadraticInteger minus(ImaginaryQuadraticInteger subtrahend) throws AlgebraicDegreeOverflowException {
+        if (((this.imagPartMult != 0) && (subtrahend.imagPartMult != 0)) && (this.imagQuadRing.negRad != subtrahend.imagQuadRing.negRad)) {
+            throw new AlgebraicDegreeOverflowException("This operation would result in an algebraic integer of degree 4.", 2, 4);
+        }
+        int subtractionRealPart = 0;
+        int subtractionImagPart = 0;
+        int subtractionDenom = 1;
+        if (this.imagQuadRing.d1mod4) {
+            if (this.denominator == 1 && subtrahend.denominator == 2) {
+                subtractionRealPart = 2 * this.realPartMult - subtrahend.realPartMult;
+                subtractionImagPart = 2 * this.imagPartMult - subtrahend.imagPartMult;
+                subtractionDenom = 2;
+            }
+            if (this.denominator == 2 && subtrahend.denominator == 1) {
+                subtractionRealPart = this.realPartMult - 2 * subtrahend.realPartMult;
+                subtractionImagPart = this.imagPartMult - 2 * subtrahend.imagPartMult;
+                subtractionDenom = 2;
+            }
+            if (this.denominator == subtrahend.denominator) {
+                subtractionRealPart = this.realPartMult - subtrahend.realPartMult;
+                subtractionImagPart = this.imagPartMult - subtrahend.imagPartMult;
+                subtractionDenom = this.denominator;
+            }
+        } else {
+            subtractionRealPart = this.realPartMult - subtrahend.realPartMult;
+            subtractionImagPart = this.imagPartMult - subtrahend.imagPartMult;
+            subtractionDenom = 1;
+        }
+        return new ImaginaryQuadraticInteger(subtractionRealPart, subtractionImagPart, this.imagQuadRing, subtractionDenom);
     }
     
     /**
@@ -297,8 +349,11 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
                 text stuff
             }
         }
-        */        
-
+        */    
+       
+        RingWindowDisplay.startRingWindowDisplay(-1);
+        
+/*
         while (chosenRingD != 0) {
             System.out.print("Please enter a negative squarefree integer d for the ring discriminant (or 0 to quit): ");
             chosenRingD = getIntFromConsole(inputScanner);
@@ -332,8 +387,8 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
                     System.out.println("Minimal polynomial is " + currIQI.minPolynomialString());
                     System.out.println(" ");
                 }
-            }
-        }
-    }
+            } 
+        } */
+    } 
     
 }

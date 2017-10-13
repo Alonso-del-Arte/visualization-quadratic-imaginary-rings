@@ -327,11 +327,11 @@ public final class RingWindowDisplay extends Canvas {
             }
             // And now to seek the primes
             for (int x = 1; x < halfMaxX; x += 2) {
-                currPointX = this.zeroCoordX + halfUnitInterval + ((x - 1) * this.pixelsPerUnitInterval);
-                currNegPointX = this.zeroCoordX - halfUnitInterval - ((x - 1) * this.pixelsPerUnitInterval);
+                currPointX = this.zeroCoordX + (x * halfUnitInterval);
+                currNegPointX = this.zeroCoordX - (x * halfUnitInterval);
                 for (int y = 1; y <= halfMaxY; y += 2) {
-                    currPointY = this.zeroCoordY + this.pixelsPerBasicImaginaryInterval + ((y - 1) * verticalGridDistance);
-                    currNegPointY = this.zeroCoordY - this.pixelsPerBasicImaginaryInterval - ((y - 1) * verticalGridDistance);
+                    currPointY = this.zeroCoordY + (y * this.pixelsPerBasicImaginaryInterval);
+                    currNegPointY = this.zeroCoordY - (y * this.pixelsPerBasicImaginaryInterval);
                     currIQI = new ImaginaryQuadraticInteger(x, y, this.imagQuadRing, 2);
                     if (NumberTheoreticFunctionsCalculator.isPrime(currIQI.norm())) {
                         graphicsForPoints.setColor(this.inertPrimeColor);

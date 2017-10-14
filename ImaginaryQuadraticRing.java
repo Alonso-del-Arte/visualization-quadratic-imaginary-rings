@@ -42,6 +42,64 @@ public class ImaginaryQuadraticRing {
      */
     protected boolean d1mod4;
     
+    private static boolean preferenceForBlackboardBold = true;
+    
+    /**
+     * Query the setting of the preference for blackboard bold.
+     * @return true if blackboard bold is preferred, false if plain bold is preferred.
+     */
+    public static boolean preferBlackboardBold() {
+        return preferenceForBlackboardBold;
+    }
+    
+    /**
+     * Set preference for blackboard bold or plain bold. This is only relevant for the functions toTeXString() and toHTMLString().
+     * @param preferenceForBB true if blackboard bold is preferred, false if plain bold is preferred.
+     */
+    public static void preferBlackboardBold(boolean preferenceForBB) {
+        preferenceForBlackboardBold = preferenceForBB;
+    }
+    
+    /**
+     * A text representation of the ring. In some contexts, toTeXString() or toHTMLString() may be preferable.
+     * @return A string representing the imaginary quadratic ring which can be output to the console.
+     */
+    @Override
+    public String toString() {
+        String IQRString;
+        if (this.d1mod4) {
+            IQRString = "O_(Q(\u221A" + this.negRad + "))";
+        } else {
+            IQRString = "Z[\u221A" + this.negRad + "]";
+        }
+        return IQRString;
+    }
+
+    /**
+     * I have not tested this function.
+     * @return A string suitable for use in a TeX document, if I haven't made any mistakes.
+     */
+    public String toTeXString() {
+        String IQRString;
+        String QChar;
+        String ZChar;
+        if (preferenceForBlackboardBold) {
+            QChar = "\\mathbb Q";
+            ZChar = "\\mathbb Z";
+        } else {
+            QChar = "\\textbf Q";
+            ZChar = "\\textbf Z";
+        }
+        if (this.d1mod4) {
+            IQRString = "\\mathcal O_{" + QChar + "(\\sqrt{" + this.negRad + "})}";
+        } else {
+            IQRString = ZChar + "[\\sqrt{" + this.negRad + "}]";
+        }
+        return IQRString;
+    }
+    
+    // public String toHTMLString() implementation GOES HERE
+    
     public ImaginaryQuadraticRing(int d) {
         //
         if (d > -1) {

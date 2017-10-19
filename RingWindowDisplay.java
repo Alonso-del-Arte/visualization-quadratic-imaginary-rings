@@ -17,13 +17,14 @@
 package imaginaryquadraticinteger;
 
 import java.awt.*;
+import java.awt.event.*;
 import javax.swing.*;
 
 /**
  *
  * @author Alonso del Arte
  */
-public final class RingWindowDisplay extends Canvas {
+public final class RingWindowDisplay extends Canvas implements ActionListener {
     
     /**
      * The default pixels per unit interval. Hopefully in later versions of the program there will be the capability to change pixels per unit interval.
@@ -46,6 +47,7 @@ public final class RingWindowDisplay extends Canvas {
     public static final int DEFAULT_RING_D = -1;
     
     public static final int DEFAULT_DOT_RADIUS = 5;
+    public static final int DEFAULT_ZOOM_INTERVAL = 5;
     
     public static final Color DEFAULT_CANVAS_BACKGROUND_COLOR = new Color(2107440); // A dark blue
     
@@ -65,18 +67,12 @@ public final class RingWindowDisplay extends Canvas {
     protected ImaginaryQuadraticRing imagQuadRing;
     protected ImaginaryQuadraticInteger basicImaginaryInterval;
     protected int pixelsPerBasicImaginaryInterval;
-    protected Canvas ringCanvas;
-    protected Graphics ringCanvasGraphics;
     
-    private java.util.List<ImagQuadrIntDisplayComplexPlanePoint> windowIntegers;
-    private int windowIntegersLength;
-    private int halfIntegersMark;
     private int ringCanvasHorizMax;
     private int ringCanvasVerticMax;
     
-    private int chosenRingD;
-    
     private int dotRadius;
+    private int zoomInterval;
     
     private Color backgroundColor;
     
@@ -92,19 +88,12 @@ public final class RingWindowDisplay extends Canvas {
     private int zeroCoordX;
     private int zeroCoordY;
     
-    /**
-     * Change how many pixels there are per unit interval.
-     * @param pixelLength An integer greater than or equal to MINIMUM_PIXELS_PER_UNIT_INTERVAL but less than or equal to MAXIMUM_PIXELS_PER_UNIT_INTERVAL. A value outside of this range will cause an IllegalArgumentException.
-     */
-    public void setPixelsPerUnitInterval(int pixelLength) {
-        if (pixelLength < MINIMUM_PIXELS_PER_UNIT_INTERVAL) {
-            throw new CoordinateSystemMismatchException("Pixels per unit interval needs to be set to greater than " + (MINIMUM_PIXELS_PER_UNIT_INTERVAL - 1), false);
-        }
-        if (pixelLength > MAXIMUM_PIXELS_PER_UNIT_INTERVAL) {
-            throw new CoordinateSystemMismatchException("Pixels per unit interval needs to be set to less than " + (MAXIMUM_PIXELS_PER_UNIT_INTERVAL + 1), false);
-        }
-        pixelsPerUnitInterval = pixelLength;
-    }
+    private JFrame ringFrame;
+    private JMenuBar ringWindowMenuBar;
+    private JMenu ringWindowMenu;
+    private JMenuItem ringWindowMenuItem;
+    private JMenuItem increaseDMenuItem, decreaseDMenuItem;
+    private JMenuItem zoomInMenuItem, zoomOutMenuItem;
     
     private void drawGrids(Graphics graphicsForGrids) {
         
@@ -353,49 +342,25 @@ public final class RingWindowDisplay extends Canvas {
         }
         
     }
-    
-    private void collectWindowIntegers() {
-        
-        int minX, maxX, minY, maxY;
-        int halfIntMinX, halfIntMaxX, halfIntMinY, halfIntMaxY;
-        int currX, currY;
-        ImagQuadrIntDisplayComplexPlanePoint currAlgInteger;
-        
-        currX = 0;
-        currY = 0;
-        
-        maxX = (int) Math.floor((ringCanvasHorizMax/pixelsPerUnitInterval)/2);
-        minX = (-1) * maxX;
-        if (imagQuadRing.d1mod4) {
-            maxY = (int) Math.floor(ringCanvasVerticMax/pixelsPerBasicImaginaryInterval);
-        } else {
-            maxY = (int) Math.floor((ringCanvasVerticMax/pixelsPerBasicImaginaryInterval)/2);
+
+    /**
+     * Change how many pixels there are per unit interval. Also concomitantly changes how many pixels there are per basic imaginary interval.
+     * @param pixelLength An integer greater than or equal to MINIMUM_PIXELS_PER_UNIT_INTERVAL but less than or equal to MAXIMUM_PIXELS_PER_UNIT_INTERVAL. A value outside of this range will cause an IllegalArgumentException.
+     */
+    public void setPixelsPerUnitInterval(int pixelLength) {
+        if (pixelLength < MINIMUM_PIXELS_PER_UNIT_INTERVAL) {
+            throw new CoordinateSystemMismatchException("Pixels per unit interval needs to be set to greater than " + (MINIMUM_PIXELS_PER_UNIT_INTERVAL - 1), false);
         }
-        minY = (-1) * maxY;
-        for (int x = minX; x < maxX; x++) {
-            for (int y = minY; y < minY; y++) {
-                currAlgInteger = new ImagQuadrIntDisplayComplexPlanePoint(x, y, imagQuadRing, 1, currX, currY);
-                windowIntegers.add(currAlgInteger);
-            }
+        if (pixelLength > MAXIMUM_PIXELS_PER_UNIT_INTERVAL) {
+            throw new CoordinateSystemMismatchException("Pixels per unit interval needs to be set to less than " + (MAXIMUM_PIXELS_PER_UNIT_INTERVAL + 1), false);
         }
-        halfIntegersMark = windowIntegers.size();
-        if (imagQuadRing.d1mod4) {
-            // TODO: Collect the "half-integers"
+        pixelsPerUnitInterval = pixelLength;
+        double imagInterval;
+        imagInterval = this.pixelsPerUnitInterval * this.imagQuadRing.absNegRadSqrt;
+        if (this.imagQuadRing.d1mod4) {
+            imagInterval /= 2;
         }
-        windowIntegersLength = windowIntegers.size();
-        
-    }
-    
-    private ImaginaryQuadraticInteger integerLookUp(int coordX, int coordY) {
-        int currIndex = 0;
-        if (coordX < 0 || coordX > ringCanvasHorizMax || coordY < 0 || coordY > ringCanvasVerticMax) {
-            throw new IllegalArgumentException("Coordinates with negative values are not allowed.");
-        }
-        if (coordX < 0 || coordX > ringCanvasHorizMax || coordY < 0 || coordY > ringCanvasVerticMax) {
-            throw new IllegalArgumentException("Coordinates exceed given canvas size.");
-        }
-        // TODO: Lookup logic goes here
-        return windowIntegers.get(currIndex);
+        this.pixelsPerBasicImaginaryInterval = (int) Math.floor(imagInterval);
     }
     
     public void changeRingWindowDimensions(int newHorizMax, int newVerticMax) {
@@ -422,6 +387,13 @@ public final class RingWindowDisplay extends Canvas {
         this.dotRadius = newDotRadius;
     }
     
+    public void changeZoomInterval(int newZoomInterval) {
+        if (newZoomInterval < 1) {
+            throw new IllegalArgumentException("Zoom interval must be at least 1 pixel.");
+        }
+        this.zoomInterval = newZoomInterval;
+    }
+    
     public void changePointColors(Color newZeroColor, Color newUnitColor, Color newInertPrimeColor, Color newSplitPrimeColor, Color newRamifiedPrimeColor) {
         this.zeroColor = newZeroColor;
         this.unitColor = newUnitColor;
@@ -435,11 +407,78 @@ public final class RingWindowDisplay extends Canvas {
         this.zeroCoordY = newCoordY;
     }
     
+    /**
+     * Paints the canvas, by delegating to drawGrids() and drawPoints().
+     * @param g 
+     */
     @Override
     public void paint(Graphics g) {
         drawGrids(g);
         drawPoints(g);
     }   
+
+    public void incrementDiscriminant() {
+        int discr = this.imagQuadRing.negRad + 1;
+        while (!NumberTheoreticFunctionsCalculator.isSquareFree(discr) && discr < -1) {
+            discr++;
+        }
+        if (discr == -1) {
+            increaseDMenuItem.setEnabled(false);
+        }
+        if (discr == Integer.MIN_VALUE + 3) {
+            decreaseDMenuItem.setEnabled(true);
+        }
+        ImaginaryQuadraticRing imagRing = new ImaginaryQuadraticRing(discr);
+        ringFrame.setTitle("Ring Diagram for " + imagRing.toString());
+        setRing(imagRing);
+        repaint();
+    }
+
+    public void decrementDiscriminant() {
+        int discr = this.imagQuadRing.negRad - 1;
+        while (!NumberTheoreticFunctionsCalculator.isSquareFree(discr) && discr > (Integer.MIN_VALUE + 1)) {
+            discr--;
+        }
+        if (discr == Integer.MIN_VALUE + 1) {
+            this.decreaseDMenuItem.setEnabled(false);
+        }
+        if (discr == -2) {
+            this.increaseDMenuItem.setEnabled(true);
+        }
+        ImaginaryQuadraticRing imagRing = new ImaginaryQuadraticRing(discr);
+        this.ringFrame.setTitle("Ring Diagram for " + imagRing.toString());
+        setRing(imagRing);
+        repaint();
+    }
+    
+    public void zoomIn() {
+        int newPixelsPerUnitInterval = this.pixelsPerUnitInterval;
+        if (newPixelsPerUnitInterval < (MAXIMUM_PIXELS_PER_UNIT_INTERVAL - zoomInterval)) {
+            newPixelsPerUnitInterval += zoomInterval;
+        } else {
+            this.zoomInMenuItem.setEnabled(false);
+        }
+        if (newPixelsPerUnitInterval > (MINIMUM_PIXELS_PER_UNIT_INTERVAL + zoomInterval) && (newPixelsPerUnitInterval < (MINIMUM_PIXELS_PER_UNIT_INTERVAL + 2 * zoomInterval))) {
+            this.zoomOutMenuItem.setEnabled(true);
+        }
+        setPixelsPerUnitInterval(newPixelsPerUnitInterval);
+        repaint();
+    }
+    
+    public void zoomOut() {
+        int newPixelsPerUnitInterval = this.pixelsPerUnitInterval;
+        if (newPixelsPerUnitInterval > (MINIMUM_PIXELS_PER_UNIT_INTERVAL + zoomInterval)) {
+            newPixelsPerUnitInterval -= zoomInterval;
+        } else {
+            this.zoomOutMenuItem.setEnabled(false);
+        }
+        if (newPixelsPerUnitInterval > (MAXIMUM_PIXELS_PER_UNIT_INTERVAL - 2 * zoomInterval) && (newPixelsPerUnitInterval < (MAXIMUM_PIXELS_PER_UNIT_INTERVAL - zoomInterval))) {
+            this.zoomOutMenuItem.setEnabled(true);
+        }
+        setPixelsPerUnitInterval(newPixelsPerUnitInterval);
+        repaint();
+    }
+
     
     /**
      * Set the imaginary quadratic ring for which to draw a window of
@@ -455,12 +494,94 @@ public final class RingWindowDisplay extends Canvas {
         this.pixelsPerBasicImaginaryInterval = (int) Math.floor(imagInterval);
     }
     
+    /**
+     * Function to handle menu events
+     * @param ae Object giving information about the menu item selected
+     */
+    @Override
+    public void actionPerformed(ActionEvent ae) {
+        switch (ae.getActionCommand()) {
+            case "incrD":
+                incrementDiscriminant();
+                break;
+            case "decrD":
+                decrementDiscriminant();
+                break;
+            case "zoomIn":
+                zoomIn();
+                break;
+            case "zoomOut":
+                zoomOut();
+                break;
+        }
+    }
+    
+    private void setUpRingFrame() {
+        
+        ringFrame = new JFrame("Ring Diagram for " + this.imagQuadRing.toString());  
+        ringFrame.add(this);
+        ringFrame.setLayout(null);  
+        ringFrame.setSize(RING_CANVAS_DEFAULT_HORIZ_MAX + 20, RING_CANVAS_DEFAULT_VERTIC_MAX + 40);
+
+        ringWindowMenuBar = new JMenuBar();
+        ringWindowMenu = new JMenu("Edit");
+        ringWindowMenu.setMnemonic(KeyEvent.VK_E);
+        ringWindowMenu.getAccessibleContext().setAccessibleDescription("Menu to change certain parameters");
+        ringWindowMenuBar.add(ringWindowMenu);
+        ringWindowMenuItem = new JMenuItem("Increment discriminant");
+        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Increment the discriminant to choose another ring");
+        increaseDMenuItem = ringWindowMenu.add(ringWindowMenuItem);
+        increaseDMenuItem.setActionCommand("incrD");
+        increaseDMenuItem.addActionListener(this);
+        if (this.imagQuadRing.negRad == -1) {
+            increaseDMenuItem.setEnabled(false);
+        }
+        ringWindowMenuItem = new JMenuItem("Decrement discriminant");
+        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Decrement the discriminant to choose another ring");
+        decreaseDMenuItem = ringWindowMenu.add(ringWindowMenuItem);
+        decreaseDMenuItem.setActionCommand("decrD");
+        decreaseDMenuItem.addActionListener(this);
+        if (this.imagQuadRing.negRad == Integer.MIN_VALUE + 1) {
+            decreaseDMenuItem.setEnabled(false);
+        }
+    /*    ringWindowMenu.addSeparator();
+        ringWindowMenuItem = new JMenuItem("Preferences...");
+        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Bring up a dialogue to adjust preferences");
+        ringWindowMenu.add(ringWindowMenuItem); 
+    */
+
+        ringWindowMenu = new JMenu("View");
+        ringWindowMenu.setMnemonic(KeyEvent.VK_V);
+        ringWindowMenu.getAccessibleContext().setAccessibleDescription("Menu to zoom in or zoom out");
+        ringWindowMenuBar.add(ringWindowMenu);
+        ringWindowMenuItem = new JMenuItem("Zoom in");
+        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Zoom in, by increasing pixels per unit interval");
+        zoomInMenuItem = ringWindowMenu.add(ringWindowMenuItem);
+        zoomInMenuItem.setActionCommand("zoomIn");
+        zoomInMenuItem.addActionListener(this);
+        if (this.pixelsPerUnitInterval > (MAXIMUM_PIXELS_PER_UNIT_INTERVAL - zoomInterval)) {
+            zoomInMenuItem.setEnabled(false);
+        }
+        ringWindowMenuItem = new JMenuItem("Zoom out");
+        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Zoom out, by decreasing pixels per unit interval");
+        zoomOutMenuItem = ringWindowMenu.add(ringWindowMenuItem);
+        zoomOutMenuItem.setActionCommand("zoomOut");
+        zoomOutMenuItem.addActionListener(this);
+        if (this.pixelsPerUnitInterval < (MINIMUM_PIXELS_PER_UNIT_INTERVAL + zoomInterval)) {
+            zoomInMenuItem.setEnabled(false);
+        }
+
+        ringFrame.setJMenuBar(ringWindowMenuBar);
+        ringFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        ringFrame.setVisible(true);
+
+    }
+    
     public RingWindowDisplay(int ringChoice) {
         
         ImaginaryQuadraticRing imR;
         
         this.pixelsPerUnitInterval = DEFAULT_PIXELS_PER_UNIT_INTERVAL;
-        this.ringCanvas = new Canvas();
         this.ringCanvasHorizMax = RING_CANVAS_DEFAULT_HORIZ_MAX;
         this.ringCanvasVerticMax = RING_CANVAS_DEFAULT_VERTIC_MAX;
         this.backgroundColor = DEFAULT_CANVAS_BACKGROUND_COLOR;
@@ -476,6 +597,7 @@ public final class RingWindowDisplay extends Canvas {
         this.zeroCoordY = (int) Math.floor(this.ringCanvasVerticMax/2);
         
         this.dotRadius = DEFAULT_DOT_RADIUS;
+        this.zoomInterval = DEFAULT_ZOOM_INTERVAL;
         
         if (ringChoice > 0) {
             ringChoice *= -1;
@@ -486,7 +608,6 @@ public final class RingWindowDisplay extends Canvas {
             imR = new ImaginaryQuadraticRing(DEFAULT_RING_D);
         }
         this.setRing(imR);
-        
         this.setBackground(this.backgroundColor);
         this.setSize(this.ringCanvasHorizMax, this.ringCanvasVerticMax); 
                                
@@ -501,17 +622,9 @@ public final class RingWindowDisplay extends Canvas {
             ringChoice = DEFAULT_RING_D;
         }
         
-        JFrame ringFrame = new JFrame("Ring Diagram");  
-        ringFrame.add(new RingWindowDisplay(ringChoice));
-        ringFrame.setLayout(null);  
-        ringFrame.setSize(RING_CANVAS_DEFAULT_HORIZ_MAX + 20, RING_CANVAS_DEFAULT_VERTIC_MAX + 20);
-        ringFrame.setVisible(true);
-        ringFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        
-        
-        
+        RingWindowDisplay rwd = new RingWindowDisplay(ringChoice);
+        rwd.setUpRingFrame();
         
     }
-
     
 }

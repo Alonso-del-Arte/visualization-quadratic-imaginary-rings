@@ -27,7 +27,7 @@ import javax.swing.*;
 public final class RingWindowDisplay extends Canvas implements ActionListener {
     
     /**
-     * The default pixels per unit interval. Hopefully in later versions of the program there will be the capability to change pixels per unit interval.
+     * The default number of pixels per unit interval. The protected variable pixelsPerUnitInterval is initialized to this value.
      */
     public static final int DEFAULT_PIXELS_PER_UNIT_INTERVAL = 40;
     /**
@@ -45,9 +45,18 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
     public static final int RING_CANVAS_DEFAULT_VERTIC_MAX = 720;
     
     public static final int DEFAULT_RING_D = -1;
+    /**
+     * The minimum integer the square root of which can be used to generate an imaginary quadratic integer ring for the purpose of display in this ring window.
+     * Although technically an ImaginaryQuadraticRing can be defined with the square root of -2147483647 (which is a prime number), this would quickly lead to arithmetic overflow problems.
+     * Hopefully this value of -67108863 = (-1) * 3 * 2371 * 8191 is "small" enough not to cause arithmetic overflow problems with the largest zoom out setting, but "large" enough to be of no interest to most users of this program.
+     */
+    public static final int MINIMUM_RING_D = Integer.MIN_VALUE/32 + 1;
     
     public static final int DEFAULT_DOT_RADIUS = 5;
+    public static final int MINIMUM_DOT_RADIUS = 1;
+    
     public static final int DEFAULT_ZOOM_INTERVAL = 5;
+    public static final int MINIMUM_ZOOM_INTERVAL = 1;
     
     public static final Color DEFAULT_CANVAS_BACKGROUND_COLOR = new Color(2107440); // A dark blue
     
@@ -92,8 +101,9 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
     private JMenuBar ringWindowMenuBar;
     private JMenu ringWindowMenu;
     private JMenuItem ringWindowMenuItem;
-    private JMenuItem increaseDMenuItem, decreaseDMenuItem;
+    private JMenuItem chooseDMenuItem, increaseDMenuItem, decreaseDMenuItem;
     private JMenuItem zoomInMenuItem, zoomOutMenuItem;
+    private JMenuItem aboutMenuItem;
     
     private void drawGrids(Graphics graphicsForGrids) {
         
@@ -363,6 +373,11 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
         this.pixelsPerBasicImaginaryInterval = (int) Math.floor(imagInterval);
     }
     
+    /**
+     * Function to change the size of the canvas on which the ring diagrams are drawn. I have not completely thought this one through, and I certainly haven't tested it.
+     * @param newHorizMax The new width of the ring window. This needs to be at least equal to RING_CANVAS_HORIZ_MIN.
+     * @param newVerticMax The new height of the ring window. This needs to be at least equal to RING_CANVAS_VERTIC_MIN.
+     */
     public void changeRingWindowDimensions(int newHorizMax, int newVerticMax) {
         if (newHorizMax < RING_CANVAS_HORIZ_MIN || newVerticMax < RING_CANVAS_VERTIC_MIN) {
             throw new IllegalArgumentException("New window dimensions need to be equal or greater than supplied minimums.");
@@ -371,29 +386,66 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
         this.ringCanvasVerticMax = newVerticMax;
     }
     
+    /**
+     * Function to change the background color. I have not tested this one yet.
+     * @param newBackgroundColor Preferably a color that will contrast nicely with the foreground points but which the grids can blend into.
+     */
     public void changeBackgroundColor(Color newBackgroundColor) {
         this.backgroundColor = newBackgroundColor;
     }
     
+    /**
+     * Function to change the grid colors.
+     * @param newHalfIntegerGridColor Applicable only when this.imagQuadRing.d1mod4 is true. In choosing this color, keep in mind that, when applicable, the "half-integer" grid is drawn first.
+     * @param newIntegerGridColor In choosing this color, keep in mind that, when applicable, the "full" integer grid is drawn second, after the "half-integer" grid.
+     */
     public void changeGridColors(Color newHalfIntegerGridColor, Color newIntegerGridColor) {
         this.halfIntegerGridColor = newHalfIntegerGridColor;
         this.integerGridColor = newIntegerGridColor;
     }
     
+    /**
+     * Function to change the dot radius.
+     * @param newDotRadius Needs to be at least MINIMUM_DOT_RADIUS pixels, or else an IllegalArgumentException will be triggered.
+     */
     public void changeDotRadius(int newDotRadius) {
-        if (newDotRadius < 1) {
-            throw new IllegalArgumentException("Dot radius must be at least 1 pixel.");
+        if (newDotRadius < MINIMUM_DOT_RADIUS) {
+            String exceptionMessage = "Dot radius must be at least " + MINIMUM_DOT_RADIUS + " pixel";
+            if (MINIMUM_DOT_RADIUS > 1) {
+                exceptionMessage += "s.";
+            } else {
+                exceptionMessage += ".";
+            }
+            throw new IllegalArgumentException(exceptionMessage);
         }
         this.dotRadius = newDotRadius;
     }
     
+    /**
+     * Function to change the zoom interval.
+     * @param newZoomInterval Needs to be at least MINIMUM_ZOOM_INTERVAL pixels, or else an IllegalArgumentException will be triggered.
+     */
     public void changeZoomInterval(int newZoomInterval) {
-        if (newZoomInterval < 1) {
-            throw new IllegalArgumentException("Zoom interval must be at least 1 pixel.");
+        if (newZoomInterval < MINIMUM_ZOOM_INTERVAL) {
+            String exceptionMessage = "Zoom interval must be at least " + MINIMUM_ZOOM_INTERVAL + " pixel";
+            if (MINIMUM_ZOOM_INTERVAL > 1) {
+                exceptionMessage += "s.";
+            } else {
+                exceptionMessage += ".";
+            }
+            throw new IllegalArgumentException(exceptionMessage);
         }
         this.zoomInterval = newZoomInterval;
     }
     
+    /**
+     * Function to change the colors of the points.
+     * @param newZeroColor The color for the point 0.
+     * @param newUnitColor The color for the units. In most imaginary quadratic rings, this color will only be used for -1 and 1.
+     * @param newInertPrimeColor The color for inert primes, or at least primes having no splitting or ramifying factors in view.
+     * @param newSplitPrimeColor The color for confirmed split primes.
+     * @param newRamifiedPrimeColor The color for primes that are factors of the discriminant.
+     */
     public void changePointColors(Color newZeroColor, Color newUnitColor, Color newInertPrimeColor, Color newSplitPrimeColor, Color newRamifiedPrimeColor) {
         this.zeroColor = newZeroColor;
         this.unitColor = newUnitColor;
@@ -402,6 +454,11 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
         this.ramifiedPrimeColor = newRamifiedPrimeColor;
     }
     
+    /**
+     * Function to change the coordinates of the point 0. I have not yet implemented a meaningful use for this function.
+     * @param newCoordX The new x-coordinate for 0.
+     * @param newCoordY The new y-coordinate for 0.
+     */
     public void changeZeroCoords(int newCoordX, int newCoordY) {
         this.zeroCoordX = newCoordX;
         this.zeroCoordY = newCoordY;
@@ -409,13 +466,52 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
     
     /**
      * Paints the canvas, by delegating to drawGrids() and drawPoints().
-     * @param g 
+     * @param g The graphics object supplied by the caller.
      */
     @Override
     public void paint(Graphics g) {
         drawGrids(g);
         drawPoints(g);
-    }   
+    }
+    
+    private void switchToRing(int d) {
+        ImaginaryQuadraticRing imagRing = new ImaginaryQuadraticRing(d);
+        this.ringFrame.setTitle("Ring Diagram for " + imagRing.toString());
+        setRing(imagRing);
+        repaint();
+    }
+    
+    public void chooseDiscriminant() {
+        String discrString = Integer.toString(this.imagQuadRing.negRad);
+        String userChoice = (String) JOptionPane.showInputDialog(ringFrame, "Please enter a negative, squarefree integer:", discrString);
+        int discr;
+        boolean repaintNeeded;
+        try {
+            discr = Integer.parseInt(userChoice);
+        } catch (NumberFormatException nfe) {
+            discr = this.imagQuadRing.negRad;
+        }
+        if (discr > 0) {
+            discr *= -1;
+        }
+        if (discr < MINIMUM_RING_D) {
+            discr = MINIMUM_RING_D;
+        }
+        while (!NumberTheoreticFunctionsCalculator.isSquareFree(discr) && discr > MINIMUM_RING_D) {
+            discr--;
+        }
+        repaintNeeded = (discr != this.imagQuadRing.negRad);
+        if (repaintNeeded) {
+            if (discr == MINIMUM_RING_D) {
+                this.decreaseDMenuItem.setEnabled(false);
+            }
+            if (discr == -2) {
+                this.increaseDMenuItem.setEnabled(true);
+            }
+            switchToRing(discr);
+        }
+
+    }
 
     public void incrementDiscriminant() {
         int discr = this.imagQuadRing.negRad + 1;
@@ -425,13 +521,10 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
         if (discr == -1) {
             increaseDMenuItem.setEnabled(false);
         }
-        if (discr == Integer.MIN_VALUE + 3) {
+        if (discr == (MINIMUM_RING_D + 1)) {
             decreaseDMenuItem.setEnabled(true);
         }
-        ImaginaryQuadraticRing imagRing = new ImaginaryQuadraticRing(discr);
-        ringFrame.setTitle("Ring Diagram for " + imagRing.toString());
-        setRing(imagRing);
-        repaint();
+        switchToRing(discr);
     }
 
     public void decrementDiscriminant() {
@@ -439,46 +532,46 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
         while (!NumberTheoreticFunctionsCalculator.isSquareFree(discr) && discr > (Integer.MIN_VALUE + 1)) {
             discr--;
         }
-        if (discr == Integer.MIN_VALUE + 1) {
+        if (discr == MINIMUM_RING_D) {
             this.decreaseDMenuItem.setEnabled(false);
         }
         if (discr == -2) {
             this.increaseDMenuItem.setEnabled(true);
         }
-        ImaginaryQuadraticRing imagRing = new ImaginaryQuadraticRing(discr);
-        this.ringFrame.setTitle("Ring Diagram for " + imagRing.toString());
-        setRing(imagRing);
-        repaint();
+        switchToRing(discr);
     }
     
     public void zoomIn() {
-        int newPixelsPerUnitInterval = this.pixelsPerUnitInterval;
-        if (newPixelsPerUnitInterval < (MAXIMUM_PIXELS_PER_UNIT_INTERVAL - zoomInterval)) {
-            newPixelsPerUnitInterval += zoomInterval;
-        } else {
-            this.zoomInMenuItem.setEnabled(false);
+        int newPixelsPerUnitInterval = this.pixelsPerUnitInterval + zoomInterval;
+        if (newPixelsPerUnitInterval < MAXIMUM_PIXELS_PER_UNIT_INTERVAL) {
+            setPixelsPerUnitInterval(newPixelsPerUnitInterval);
+            repaint();
+            if ((newPixelsPerUnitInterval + zoomInterval) > MAXIMUM_PIXELS_PER_UNIT_INTERVAL) {
+                this.zoomInMenuItem.setEnabled(false);
+            }
         }
         if (newPixelsPerUnitInterval > (MINIMUM_PIXELS_PER_UNIT_INTERVAL + zoomInterval) && (newPixelsPerUnitInterval < (MINIMUM_PIXELS_PER_UNIT_INTERVAL + 2 * zoomInterval))) {
             this.zoomOutMenuItem.setEnabled(true);
         }
-        setPixelsPerUnitInterval(newPixelsPerUnitInterval);
-        repaint();
     }
     
     public void zoomOut() {
-        int newPixelsPerUnitInterval = this.pixelsPerUnitInterval;
-        if (newPixelsPerUnitInterval > (MINIMUM_PIXELS_PER_UNIT_INTERVAL + zoomInterval)) {
-            newPixelsPerUnitInterval -= zoomInterval;
-        } else {
-            this.zoomOutMenuItem.setEnabled(false);
+        int newPixelsPerUnitInterval = this.pixelsPerUnitInterval - zoomInterval;
+        if (newPixelsPerUnitInterval > MINIMUM_PIXELS_PER_UNIT_INTERVAL) {
+            setPixelsPerUnitInterval(newPixelsPerUnitInterval);
+            repaint();
+            if ((newPixelsPerUnitInterval - zoomInterval) < MINIMUM_PIXELS_PER_UNIT_INTERVAL) {
+                this.zoomOutMenuItem.setEnabled(false);
+            }
         }
-        if (newPixelsPerUnitInterval > (MAXIMUM_PIXELS_PER_UNIT_INTERVAL - 2 * zoomInterval) && (newPixelsPerUnitInterval < (MAXIMUM_PIXELS_PER_UNIT_INTERVAL - zoomInterval))) {
-            this.zoomOutMenuItem.setEnabled(true);
+        if (newPixelsPerUnitInterval > (MAXIMUM_PIXELS_PER_UNIT_INTERVAL - zoomInterval) && (newPixelsPerUnitInterval < (MAXIMUM_PIXELS_PER_UNIT_INTERVAL - 2 * zoomInterval))) {
+            this.zoomInMenuItem.setEnabled(true);
         }
-        setPixelsPerUnitInterval(newPixelsPerUnitInterval);
-        repaint();
     }
 
+    private void showAboutBox() {
+        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.6\n\u00A9 2017 Alonso del Arte");
+    }
     
     /**
      * Set the imaginary quadratic ring for which to draw a window of
@@ -501,6 +594,9 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent ae) {
         switch (ae.getActionCommand()) {
+            case "chooseD":
+                chooseDiscriminant();
+                break;
             case "incrD":
                 incrementDiscriminant();
                 break;
@@ -513,6 +609,11 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
             case "zoomOut":
                 zoomOut();
                 break;
+            case "about":
+                showAboutBox();
+                break;
+            default:
+                System.out.println("Command not recognized.");
         }
     }
     
@@ -528,10 +629,17 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
         ringWindowMenu.setMnemonic(KeyEvent.VK_E);
         ringWindowMenu.getAccessibleContext().setAccessibleDescription("Menu to change certain parameters");
         ringWindowMenuBar.add(ringWindowMenu);
+        ringWindowMenuItem = new JMenuItem("Choose discriminant...");
+        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Let user enter new choice for ring discriminant");
+        chooseDMenuItem = ringWindowMenu.add(ringWindowMenuItem);
+        chooseDMenuItem.setActionCommand("chooseD");
+        // chooseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F2, Event.CTRL_MASK));
+        chooseDMenuItem.addActionListener(this);
         ringWindowMenuItem = new JMenuItem("Increment discriminant");
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Increment the discriminant to choose another ring");
         increaseDMenuItem = ringWindowMenu.add(ringWindowMenuItem);
         increaseDMenuItem.setActionCommand("incrD");
+        increaseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_UP, Event.CTRL_MASK));
         increaseDMenuItem.addActionListener(this);
         if (this.imagQuadRing.negRad == -1) {
             increaseDMenuItem.setEnabled(false);
@@ -540,10 +648,12 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Decrement the discriminant to choose another ring");
         decreaseDMenuItem = ringWindowMenu.add(ringWindowMenuItem);
         decreaseDMenuItem.setActionCommand("decrD");
+        decreaseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, Event.CTRL_MASK));
         decreaseDMenuItem.addActionListener(this);
         if (this.imagQuadRing.negRad == Integer.MIN_VALUE + 1) {
             decreaseDMenuItem.setEnabled(false);
         }
+        
     /*    ringWindowMenu.addSeparator();
         ringWindowMenuItem = new JMenuItem("Preferences...");
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Bring up a dialogue to adjust preferences");
@@ -558,6 +668,7 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Zoom in, by increasing pixels per unit interval");
         zoomInMenuItem = ringWindowMenu.add(ringWindowMenuItem);
         zoomInMenuItem.setActionCommand("zoomIn");
+        zoomInMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ADD, Event.CTRL_MASK));
         zoomInMenuItem.addActionListener(this);
         if (this.pixelsPerUnitInterval > (MAXIMUM_PIXELS_PER_UNIT_INTERVAL - zoomInterval)) {
             zoomInMenuItem.setEnabled(false);
@@ -566,10 +677,20 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Zoom out, by decreasing pixels per unit interval");
         zoomOutMenuItem = ringWindowMenu.add(ringWindowMenuItem);
         zoomOutMenuItem.setActionCommand("zoomOut");
+        zoomOutMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_SUBTRACT, Event.CTRL_MASK));
         zoomOutMenuItem.addActionListener(this);
         if (this.pixelsPerUnitInterval < (MINIMUM_PIXELS_PER_UNIT_INTERVAL + zoomInterval)) {
             zoomInMenuItem.setEnabled(false);
         }
+        ringWindowMenu = new JMenu("Help");
+        ringWindowMenu.setMnemonic(KeyEvent.VK_H);
+        ringWindowMenu.getAccessibleContext().setAccessibleDescription("Menu to provide help and documentation");
+        ringWindowMenuBar.add(ringWindowMenu);
+        ringWindowMenuItem = new JMenuItem("About...");
+        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Information about the program");
+        aboutMenuItem = ringWindowMenu.add(ringWindowMenuItem);
+        aboutMenuItem.setActionCommand("about");
+        aboutMenuItem.addActionListener(this);
 
         ringFrame.setJMenuBar(ringWindowMenuBar);
         ringFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

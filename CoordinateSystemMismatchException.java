@@ -17,7 +17,8 @@
 package imaginaryquadraticinteger;
 
 /**
- *
+ * An exception to use if the wrong coordinate system is used.
+ * Now I'm not sure this one is actually necessary and I might even delete it from my project, but I might keep it in the repository.
  * @author Alonso del Arte
  */
 public class CoordinateSystemMismatchException extends IllegalArgumentException {

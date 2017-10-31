@@ -24,7 +24,7 @@ import javax.swing.*;
  *
  * @author Alonso del Arte
  */
-public final class RingWindowDisplay extends Canvas implements ActionListener {
+public final class RingWindowDisplay extends Canvas implements ActionListener, MouseMotionListener {
     
     /**
      * The default number of pixels per unit interval. The protected variable pixelsPerUnitInterval is initialized to this value.
@@ -69,12 +69,14 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
     public static final Color DEFAULT_SPLIT_PRIME_COLOR = Color.BLUE;
     public static final Color DEFAULT_RAMIFIED_PRIME_COLOR = Color.GREEN;
     
+    public static final int DEFAULT_READOUT_FIELD_COLUMNS = 20;
+    
     /**
      * The actual pixels per unit interval setting, should be initialized to DEFAULT_PIXELS_PER_UNIT_INTERVAL in the constructor. Use setPixelsPerUnitInterval(int pixelLength) to change, making sure pixelLength is greater than or equal to MINIMUM_PIXELS_PER_UNIT_INTERVAL but less than or equal to MAXIMUM_PIXELS_PER_UNIT_INTERVAL.
      */
     protected int pixelsPerUnitInterval;
     protected ImaginaryQuadraticRing imagQuadRing;
-    protected ImaginaryQuadraticInteger basicImaginaryInterval;
+    protected ImaginaryQuadraticInteger mouseIQI;
     protected int pixelsPerBasicImaginaryInterval;
     
     private int ringCanvasHorizMax;
@@ -98,12 +100,16 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
     private int zeroCoordY;
     
     private JFrame ringFrame;
+    
     private JMenuBar ringWindowMenuBar;
     private JMenu ringWindowMenu;
     private JMenuItem ringWindowMenuItem;
     private JMenuItem chooseDMenuItem, increaseDMenuItem, decreaseDMenuItem;
     private JMenuItem zoomInMenuItem, zoomOutMenuItem;
+    private JCheckBoxMenuItem toggleReadOutsEnabledMenuItem;
     private JMenuItem aboutMenuItem;
+    
+    private JTextField algIntReadOut, algIntTraceReadOut, algIntNormReadOut, algIntPolReadOut;
     
     private void drawGrids(Graphics graphicsForGrids) {
         
@@ -474,6 +480,49 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
         drawPoints(g);
     }
     
+    /**
+     * 
+     * @param mauv 
+     */
+    @Override
+    public void mouseMoved(MouseEvent mauv) {
+        boolean algIntFound;
+        int horizCoord, verticCoord;
+        if (this.imagQuadRing.d1mod4) {
+            int halfUnitInterval = this.pixelsPerUnitInterval;
+            if (halfUnitInterval % 2 == 1) {
+                halfUnitInterval--;
+            }
+            halfUnitInterval /= 2;
+            horizCoord = (int) Math.round((mauv.getX() - this.zeroCoordX)/halfUnitInterval);
+            verticCoord = (int) Math.round((mauv.getY() - this.zeroCoordY)/this.pixelsPerBasicImaginaryInterval);
+            algIntFound = ((horizCoord % 2) == (verticCoord % 2));
+            if (algIntFound) {
+                mouseIQI = new ImaginaryQuadraticInteger(horizCoord, verticCoord, this.imagQuadRing, 2);
+            }
+        } else {
+            horizCoord = (int) Math.round((mauv.getX() - this.zeroCoordX)/this.pixelsPerUnitInterval);
+            verticCoord = (int) Math.round((mauv.getY() - this.zeroCoordY)/this.pixelsPerBasicImaginaryInterval);
+            mouseIQI = new ImaginaryQuadraticInteger(horizCoord, verticCoord, this.imagQuadRing, 1);
+            algIntFound = true;
+        }
+        if (algIntFound) {
+            algIntReadOut.setText(mouseIQI.toString());
+            algIntTraceReadOut.setText(Integer.toString(mouseIQI.trace()));
+            algIntNormReadOut.setText(Integer.toString(mouseIQI.norm()));
+            algIntPolReadOut.setText(mouseIQI.minPolynomialString());
+        }
+    }
+    
+    /**
+     * No implementation for time being. Hope to add the capability to drag the diagram in a future version.
+     * @param mauv Mouse event to respond to.
+     */
+    @Override
+    public void mouseDragged(MouseEvent mauv) {
+        // Implementation placeholder.
+    }
+    
     private void switchToRing(int d) {
         ImaginaryQuadraticRing imagRing = new ImaginaryQuadraticRing(d);
         this.ringFrame.setTitle("Ring Diagram for " + imagRing.toString());
@@ -505,7 +554,13 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
             if (discr == MINIMUM_RING_D) {
                 this.decreaseDMenuItem.setEnabled(false);
             }
-            if (discr == -2) {
+            if (discr > MINIMUM_RING_D && !this.decreaseDMenuItem.isEnabled()) {
+                this.decreaseDMenuItem.setEnabled(true);
+            }
+            if (discr == -1) {
+                this.increaseDMenuItem.setEnabled(false);
+            }
+            if (discr < -1 && !this.increaseDMenuItem.isEnabled()) {
                 this.increaseDMenuItem.setEnabled(true);
             }
             switchToRing(discr);
@@ -569,8 +624,20 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
         }
     }
 
+    /**
+     * Function to enable or disable updating of the readout fields for integer, trace, norm and polynomial.
+     * I don't know what it is that I forgot to do, but after enabling the readouts, the menu becomes hard to reach.
+     */
+    public void toggleReadOutsEnabled() {
+        if (toggleReadOutsEnabledMenuItem.isSelected()) {
+            this.addMouseMotionListener(this);
+        } else {
+            this.removeMouseMotionListener(this);
+        }
+    }
+    
     private void showAboutBox() {
-        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.6\n\u00A9 2017 Alonso del Arte");
+        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.7\n\u00A9 2017 Alonso del Arte");
     }
     
     /**
@@ -609,6 +676,9 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
             case "zoomOut":
                 zoomOut();
                 break;
+            case "toggleReadOuts":
+                toggleReadOutsEnabled();
+                break;
             case "about":
                 showAboutBox();
                 break;
@@ -620,9 +690,7 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
     private void setUpRingFrame() {
         
         ringFrame = new JFrame("Ring Diagram for " + this.imagQuadRing.toString());  
-        ringFrame.add(this);
-        ringFrame.setLayout(null);  
-        ringFrame.setSize(RING_CANVAS_DEFAULT_HORIZ_MAX + 20, RING_CANVAS_DEFAULT_VERTIC_MAX + 40);
+        ringFrame.add(this, BorderLayout.CENTER);
 
         ringWindowMenuBar = new JMenuBar();
         ringWindowMenu = new JMenu("Edit");
@@ -633,6 +701,7 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Let user enter new choice for ring discriminant");
         chooseDMenuItem = ringWindowMenu.add(ringWindowMenuItem);
         chooseDMenuItem.setActionCommand("chooseD");
+        chooseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, Event.CTRL_MASK));
         // chooseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F2, Event.CTRL_MASK));
         chooseDMenuItem.addActionListener(this);
         ringWindowMenuItem = new JMenuItem("Increment discriminant");
@@ -682,18 +751,49 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
         if (this.pixelsPerUnitInterval < (MINIMUM_PIXELS_PER_UNIT_INTERVAL + zoomInterval)) {
             zoomInMenuItem.setEnabled(false);
         }
+        ringWindowMenu.addSeparator();
+        toggleReadOutsEnabledMenuItem = new JCheckBoxMenuItem("Update readouts", false);
+        toggleReadOutsEnabledMenuItem.getAccessibleContext().setAccessibleDescription("Toggle whether the trace, norm and polynomial readouts are updated.");
+        toggleReadOutsEnabledMenuItem.setActionCommand("toggleReadOuts");
+        toggleReadOutsEnabledMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F2, Event.CTRL_MASK));
+        toggleReadOutsEnabledMenuItem.addActionListener(this);
+        ringWindowMenu.add(toggleReadOutsEnabledMenuItem);
         ringWindowMenu = new JMenu("Help");
         ringWindowMenu.setMnemonic(KeyEvent.VK_H);
         ringWindowMenu.getAccessibleContext().setAccessibleDescription("Menu to provide help and documentation");
         ringWindowMenuBar.add(ringWindowMenu);
         ringWindowMenuItem = new JMenuItem("About...");
-        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Information about the program");
+        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Information about this program");
         aboutMenuItem = ringWindowMenu.add(ringWindowMenuItem);
         aboutMenuItem.setActionCommand("about");
         aboutMenuItem.addActionListener(this);
 
         ringFrame.setJMenuBar(ringWindowMenuBar);
+        
+        JPanel readOutsPane = new JPanel();
+        algIntReadOut = new JTextField(DEFAULT_READOUT_FIELD_COLUMNS);
+        algIntReadOut.setText("0");
+        algIntReadOut.setEditable(false);
+        readOutsPane.add(algIntReadOut);
+        readOutsPane.add(new JLabel("Trace: "));
+        algIntTraceReadOut = new JTextField(DEFAULT_READOUT_FIELD_COLUMNS);
+        algIntTraceReadOut.setText("0");
+        algIntTraceReadOut.setEditable(false);
+        readOutsPane.add(algIntTraceReadOut);
+        readOutsPane.add(new JLabel("Norm: "));
+        algIntNormReadOut = new JTextField(DEFAULT_READOUT_FIELD_COLUMNS);
+        algIntNormReadOut.setText("0");
+        algIntNormReadOut.setEditable(false);
+        readOutsPane.add(algIntNormReadOut);
+        readOutsPane.add(new JLabel("Polynomial: "));
+        algIntPolReadOut = new JTextField(DEFAULT_READOUT_FIELD_COLUMNS);
+        algIntPolReadOut.setText("0");
+        algIntPolReadOut.setEditable(false);
+        readOutsPane.add(algIntPolReadOut);
+        
+        ringFrame.add(readOutsPane, BorderLayout.PAGE_END);
         ringFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        ringFrame.pack();
         ringFrame.setVisible(true);
 
     }
@@ -729,6 +829,7 @@ public final class RingWindowDisplay extends Canvas implements ActionListener {
             imR = new ImaginaryQuadraticRing(DEFAULT_RING_D);
         }
         this.setRing(imR);
+        this.mouseIQI = new ImaginaryQuadraticInteger(0, 0, imR, 1);
         this.setBackground(this.backgroundColor);
         this.setSize(this.ringCanvasHorizMax, this.ringCanvasVerticMax); 
                                

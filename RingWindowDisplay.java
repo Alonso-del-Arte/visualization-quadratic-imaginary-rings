@@ -24,7 +24,7 @@ import javax.swing.*;
  *
  * @author Alonso del Arte
  */
-public final class RingWindowDisplay extends Canvas implements ActionListener, MouseMotionListener {
+public final class RingWindowDisplay extends JPanel implements ActionListener, MouseMotionListener {
     
     /**
      * The default number of pixels per unit interval. The protected variable pixelsPerUnitInterval is initialized to this value.
@@ -76,7 +76,7 @@ public final class RingWindowDisplay extends Canvas implements ActionListener, M
      */
     protected int pixelsPerUnitInterval;
     protected ImaginaryQuadraticRing imagQuadRing;
-    protected ImaginaryQuadraticInteger mouseIQI;
+    private ImaginaryQuadraticInteger mouseIQI;
     protected int pixelsPerBasicImaginaryInterval;
     
     private int ringCanvasHorizMax;
@@ -365,10 +365,10 @@ public final class RingWindowDisplay extends Canvas implements ActionListener, M
      */
     public void setPixelsPerUnitInterval(int pixelLength) {
         if (pixelLength < MINIMUM_PIXELS_PER_UNIT_INTERVAL) {
-            throw new CoordinateSystemMismatchException("Pixels per unit interval needs to be set to greater than " + (MINIMUM_PIXELS_PER_UNIT_INTERVAL - 1), false);
+            throw new IllegalArgumentException("Pixels per unit interval needs to be set to greater than " + (MINIMUM_PIXELS_PER_UNIT_INTERVAL - 1));
         }
         if (pixelLength > MAXIMUM_PIXELS_PER_UNIT_INTERVAL) {
-            throw new CoordinateSystemMismatchException("Pixels per unit interval needs to be set to less than " + (MAXIMUM_PIXELS_PER_UNIT_INTERVAL + 1), false);
+            throw new IllegalArgumentException("Pixels per unit interval needs to be set to less than " + (MAXIMUM_PIXELS_PER_UNIT_INTERVAL + 1));
         }
         pixelsPerUnitInterval = pixelLength;
         double imagInterval;
@@ -472,12 +472,13 @@ public final class RingWindowDisplay extends Canvas implements ActionListener, M
     
     /**
      * Paints the canvas, by delegating to drawGrids() and drawPoints().
-     * @param g The graphics object supplied by the caller.
+     * @param gr The graphics object supplied by the caller.
      */
     @Override
-    public void paint(Graphics g) {
-        drawGrids(g);
-        drawPoints(g);
+    public void paintComponent(Graphics gr) {
+        super.paintComponent(gr);
+        drawGrids(gr);
+        drawPoints(gr);
     }
     
     /**
@@ -495,14 +496,14 @@ public final class RingWindowDisplay extends Canvas implements ActionListener, M
             }
             halfUnitInterval /= 2;
             horizCoord = (int) Math.round((mauv.getX() - this.zeroCoordX)/halfUnitInterval);
-            verticCoord = (int) Math.round((mauv.getY() - this.zeroCoordY)/this.pixelsPerBasicImaginaryInterval);
-            algIntFound = ((horizCoord % 2) == (verticCoord % 2));
+            verticCoord = (int) Math.round((-mauv.getY() + this.zeroCoordY)/this.pixelsPerBasicImaginaryInterval);
+            algIntFound = (Math.abs(horizCoord % 2) == Math.abs(verticCoord % 2));
             if (algIntFound) {
                 mouseIQI = new ImaginaryQuadraticInteger(horizCoord, verticCoord, this.imagQuadRing, 2);
             }
         } else {
             horizCoord = (int) Math.round((mauv.getX() - this.zeroCoordX)/this.pixelsPerUnitInterval);
-            verticCoord = (int) Math.round((mauv.getY() - this.zeroCoordY)/this.pixelsPerBasicImaginaryInterval);
+            verticCoord = (int) Math.round((-mauv.getY() + this.zeroCoordY)/this.pixelsPerBasicImaginaryInterval);
             mouseIQI = new ImaginaryQuadraticInteger(horizCoord, verticCoord, this.imagQuadRing, 1);
             algIntFound = true;
         }
@@ -637,7 +638,7 @@ public final class RingWindowDisplay extends Canvas implements ActionListener, M
     }
     
     private void showAboutBox() {
-        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.7\n\u00A9 2017 Alonso del Arte");
+        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.71\n\u00A9 2017 Alonso del Arte");
     }
     
     /**
@@ -690,8 +691,7 @@ public final class RingWindowDisplay extends Canvas implements ActionListener, M
     private void setUpRingFrame() {
         
         ringFrame = new JFrame("Ring Diagram for " + this.imagQuadRing.toString());  
-        ringFrame.add(this, BorderLayout.CENTER);
-
+        
         ringWindowMenuBar = new JMenuBar();
         ringWindowMenu = new JMenu("Edit");
         ringWindowMenu.setMnemonic(KeyEvent.VK_E);
@@ -769,7 +769,7 @@ public final class RingWindowDisplay extends Canvas implements ActionListener, M
         aboutMenuItem.addActionListener(this);
 
         ringFrame.setJMenuBar(ringWindowMenuBar);
-        
+                
         JPanel readOutsPane = new JPanel();
         algIntReadOut = new JTextField(DEFAULT_READOUT_FIELD_COLUMNS);
         algIntReadOut.setText("0");
@@ -792,6 +792,7 @@ public final class RingWindowDisplay extends Canvas implements ActionListener, M
         readOutsPane.add(algIntPolReadOut);
         
         ringFrame.add(readOutsPane, BorderLayout.PAGE_END);
+        ringFrame.add(this, BorderLayout.CENTER);
         ringFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         ringFrame.pack();
         ringFrame.setVisible(true);
@@ -831,7 +832,7 @@ public final class RingWindowDisplay extends Canvas implements ActionListener, M
         this.setRing(imR);
         this.mouseIQI = new ImaginaryQuadraticInteger(0, 0, imR, 1);
         this.setBackground(this.backgroundColor);
-        this.setSize(this.ringCanvasHorizMax, this.ringCanvasVerticMax); 
+        this.setPreferredSize(new Dimension(this.ringCanvasHorizMax, this.ringCanvasVerticMax)); 
                                
     }
     

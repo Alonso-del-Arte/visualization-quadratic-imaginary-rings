@@ -102,6 +102,10 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         return coeffs;
     }
     
+    /**
+     * Gives the polynomial in a format suitable for plain text or TeX.
+     * @return A String. If the algebraic degree is 2, the String should start off with "x^2".
+     */
     @Override
     public String minPolynomialString() {
         String polString = "";
@@ -140,9 +144,53 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         return polString;
     }
     
+    /**
+     * Gets the real part of the imaginary quadratic integer. May be half an integer.
+     * @return The real part of the imaginary quadratic integer. For example, for -1/2 + sqrt(-7)/2, the result should be -0.5.
+     */
+    public double getRealPartMult() {
+        double realPart = this.realPartMult;
+        if (this.denominator == 2) {
+            realPart /= 2;
+        }
+        return realPart;
+    }
+    
+    /**
+     * Gets the imaginary part of the imaginary quadratic integer multiplied by -i. May be the rational approximation of an irrational real number.
+     * @return The imaginary part of the imaginary quadratic integer multiplied by -i. For example, for -1/2 + sqrt(-7)/2, the result should be something like 1.32287565553229529525.
+     */
+    public double getImagPartwRadMult() {
+        double imagPartwRad = this.imagPartMult * this.imagQuadRing.absNegRadSqrt;
+        if (this.denominator == 2) {
+            imagPartwRad /= 2;
+        }
+        return imagPartwRad;
+    }
+    
+    public long getTwiceRealPartMult() {
+        long twiceRealPartMult = this.realPartMult;
+        if (this.denominator == 1) {
+            twiceRealPartMult *= 2;
+        }
+        return twiceRealPartMult;
+    }
+    
+    public long getTwiceImagPartMult() {
+        long twiceImagPartMult = this.imagPartMult;
+        if (this.denominator == 1) {
+            twiceImagPartMult *= 2;
+        }
+        return twiceImagPartMult;
+    }
+    
+    /**
+     * A text representation of the imaginary quadratic integer, with the real part first and the imaginary part second.
+     * @return A string representing the imaginary quadratic integer which can be output to the console.
+     */
     @Override
     public String toString() {
-        String IQIString;
+        String IQIString = "";
         if (this.denominator == 2) {
             IQIString = this.realPartMult + "/2 ";
             if (this.imagPartMult < -1) {
@@ -158,18 +206,34 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
                 IQIString += ("+ " + this.imagPartMult + "\u221A(" + this.imagQuadRing.negRad + ")/2");
             } 
         } else {
-            IQIString = this.realPartMult + " ";
-            if (this.imagPartMult < -1) {
-                IQIString += (("- " + ((-1) * this.imagPartMult)) + "\u221A(" + this.imagQuadRing.negRad + ")");
-            }
-            if (this.imagPartMult == -1) {
-                IQIString += ("- \u221A(" + this.imagQuadRing.negRad + ")");
-            }
-            if (this.imagPartMult == 1) {
-                IQIString += ("+ \u221A(" + this.imagQuadRing.negRad + ")");
-            }
-            if (this.imagPartMult > 1) {
-                IQIString += ("+ " + this.imagPartMult + "\u221A(" + this.imagQuadRing.negRad + ")");
+            if (this.realPartMult == 0) {
+                if (this.imagPartMult == 0) {
+                    IQIString = "0";
+                } else {
+                    if (this.imagPartMult < -1 || this.imagPartMult > 1) {
+                        IQIString = this.imagPartMult + "\u221A(" + this.imagQuadRing.negRad + ")";
+                    }
+                    if (this.imagPartMult == -1) {
+                        IQIString = "-\u221A(" + this.imagQuadRing.negRad + ")";
+                    }
+                    if (this.imagPartMult == 1) {
+                        IQIString = "\u221A(" + this.imagQuadRing.negRad + ")";
+                    }
+                }
+            } else {
+                IQIString = Integer.toString(this.realPartMult);
+                if (this.imagPartMult < -1) {
+                    IQIString += ((" - " + ((-1) * this.imagPartMult)) + "\u221A(" + this.imagQuadRing.negRad + ")");
+                }
+                if (this.imagPartMult == -1) {
+                    IQIString += (" - \u221A(" + this.imagQuadRing.negRad + ")");
+                }
+                if (this.imagPartMult == 1) {
+                    IQIString += (" + \u221A(" + this.imagQuadRing.negRad + ")");
+                }
+                if (this.imagPartMult > 1) {
+                    IQIString += (" + " + this.imagPartMult + "\u221A(" + this.imagQuadRing.negRad + ")");
+                }
             }
         }
         return IQIString;

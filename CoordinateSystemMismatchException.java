@@ -1,26 +1,5 @@
-/*
- * Copyright (C) 2017 Alonso del Arte
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-package imaginaryquadraticinteger;
+I HAVE DELETED THIS FILE FROM MY LOCAL COPY OF THE PROJECT BUT WILL KEEP THIS FILE HERE FOR HISTORICAL PURPOSES.
 
-/**
- * An exception to use if the wrong coordinate system is used.
- * Now I'm not sure this one is actually necessary and I might even delete it from my project, but I might keep it in the repository.
- * @author Alonso del Arte
- */
 public class CoordinateSystemMismatchException extends IllegalArgumentException {
     
     private static final long serialVersionUID = 1;

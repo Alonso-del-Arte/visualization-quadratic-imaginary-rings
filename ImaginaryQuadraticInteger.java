@@ -25,12 +25,23 @@ import java.util.*;
 
 public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     
+    /**
+     * The real part of the imaginary quadratic integer. If the denominator is 2, the real part should be odd.
+     */
     protected int realPartMult;
+    
+    /**
+     * The imaginary part of the imaginary quadratic integer. If the denominator is 2, the real part should be odd.
+     */
     protected int imagPartMult;
+    
+    /**
+     * Really this is an object that stores information about the ring that we're working in, such as whether the denominator may be 2.
+     */
     protected ImaginaryQuadraticRing imagQuadRing;
     
     /**
-     * If d1mod4 is true, then denominator may be 1 or 2, otherwise denominator should be 1.
+     * If imagQuadRing.d1mod4 is true, then denominator may be 1 or 2, otherwise denominator should be 1.
      */
     protected int denominator;
 
@@ -87,7 +98,8 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     public int[] minPolynomial() {
         int[] coeffs = {0, 0, 0};
         switch (algebraicDegree()) {
-            case 0: 
+            case 0:
+                coeffs[1] = 1;
                 break;
             case 1: 
                 coeffs[0] = -1 * realPartMult;
@@ -112,6 +124,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         int[] polCoeffs = minPolynomial();
         switch (algebraicDegree()) {
             case 0:
+                polString = "x";
                 break;
             case 1:
                 if (polCoeffs[0] < 0) {
@@ -168,6 +181,10 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         return imagPartwRad;
     }
     
+    /**
+     * Gets the real part of the imaginary quadratic integer multiplied by 2.
+     * @return The real part of the imaginary quadratic integer multiplied by 2. For example, for -1/2 + sqrt(-7)/2, the result should be -1; and for -1 + sqrt(-7), the result should be -2.
+     */
     public long getTwiceRealPartMult() {
         long twiceRealPartMult = this.realPartMult;
         if (this.denominator == 1) {
@@ -176,6 +193,10 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         return twiceRealPartMult;
     }
     
+    /**
+     * Gets the imaginary part of the imaginary quadratic integer multiplied by -2i.
+     * @return The real part of the imaginary quadratic integer multiplied by -2i. For example, for -1/2 + sqrt(-7)/2, the result should be 1; and for -1 + sqrt(-7), the result should be 2.
+     */
     public long getTwiceImagPartMult() {
         long twiceImagPartMult = this.imagPartMult;
         if (this.denominator == 1) {
@@ -256,8 +277,8 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * Addition operation, since operator+ (plus) can't be overloaded.
-     * @param summand The imaginary quadratic integer to be added.
+     * Addition operation, since operator+ (plus) can't be overloaded. No overflow checking as of yet.
+     * @param summand The imaginary quadratic integer to be added to this quadratic integer.
      * @return A new ImaginaryQuadraticInteger object with the result of the operation.
      * @throws AlgebraicDegreeOverflowException If the algebraic integers come from different quadratic rings, the result of the sum will be an algebraic integer of degree 4 and this exception will be thrown.
      */
@@ -293,8 +314,8 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
 
     /**
-     * Subtraction operation, since operator- can't be overloaded
-     * @param subtrahend The imaginary quadratic integer to be subtracted
+     * Subtraction operation, since operator- can't be overloaded.  No overflow checking as of yet.
+     * @param subtrahend The imaginary quadratic integer to be subtracted from this quadratic integer.
      * @return A new ImaginaryQuadraticInteger object with the result of the operation.
      * @throws AlgebraicDegreeOverflowException If the algebraic integers come from different quadratic rings, the result of the sum will be an algebraic integer of degree 4 and this exception will be thrown.
      */
@@ -328,6 +349,31 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         }
         return new ImaginaryQuadraticInteger(subtractionRealPart, subtractionImagPart, this.imagQuadRing, subtractionDenom);
     }
+    
+    /**
+     * Multiplication operation, since operator* can't be overloaded. No overflow checking as of yet.
+     * @param multiplicand The imaginary quadratic integer to be multiplied by this quadratic integer.
+     * @return A new ImaginaryQuadraticInteger object with the result of the operation.
+     * @throws AlgebraicDegreeOverflowException If the algebraic integers come from different quadratic rings, the result of the sum will be an algebraic integer of degree 4 and this exception will be thrown.
+     */
+    public ImaginaryQuadraticInteger times(ImaginaryQuadraticInteger multiplicand) throws AlgebraicDegreeOverflowException {
+        if (((this.imagPartMult != 0) && (multiplicand.imagPartMult != 0)) && (this.imagQuadRing.negRad != multiplicand.imagQuadRing.negRad)) {
+            throw new AlgebraicDegreeOverflowException("This operation would result in an algebraic integer of degree 4.", 2, 4);
+        }
+        int intermediateRealPart = this.realPartMult * multiplicand.realPartMult - this.imagPartMult * multiplicand.realPartMult * this.imagQuadRing.absNegRad;
+        int intermediateImagPart = this.realPartMult * multiplicand.imagPartMult + this.imagPartMult * multiplicand.realPartMult;
+        int intermediateDenom = this.denominator * multiplicand.denominator;
+        if (intermediateDenom == 4) {
+            intermediateRealPart /= 2;
+            intermediateImagPart /= 2;
+            intermediateDenom = 2;
+        }
+        // There is no need to check if intermediateDenom is equal to 2 and both intermediateRealPart and intermediateImagPart are even because the ImaginaryQuadraticInteger constructor will take care of halving the parts and changing the denominator to 1.
+        ImaginaryQuadraticInteger result = new ImaginaryQuadraticInteger(intermediateRealPart, intermediateImagPart, this.imagQuadRing, intermediateDenom);
+        return result;
+    }
+   
+    // PLACEHOLDER FOR divides()
     
     /**
      * Class constructor

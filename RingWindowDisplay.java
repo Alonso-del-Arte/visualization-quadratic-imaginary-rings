@@ -30,18 +30,39 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      * The default number of pixels per unit interval. The protected variable pixelsPerUnitInterval is initialized to this value.
      */
     public static final int DEFAULT_PIXELS_PER_UNIT_INTERVAL = 40;
+    
     /**
      * The minimum pixels per unit interval. Trying to set pixels per unit interval below this value will cause an exception.
      */
     public static final int MINIMUM_PIXELS_PER_UNIT_INTERVAL = 2;
+    
     /**
      * The maximum pixels per unit interval. Even on an 8K display, this value might be much too large. Trying to set pixels per unit interval above this value will cause an exception.
      */
     public static final int MAXIMUM_PIXELS_PER_UNIT_INTERVAL = 6400;
     
+    /**
+     * The minimum horizontal pixel dimension for the canvas in which to draw the diagram.
+     * This should be small even on moderately obsolete mobile devices.
+     */
     public static final int RING_CANVAS_HORIZ_MIN = 100;
+    
+    /**
+     * The minimum vertical pixel dimension for the canvas in which to draw the diagram.
+     * This should be small even on moderately obsolete mobile devices.
+     */
     public static final int RING_CANVAS_VERTIC_MIN = 178;
+    
+    /**
+     * The default horizontal pixel dimension for the canvas in which to draw the diagram.
+     * This fills up most of the screen on a 1440 by 900 (16:10 aspect ration) display.
+     */
     public static final int RING_CANVAS_DEFAULT_HORIZ_MAX = 1280;
+    
+    /**
+     * The default vertical pixel dimension for the canvas in which to draw the diagram.
+     * This fills up most of the screen on a 1440 by 900 (16:10 aspect ration) display.
+     */
     public static final int RING_CANVAS_DEFAULT_VERTIC_MAX = 720;
     
     public static final int DEFAULT_RING_D = -1;
@@ -54,9 +75,11 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     
     public static final int DEFAULT_DOT_RADIUS = 5;
     public static final int MINIMUM_DOT_RADIUS = 1;
+    public static final int MAXIMUM_DOT_RADIUS = 128;
     
     public static final int DEFAULT_ZOOM_INTERVAL = 5;
     public static final int MINIMUM_ZOOM_INTERVAL = 1;
+    public static final int MAXIMUM_ZOOM_INTERVAL = 48;
     
     public static final Color DEFAULT_CANVAS_BACKGROUND_COLOR = new Color(2107440); // A dark blue
     
@@ -79,6 +102,14 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     private ImaginaryQuadraticInteger mouseIQI;
     protected int pixelsPerBasicImaginaryInterval;
     
+    /**
+     * When imagQuadRing.d1mod4 is true, some users may prefer to see "half-integers" notated with theta notation rather than fractions with 2s for denominators.
+     * With this preference turned on and d = -3, omega will be used rather than theta.
+     * omega = -1/2 + sqrt(-3)/2.
+     * theta = 1/2 + sqrt(d)/2.
+     */
+    private boolean preferenceForThetaNotation;
+    
     private int ringCanvasHorizMax;
     private int ringCanvasVerticMax;
     
@@ -96,8 +127,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     private Color splitPrimeColor;
     private Color ramifiedPrimeColor;
     
-    private int zeroCoordX;
-    private int zeroCoordY;
+    private int zeroCoordX, zeroCoordY;
+    private boolean zeroCentered, zeroInView;
     
     private JFrame ringFrame;
     
@@ -106,7 +137,10 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     private JMenuItem ringWindowMenuItem;
     private JMenuItem chooseDMenuItem, increaseDMenuItem, decreaseDMenuItem;
     private JMenuItem zoomInMenuItem, zoomOutMenuItem;
-    private JCheckBoxMenuItem toggleReadOutsEnabledMenuItem;
+    private JMenuItem decreaseZoomIntervalMenuItem, increaseZoomIntervalMenuItem;
+    private JMenuItem decreaseDotRadiusMenuItem, increaseDotRadiusMenuItem;
+    private JMenuItem resetViewDefaultsMenuItem;
+    private JCheckBoxMenuItem preferThetaNotationMenuItem, toggleReadOutsEnabledMenuItem;
     private JMenuItem aboutMenuItem;
     
     private JTextField algIntReadOut, algIntTraceReadOut, algIntNormReadOut, algIntPolReadOut;
@@ -371,8 +405,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             throw new IllegalArgumentException("Pixels per unit interval needs to be set to less than " + (MAXIMUM_PIXELS_PER_UNIT_INTERVAL + 1));
         }
         pixelsPerUnitInterval = pixelLength;
-        double imagInterval;
-        imagInterval = this.pixelsPerUnitInterval * this.imagQuadRing.absNegRadSqrt;
+        double imagInterval = this.pixelsPerUnitInterval * this.imagQuadRing.absNegRadSqrt;
         if (this.imagQuadRing.d1mod4) {
             imagInterval /= 2;
         }
@@ -409,42 +442,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         this.halfIntegerGridColor = newHalfIntegerGridColor;
         this.integerGridColor = newIntegerGridColor;
     }
-    
-    /**
-     * Function to change the dot radius.
-     * @param newDotRadius Needs to be at least MINIMUM_DOT_RADIUS pixels, or else an IllegalArgumentException will be triggered.
-     */
-    public void changeDotRadius(int newDotRadius) {
-        if (newDotRadius < MINIMUM_DOT_RADIUS) {
-            String exceptionMessage = "Dot radius must be at least " + MINIMUM_DOT_RADIUS + " pixel";
-            if (MINIMUM_DOT_RADIUS > 1) {
-                exceptionMessage += "s.";
-            } else {
-                exceptionMessage += ".";
-            }
-            throw new IllegalArgumentException(exceptionMessage);
-        }
-        this.dotRadius = newDotRadius;
-    }
-    
-    /**
-     * Function to change the zoom interval.
-     * @param newZoomInterval Needs to be at least MINIMUM_ZOOM_INTERVAL pixels, or else an IllegalArgumentException will be triggered.
-     */
-    public void changeZoomInterval(int newZoomInterval) {
-        if (newZoomInterval < MINIMUM_ZOOM_INTERVAL) {
-            String exceptionMessage = "Zoom interval must be at least " + MINIMUM_ZOOM_INTERVAL + " pixel";
-            if (MINIMUM_ZOOM_INTERVAL > 1) {
-                exceptionMessage += "s.";
-            } else {
-                exceptionMessage += ".";
-            }
-            throw new IllegalArgumentException(exceptionMessage);
-        }
-        this.zoomInterval = newZoomInterval;
-    }
-    
-    /**
+     /**
      * Function to change the colors of the points.
      * @param newZeroColor The color for the point 0.
      * @param newUnitColor The color for the units. In most imaginary quadratic rings, this color will only be used for -1 and 1.
@@ -459,6 +457,62 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         this.splitPrimeColor = newSplitPrimeColor;
         this.ramifiedPrimeColor = newRamifiedPrimeColor;
     }
+   
+    /**
+     * Function to change the dot radius.
+     * @param newDotRadius Needs to be at least MINIMUM_DOT_RADIUS pixels, or else an IllegalArgumentException will be triggered.
+     */
+    public void changeDotRadius(int newDotRadius) {
+        boolean dotRadiusOutOfBounds = false;
+        String exceptionMessage = "Dot radius must be ";
+        if (newDotRadius < MINIMUM_DOT_RADIUS) {
+            dotRadiusOutOfBounds = true;
+            exceptionMessage = exceptionMessage + "at least " + MINIMUM_DOT_RADIUS + " pixel";
+            if (MINIMUM_DOT_RADIUS > 1) {
+                exceptionMessage += "s.";
+            } else {
+                exceptionMessage += ".";
+            }
+            throw new IllegalArgumentException(exceptionMessage);
+        } else {
+            if (newDotRadius > MAXIMUM_DOT_RADIUS) {
+                dotRadiusOutOfBounds = true;
+                exceptionMessage = exceptionMessage + "no more than " + MAXIMUM_DOT_RADIUS + " pixels.";
+            }
+        }
+        if (dotRadiusOutOfBounds) {
+            throw new IllegalArgumentException(exceptionMessage);
+        }
+        this.dotRadius = newDotRadius;
+    }
+    
+    /**
+     * Function to change the zoom interval.
+     * @param newZoomInterval Needs to be at least MINIMUM_ZOOM_INTERVAL pixels, or else an IllegalArgumentException will be triggered.
+     */
+    public void changeZoomInterval(int newZoomInterval) {
+        boolean zoomIntervalOutOfBounds = false;
+        String exceptionMessage = "Zoom interval must be ";
+        if (newZoomInterval < MINIMUM_ZOOM_INTERVAL) {
+            zoomIntervalOutOfBounds = true;
+            exceptionMessage = exceptionMessage + "at least " + MINIMUM_ZOOM_INTERVAL + " pixel";
+            if (MINIMUM_ZOOM_INTERVAL > 1) {
+                exceptionMessage += "s.";
+            } else {
+                exceptionMessage += ".";
+            }
+        } else {
+            if (newZoomInterval > MAXIMUM_ZOOM_INTERVAL) {
+                zoomIntervalOutOfBounds = true;
+                exceptionMessage = exceptionMessage + "no more than " + MAXIMUM_ZOOM_INTERVAL + " pixels.";
+            }
+        }
+        if (zoomIntervalOutOfBounds) {
+            throw new IllegalArgumentException(exceptionMessage);
+        }
+        this.zoomInterval = newZoomInterval;
+    }
+    
     
     /**
      * Function to change the coordinates of the point 0. I have not yet implemented a meaningful use for this function.
@@ -468,6 +522,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     public void changeZeroCoords(int newCoordX, int newCoordY) {
         this.zeroCoordX = newCoordX;
         this.zeroCoordY = newCoordY;
+        zeroCentered = (this.zeroCoordX == (int) Math.floor(this.ringCanvasHorizMax/2) && this.zeroCoordY == (int) Math.floor(this.ringCanvasVerticMax/2));
+        zeroInView = ((this.zeroCoordX > -1) && (this.zeroCoordY > -1) && (this.zeroCoordX <= this.ringCanvasHorizMax) && (this.zeroCoordY <= this.ringCanvasVerticMax));
     }
     
     /**
@@ -489,13 +545,10 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     public void mouseMoved(MouseEvent mauv) {
         boolean algIntFound;
         int horizCoord, verticCoord;
+        String stringForAlgIntReadOut;
         if (this.imagQuadRing.d1mod4) {
-            int halfUnitInterval = this.pixelsPerUnitInterval;
-            if (halfUnitInterval % 2 == 1) {
-                halfUnitInterval--;
-            }
-            halfUnitInterval /= 2;
-            horizCoord = (int) Math.round((mauv.getX() - this.zeroCoordX)/halfUnitInterval);
+            double horizIntermediate = 4 * (mauv.getX() - this.zeroCoordX)/this.pixelsPerUnitInterval;
+            horizCoord = (int) Math.round(horizIntermediate/2);
             verticCoord = (int) Math.round((-mauv.getY() + this.zeroCoordY)/this.pixelsPerBasicImaginaryInterval);
             algIntFound = (Math.abs(horizCoord % 2) == Math.abs(verticCoord % 2));
             if (algIntFound) {
@@ -508,7 +561,12 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             algIntFound = true;
         }
         if (algIntFound) {
-            algIntReadOut.setText(mouseIQI.toString());
+            if (preferenceForThetaNotation) {
+                stringForAlgIntReadOut = mouseIQI.toStringAlt();
+            } else {
+                stringForAlgIntReadOut = mouseIQI.toString();
+            }
+            algIntReadOut.setText(stringForAlgIntReadOut);
             algIntTraceReadOut.setText(Integer.toString(mouseIQI.trace()));
             algIntNormReadOut.setText(Integer.toString(mouseIQI.norm()));
             algIntPolReadOut.setText(mouseIQI.minPolynomialString());
@@ -599,38 +657,142 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     
     public void zoomIn() {
         int newPixelsPerUnitInterval = this.pixelsPerUnitInterval + zoomInterval;
-        if (newPixelsPerUnitInterval < MAXIMUM_PIXELS_PER_UNIT_INTERVAL) {
+        if (newPixelsPerUnitInterval <= MAXIMUM_PIXELS_PER_UNIT_INTERVAL) {
             setPixelsPerUnitInterval(newPixelsPerUnitInterval);
             repaint();
             if ((newPixelsPerUnitInterval + zoomInterval) > MAXIMUM_PIXELS_PER_UNIT_INTERVAL) {
                 this.zoomInMenuItem.setEnabled(false);
             }
         }
-        if (newPixelsPerUnitInterval > (MINIMUM_PIXELS_PER_UNIT_INTERVAL + zoomInterval) && (newPixelsPerUnitInterval < (MINIMUM_PIXELS_PER_UNIT_INTERVAL + 2 * zoomInterval))) {
+        if (!this.zoomOutMenuItem.isEnabled() && (newPixelsPerUnitInterval >= (MINIMUM_PIXELS_PER_UNIT_INTERVAL + zoomInterval))) {
             this.zoomOutMenuItem.setEnabled(true);
         }
     }
     
     public void zoomOut() {
         int newPixelsPerUnitInterval = this.pixelsPerUnitInterval - zoomInterval;
-        if (newPixelsPerUnitInterval > MINIMUM_PIXELS_PER_UNIT_INTERVAL) {
+        if (newPixelsPerUnitInterval >= MINIMUM_PIXELS_PER_UNIT_INTERVAL) {
             setPixelsPerUnitInterval(newPixelsPerUnitInterval);
             repaint();
             if ((newPixelsPerUnitInterval - zoomInterval) < MINIMUM_PIXELS_PER_UNIT_INTERVAL) {
                 this.zoomOutMenuItem.setEnabled(false);
             }
         }
-        if (newPixelsPerUnitInterval > (MAXIMUM_PIXELS_PER_UNIT_INTERVAL - zoomInterval) && (newPixelsPerUnitInterval < (MAXIMUM_PIXELS_PER_UNIT_INTERVAL - 2 * zoomInterval))) {
+        if (!this.zoomInMenuItem.isEnabled() && (newPixelsPerUnitInterval <= (MAXIMUM_PIXELS_PER_UNIT_INTERVAL - zoomInterval))) {
             this.zoomInMenuItem.setEnabled(true);
         }
     }
+    
+    private void informZoomIntervalChange(boolean changeFlag) {
+        String notificationString = "Zoom interval is now " + this.zoomInterval + ".\nThere are " + this.pixelsPerUnitInterval + " pixels per unit interval.";
+        JOptionPane.showMessageDialog(ringFrame, notificationString);
+    }
+    
+    public void decreaseZoomInterval() {
+        int newZoomInterval = this.zoomInterval - 1;
+        boolean newZoomIntervalFlag = false;
+        if (newZoomInterval >= MINIMUM_ZOOM_INTERVAL) {
+            changeZoomInterval(newZoomInterval);
+            newZoomIntervalFlag = true;
+            if (this.zoomInterval == MINIMUM_ZOOM_INTERVAL) {
+                this.decreaseZoomIntervalMenuItem.setEnabled(false);
+            }
+        }
+        informZoomIntervalChange(newZoomIntervalFlag);
+        if (!this.increaseZoomIntervalMenuItem.isEnabled() && (newZoomInterval < MAXIMUM_ZOOM_INTERVAL)) {
+            this.increaseZoomIntervalMenuItem.setEnabled(true);
+        }
+    }
 
+    public void increaseZoomInterval() {
+        int newZoomInterval = this.zoomInterval + 1;
+        boolean newZoomIntervalFlag = false;
+        if (newZoomInterval <= MAXIMUM_ZOOM_INTERVAL) {
+            changeZoomInterval(newZoomInterval);
+            newZoomIntervalFlag = true;
+            if (this.zoomInterval == MAXIMUM_ZOOM_INTERVAL) {
+                this.increaseZoomIntervalMenuItem.setEnabled(false);
+            }
+        }
+        informZoomIntervalChange(newZoomIntervalFlag);
+        if (!this.decreaseZoomIntervalMenuItem.isEnabled() && (newZoomInterval > MINIMUM_ZOOM_INTERVAL)) {
+            this.decreaseZoomIntervalMenuItem.setEnabled(true);
+        }
+    }
+
+    public void decreaseDotRadius() {
+        int newDotRadius = this.dotRadius - 1;
+        if (newDotRadius >= MINIMUM_DOT_RADIUS) {
+            changeDotRadius(newDotRadius);
+            repaint();
+            if (this.dotRadius == MINIMUM_DOT_RADIUS) {
+                this.decreaseDotRadiusMenuItem.setEnabled(false);
+            }
+        }
+        if (!this.increaseDotRadiusMenuItem.isEnabled() && (newDotRadius < MAXIMUM_DOT_RADIUS)) {
+            this.increaseDotRadiusMenuItem.setEnabled(true);
+        }
+    }
+
+    public void increaseDotRadius() {
+        int newDotRadius = this.dotRadius + 1;
+        if (newDotRadius <= MAXIMUM_DOT_RADIUS) {
+            changeDotRadius(newDotRadius);
+            repaint();
+            if (this.dotRadius == MAXIMUM_DOT_RADIUS) {
+                this.increaseDotRadiusMenuItem.setEnabled(false);
+            }
+        }
+        if (!this.decreaseDotRadiusMenuItem.isEnabled() && (newDotRadius > MINIMUM_DOT_RADIUS)) {
+            this.decreaseDotRadiusMenuItem.setEnabled(true);
+        }
+    }
+    
+    public void resetViewDefaults() {
+        /* Since the program does not yet allow the user to change colors, the following three lines are for now unnecessary.
+        changeBackgroundColor(DEFAULT_CANVAS_BACKGROUND_COLOR);
+        changeGridColors(DEFAULT_HALF_INTEGER_GRID_COLOR, DEFAULT_INTEGER_GRID_COLOR);
+        changePointColors(DEFAULT_ZERO_COLOR, DEFAULT_UNIT_COLOR, DEFAULT_INERT_PRIME_COLOR, DEFAULT_SPLIT_PRIME_COLOR, DEFAULT_RAMIFIED_PRIME_COLOR);
+        */
+        setPixelsPerUnitInterval(DEFAULT_PIXELS_PER_UNIT_INTERVAL);
+        changeZoomInterval(DEFAULT_ZOOM_INTERVAL);
+        changeDotRadius(DEFAULT_DOT_RADIUS);
+        repaint();
+        // Now to check if any menu items need to be re-enabled
+        if (!this.zoomInMenuItem.isEnabled() && (this.pixelsPerUnitInterval < (MAXIMUM_PIXELS_PER_UNIT_INTERVAL - zoomInterval))) {
+            this.zoomInMenuItem.setEnabled(true);
+        }
+        if (!this.zoomOutMenuItem.isEnabled() && (this.pixelsPerUnitInterval > (MINIMUM_PIXELS_PER_UNIT_INTERVAL + zoomInterval))) {
+            this.zoomOutMenuItem.setEnabled(true);
+        }
+        if (!this.increaseZoomIntervalMenuItem.isEnabled() && (this.zoomInterval < MAXIMUM_ZOOM_INTERVAL)) {
+            this.increaseZoomIntervalMenuItem.setEnabled(true);
+        }
+        if (!this.decreaseZoomIntervalMenuItem.isEnabled() && (this.zoomInterval > MINIMUM_ZOOM_INTERVAL)) {
+            this.decreaseZoomIntervalMenuItem.setEnabled(true);
+        }
+        if (!this.increaseDotRadiusMenuItem.isEnabled() && (this.dotRadius < MAXIMUM_DOT_RADIUS)) {
+            this.increaseDotRadiusMenuItem.setEnabled(true);
+        }
+        if (!this.decreaseDotRadiusMenuItem.isEnabled() && (this.dotRadius > MINIMUM_DOT_RADIUS)) {
+            this.decreaseDotRadiusMenuItem.setEnabled(true);
+        }
+    }
+    
+    /**
+     * Function to enable or disable the use of theta notation in the readout field for integer when imagQuadRing.d1mod4 is true.
+     * Of course updating of readouts has to be enabled.
+     */
+    public void toggleThetaNotation() {
+        this.preferenceForThetaNotation = this.preferThetaNotationMenuItem.isSelected();
+    }
+    
     /**
      * Function to enable or disable updating of the readout fields for integer, trace, norm and polynomial.
      * I don't know what it is that I forgot to do, but after enabling the readouts, the menu becomes hard to reach.
      */
     public void toggleReadOutsEnabled() {
-        if (toggleReadOutsEnabledMenuItem.isSelected()) {
+        if (this.toggleReadOutsEnabledMenuItem.isSelected()) {
             this.addMouseMotionListener(this);
         } else {
             this.removeMouseMotionListener(this);
@@ -638,7 +800,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     private void showAboutBox() {
-        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.71\n\u00A9 2017 Alonso del Arte");
+        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.8\n\u00A9 2017 Alonso del Arte");
     }
     
     /**
@@ -677,6 +839,29 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             case "zoomOut":
                 zoomOut();
                 break;
+            case "decrZoomInterval":
+                decreaseZoomInterval();
+                break;
+            case "incrZoomInterval":
+                increaseZoomInterval();
+                break;
+            case "decrDotRadius":
+                decreaseDotRadius();
+                break;
+            case "incrDotRadius":
+                increaseDotRadius();
+                break;
+            case "defaultView":
+                String messageForOKCancel = "This will reset pixels per unit interval, dot radius and zoom interval,\nbut not discriminant nor whether readouts are updated.";
+                String titleForOKCancel = "Reset view defaults?";
+                int okCancelReply = JOptionPane.showConfirmDialog(ringFrame, messageForOKCancel, titleForOKCancel, JOptionPane.OK_CANCEL_OPTION);
+                if (okCancelReply == JOptionPane.OK_OPTION) {
+                    resetViewDefaults();
+                }
+                break;
+            case "toggleTheta":
+                toggleThetaNotation();
+                break;
             case "toggleReadOuts":
                 toggleReadOutsEnabled();
                 break;
@@ -702,7 +887,6 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         chooseDMenuItem = ringWindowMenu.add(ringWindowMenuItem);
         chooseDMenuItem.setActionCommand("chooseD");
         chooseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, Event.CTRL_MASK));
-        // chooseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F2, Event.CTRL_MASK));
         chooseDMenuItem.addActionListener(this);
         ringWindowMenuItem = new JMenuItem("Increment discriminant");
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Increment the discriminant to choose another ring");
@@ -752,10 +936,61 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             zoomInMenuItem.setEnabled(false);
         }
         ringWindowMenu.addSeparator();
+        ringWindowMenuItem = new JMenuItem("Decrease zoom interval");
+        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Decrease the zoom interval used by the zoom in and zoom out functions");
+        decreaseZoomIntervalMenuItem = ringWindowMenu.add(ringWindowMenuItem);
+        decreaseZoomIntervalMenuItem.setActionCommand("decrZoomInterval");
+        decreaseZoomIntervalMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, Event.CTRL_MASK + Event.SHIFT_MASK));
+        decreaseZoomIntervalMenuItem.addActionListener(this);
+        if (this.zoomInterval == MINIMUM_ZOOM_INTERVAL) {
+            decreaseZoomIntervalMenuItem.setEnabled(false);
+        }
+        ringWindowMenuItem = new JMenuItem("Increase zoom interval");
+        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Increase the zoom interval used by the zoom in and zoom out functions");
+        increaseZoomIntervalMenuItem = ringWindowMenu.add(ringWindowMenuItem);
+        increaseZoomIntervalMenuItem.setActionCommand("incrZoomInterval");
+        increaseZoomIntervalMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, Event.CTRL_MASK + Event.SHIFT_MASK));
+        increaseZoomIntervalMenuItem.addActionListener(this);
+        if (this.zoomInterval == MAXIMUM_ZOOM_INTERVAL) {
+            increaseZoomIntervalMenuItem.setEnabled(false);
+        }
+        ringWindowMenu.addSeparator();
+        ringWindowMenuItem = new JMenuItem("Decrease dot radius");
+        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Decrease the dot radius used to draw the points on the grids");
+        decreaseDotRadiusMenuItem = ringWindowMenu.add(ringWindowMenuItem);
+        decreaseDotRadiusMenuItem.setActionCommand("decrDotRadius");
+        decreaseDotRadiusMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, Event.CTRL_MASK));
+        decreaseDotRadiusMenuItem.addActionListener(this);
+        if (this.dotRadius == MINIMUM_DOT_RADIUS) {
+            decreaseDotRadiusMenuItem.setEnabled(false);
+        }
+        ringWindowMenuItem = new JMenuItem("Increase dot radius");
+        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Increase the dot radius used to draw the points on the grids");
+        increaseDotRadiusMenuItem = ringWindowMenu.add(ringWindowMenuItem);
+        increaseDotRadiusMenuItem.setActionCommand("incrDotRadius");
+        increaseDotRadiusMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, Event.CTRL_MASK));
+        increaseDotRadiusMenuItem.addActionListener(this);
+        if (this.dotRadius == MAXIMUM_DOT_RADIUS) {
+            increaseDotRadiusMenuItem.setEnabled(false);
+        }
+        ringWindowMenu.addSeparator();
+        ringWindowMenuItem = new JMenuItem("Reset view defaults");
+        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Reset defaults for zoom level, zoom interval and dot radius");
+        resetViewDefaultsMenuItem = ringWindowMenu.add(ringWindowMenuItem);
+        resetViewDefaultsMenuItem.setActionCommand("defaultView");
+        resetViewDefaultsMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0));
+        resetViewDefaultsMenuItem.addActionListener(this);
+        ringWindowMenu.addSeparator();
+        preferThetaNotationMenuItem = new JCheckBoxMenuItem("Use theta notation in readouts", false);
+        preferThetaNotationMenuItem.getAccessibleContext().setAccessibleDescription("Toggle whether theta notation is used or not in the integer readout.");
+        preferThetaNotationMenuItem.setActionCommand("toggleTheta");
+        preferThetaNotationMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, 0));
+        preferThetaNotationMenuItem.addActionListener(this);
+        ringWindowMenu.add(preferThetaNotationMenuItem);
         toggleReadOutsEnabledMenuItem = new JCheckBoxMenuItem("Update readouts", false);
         toggleReadOutsEnabledMenuItem.getAccessibleContext().setAccessibleDescription("Toggle whether the trace, norm and polynomial readouts are updated.");
         toggleReadOutsEnabledMenuItem.setActionCommand("toggleReadOuts");
-        toggleReadOutsEnabledMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F2, Event.CTRL_MASK));
+        toggleReadOutsEnabledMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0)); // Decided Ctrl-F2 is too uncomfortable, so changed it to just F2.
         toggleReadOutsEnabledMenuItem.addActionListener(this);
         ringWindowMenu.add(toggleReadOutsEnabledMenuItem);
         ringWindowMenu = new JMenu("Help");
@@ -787,7 +1022,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         readOutsPane.add(algIntNormReadOut);
         readOutsPane.add(new JLabel("Polynomial: "));
         algIntPolReadOut = new JTextField(DEFAULT_READOUT_FIELD_COLUMNS);
-        algIntPolReadOut.setText("0");
+        algIntPolReadOut.setText("x");
         algIntPolReadOut.setEditable(false);
         readOutsPane.add(algIntPolReadOut);
         
@@ -817,9 +1052,12 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         
         this.zeroCoordX = (int) Math.floor(this.ringCanvasHorizMax/2);
         this.zeroCoordY = (int) Math.floor(this.ringCanvasVerticMax/2);
+        this.zeroCentered = true;
+        this.zeroInView = true;
         
         this.dotRadius = DEFAULT_DOT_RADIUS;
         this.zoomInterval = DEFAULT_ZOOM_INTERVAL;
+        this.preferenceForThetaNotation = false;
         
         if (ringChoice > 0) {
             ringChoice *= -1;

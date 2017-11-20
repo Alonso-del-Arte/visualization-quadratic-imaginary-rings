@@ -62,22 +62,31 @@ public class ImaginaryQuadraticRing {
     
     /**
      * A text representation of the ring. In some contexts, toTeXString() or toHTMLString() may be preferable.
-     * @return A string representing the imaginary quadratic ring which can be output to the console.
+     * @return A String representing the imaginary quadratic ring which can be output to the console.
      */
     @Override
     public String toString() {
         String IQRString;
-        if (this.d1mod4) {
-            IQRString = "O_(Q(\u221A" + this.negRad + "))";
-        } else {
-            IQRString = "Z[\u221A" + this.negRad + "]";
+        switch (this.negRad) {
+            case -1:
+                IQRString = "Z[i]";
+                break;
+            case -3:
+                IQRString = "Z[\u03C9]";
+                break;
+            default:
+                if (this.d1mod4) {
+                    IQRString = "O_(Q(\u221A" + this.negRad + "))";
+                } else {
+                    IQRString = "Z[\u221A" + this.negRad + "]";
+                }
         }
         return IQRString;
     }
 
     /**
      * I have not tested this function.
-     * @return A string suitable for use in a TeX document, if I haven't made any mistakes.
+     * @return A String suitable for use in a TeX document, if I haven't made any mistakes.
      */
     public String toTeXString() {
         String IQRString;
@@ -98,10 +107,35 @@ public class ImaginaryQuadraticRing {
         return IQRString;
     }
     
-    // public String toHTMLString() implementation GOES HERE
+    /**
+     * I have not tested this function.
+     * @return A String suitable for use in an HTML document, if I haven't made any mistakes. If preferenceForBlackboardBold is true, this also assumes the font has the relevant Unicode characters.
+     */
+    public String toHTMLString() {
+        String IQRString;
+        String QChar;
+        String ZChar;
+        if (preferenceForBlackboardBold) {
+            QChar = "\u211A";
+            ZChar = "\u2124";
+        } else {
+            QChar = "<b>Q</b>";
+            ZChar = "<b>Z</b>";
+        }
+        if (this.d1mod4) {
+            IQRString = "\\mathcal O_{" + QChar + "(\\sqrt{" + this.negRad + "})}";
+        } else {
+            IQRString = ZChar + "[\\sqrt{" + this.negRad + "}]";
+        }
+        return IQRString;
+    }
     
+    /**
+     * Class constructor
+     * @param d A negative, squarefree integer.
+     * @throws IllegalArgumentException If d is 0 or any positive integer, or if d is negative but not squarefree.
+     */
     public ImaginaryQuadraticRing(int d) {
-        //
         if (d > -1) {
             throw new IllegalArgumentException("Negative integer required for parameter d.");
         }

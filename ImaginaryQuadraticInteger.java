@@ -207,7 +207,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     
     /**
      * A text representation of the imaginary quadratic integer, with the real part first and the imaginary part second.
-     * @return A string representing the imaginary quadratic integer which can be output to the console.
+     * @return A String representing the imaginary quadratic integer which can be output to the console.
      */
     @Override
     public String toString() {
@@ -257,20 +257,60 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
                 }
             }
         }
+        if (this.imagQuadRing.negRad == -1) {
+            IQIString = IQIString.replace("\u221A(-1)", "i");
+        }
         return IQIString;
     }
     
+    /**
+     * A text representation of the imaginary quadratic integer, using theta notation when imagQuadRing.d1mod4 is true.
+     * @return A String representing the imaginary quadratic integer which can be output to the console. If imagQuadRing.d1mod4 is false, this just returns the same String as toString().
+     */
     public String toStringAlt() {
 
-        String altIQIString = this.toString();
-        if (this.imagQuadRing.negRad == -1) {
-            altIQIString = altIQIString.replace("\u221A(-1)", "i");
-        }
+        String altIQIString;
         if (this.imagQuadRing.d1mod4) {
-            // TO DO: Conversion logic for theta notation
-        }
-        if (this.imagQuadRing.negRad == -3) {
-            altIQIString = altIQIString.replace("\u03B8", "\u03C9");
+            int nonThetaPart = this.realPartMult;
+            int thetaPart = this.imagPartMult;
+            char thetaLetter = '\u03B8';
+            if (this.denominator == 1) {
+                nonThetaPart *= 2;
+                thetaPart *= 2;
+            }
+            if (this.imagQuadRing.negRad == -3) {
+                nonThetaPart = (nonThetaPart + thetaPart)/2;
+                thetaLetter = '\u03C9'; // Now this holds omega instead of theta
+            } else {
+                nonThetaPart = (nonThetaPart - thetaPart)/2;
+            }
+            altIQIString = Integer.toString(nonThetaPart);
+            if (nonThetaPart == 0 && thetaPart != 0) {
+                if (thetaPart < -1 || thetaPart > 1) {
+                    altIQIString = Integer.toString(thetaPart) + thetaLetter;
+                }
+                if (thetaPart == -1) {
+                    altIQIString = "-" + thetaLetter;
+                }
+                if (thetaPart == 1) {
+                    altIQIString = Character.toString(thetaLetter);
+                }
+            } else {
+                if (thetaPart < -1) {
+                    altIQIString += (" - " + ((-1) * thetaPart) + thetaLetter);
+                }
+                if (thetaPart == -1) {
+                    altIQIString += (" - " + thetaLetter);
+                }
+                if (thetaPart == 1) {
+                    altIQIString += (" + " + thetaLetter);
+                }
+                if (thetaPart > 1) {
+                    altIQIString += (" + " + thetaPart + thetaLetter);
+                }
+            }
+        } else {
+            altIQIString = this.toString();
         }
         return altIQIString;
  

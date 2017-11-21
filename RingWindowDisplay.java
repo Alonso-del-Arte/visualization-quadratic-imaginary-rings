@@ -655,6 +655,15 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         switchToRing(discr);
     }
     
+    private void checkViewMenuEnablements() {
+        if (!this.zoomInMenuItem.isEnabled() && (this.pixelsPerUnitInterval <= (MAXIMUM_PIXELS_PER_UNIT_INTERVAL - zoomInterval))) {
+            this.zoomInMenuItem.setEnabled(true);
+        }
+        if (!this.zoomOutMenuItem.isEnabled() && (this.pixelsPerUnitInterval >= (MINIMUM_PIXELS_PER_UNIT_INTERVAL + zoomInterval))) {
+            this.zoomOutMenuItem.setEnabled(true);
+        }
+    }
+    
     public void zoomIn() {
         int newPixelsPerUnitInterval = this.pixelsPerUnitInterval + zoomInterval;
         if (newPixelsPerUnitInterval <= MAXIMUM_PIXELS_PER_UNIT_INTERVAL) {
@@ -702,6 +711,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         if (!this.increaseZoomIntervalMenuItem.isEnabled() && (newZoomInterval < MAXIMUM_ZOOM_INTERVAL)) {
             this.increaseZoomIntervalMenuItem.setEnabled(true);
         }
+        checkViewMenuEnablements();
     }
 
     public void increaseZoomInterval() {
@@ -718,6 +728,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         if (!this.decreaseZoomIntervalMenuItem.isEnabled() && (newZoomInterval > MINIMUM_ZOOM_INTERVAL)) {
             this.decreaseZoomIntervalMenuItem.setEnabled(true);
         }
+        checkViewMenuEnablements();
     }
 
     public void decreaseDotRadius() {
@@ -800,7 +811,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     private void showAboutBox() {
-        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.8\n\u00A9 2017 Alonso del Arte");
+        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.81\n\u00A9 2017 Alonso del Arte");
     }
     
     /**

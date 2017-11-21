@@ -99,10 +99,19 @@ public class ImaginaryQuadraticRing {
             QChar = "\\textbf Q";
             ZChar = "\\textbf Z";
         }
-        if (this.d1mod4) {
-            IQRString = "\\mathcal O_{" + QChar + "(\\sqrt{" + this.negRad + "})}";
-        } else {
-            IQRString = ZChar + "[\\sqrt{" + this.negRad + "}]";
+        switch (this.negRad) {
+            case -1:
+                IQRString = ZChar + "[i]";
+                break;
+            case -3:
+                IQRString = ZChar + "[\\omega]";
+                break;
+            default:
+                if (this.d1mod4) {
+                    IQRString = "\\mathcal O_{" + QChar + "(\\sqrt{" + this.negRad + "})}";
+                } else {
+                    IQRString = ZChar + "[\\sqrt{" + this.negRad + "}]";
+            }
         }
         return IQRString;
     }
@@ -116,16 +125,25 @@ public class ImaginaryQuadraticRing {
         String QChar;
         String ZChar;
         if (preferenceForBlackboardBold) {
-            QChar = "\u211A";
-            ZChar = "\u2124";
+            QChar = "\u211A"; // Double-struck capital Q
+            ZChar = "\u2124"; // Double-struck capital Z
         } else {
             QChar = "<b>Q</b>";
             ZChar = "<b>Z</b>";
         }
-        if (this.d1mod4) {
-            IQRString = "\\mathcal O_{" + QChar + "(\\sqrt{" + this.negRad + "})}";
-        } else {
-            IQRString = ZChar + "[\\sqrt{" + this.negRad + "}]";
+        switch (this.negRad) {
+            case -1:
+                IQRString = ZChar + "[<i>i</i>]";
+                break;
+            case -3:
+                IQRString = ZChar + "[\u03C9]";
+                break;
+            default:
+                if (this.d1mod4) {
+                    IQRString = "<i>O</i><sub>" + QChar + "(&radic;(" + this.negRad + ")</sub>";
+                } else {
+                    IQRString = ZChar + "[&radic;" + this.negRad + "]";
+                }
         }
         return IQRString;
     }

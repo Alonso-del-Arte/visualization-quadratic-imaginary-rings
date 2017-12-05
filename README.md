@@ -58,20 +58,24 @@ Help -> About... Shows the about box with the version number and copyright notic
 
 By issues, I mean a feature I have implemented does not work as well as expected, or it does not work correctly. This is meant to exclude features I have not implemented at all. For those, see under "feature requests" (and also under "version goals").
 
-* The program is very sluggish when the diagram is zoomed out to 2 pixels per unit interval, especially in Z[i] and Z[omega]. I don't recommend changing MINIMUM_PIXELS_PER_UNIT_INTERVAL to 1.
-* The keyboard shortcuts in Mac OS leave a lot to be desired.
+* The program is very sluggish when the diagram is zoomed out to 2 pixels per unit interval, especially in Z[i] and Z[omega]. I don't recommend changing MINIMUM_PIXELS_PER_UNIT_INTERVAL to 1. I will do some basic optimization of the primeFactors() function, but I don't know if it will help much.
+* The keyboard shortcuts in Mac OS leave a lot to be desired. I hope to have this issue taken care of before Version 1.0.
 
 ## Version goals
 
 By Version 1.0, the program ought to have:
 * the ability to save diagrams in a graphics format (most likely PNG).
 * the ability to copy the diagram to the clipboard in a graphics format using a menu command within the program (at least for now on Windows you can use Alt-PrintScreen, or Command-Shift-3 or Command-Shift-4 on Mac OS X).
+* some command-line options.
 
 By Version 2.0, the program ought to have:
-* a way for the user to change the numerical color coding
+* a way for the user to change the numerical color coding.
+* some internationalization.
+* the ability to read in preferences from the previous session (if available). But perhaps Z[i] should always be the ring shown at start-up.
 
 By Version 3.0, the program ought to have:
 * the ability to drag the diagram in any direction ("north," "west," "south," "east") that the user wants, like you can with Google Maps.
+* internationalization for the ten most spoken languages of the world.
 
 ## Feature requests
 

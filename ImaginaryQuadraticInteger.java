@@ -352,6 +352,23 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         }
         return new ImaginaryQuadraticInteger(sumRealPart, sumImagPart, this.imagQuadRing, sumDenom);
     }
+    
+    /**
+     * Addition operation, since operator+ (plus) can't be overloaded. No overflow checking as of yet.
+     * Although the previous plus function can be passed an ImaginaryQuadraticInteger with imagPartMult equal to 0, this function is to be preferred if you know for sure the summand is purely real.
+     * With this plus, there is no need to catch an AlgebraicDegreeOverflowException.
+     * @param summand The purely real integer to be added to the real part of the ImaginaryQuadraticInteger.
+     * @return A new ImaginaryQuadraticInteger object with the result of the operation.
+     */
+    public ImaginaryQuadraticInteger plus(int summand) {
+        int sumRealPart = this.realPartMult;
+        if (this.denominator == 2) {
+            sumRealPart += (2 * summand);
+        } else {
+            sumRealPart += summand;
+        }
+        return new ImaginaryQuadraticInteger(sumRealPart, this.imagPartMult, this.imagQuadRing, this.denominator);
+    }
 
     /**
      * Subtraction operation, since operator- can't be overloaded.  No overflow checking as of yet.
@@ -391,6 +408,24 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
+     * Subtraction operation, since operator- can't be overloaded.  No overflow checking as of yet.
+     * Although the previous minus function can be passed an ImaginaryQuadraticInteger with imagPartMult equal to 0, this function is to be preferred if you know for sure the subtrahend is purely real.
+     * With this minus, there is no need to catch an AlgebraicDegreeOverflowException.
+     * @param subtrahend The purely real integer to be subtracted from this quadratic integer.
+     * @return A new ImaginaryQuadraticInteger object with the result of the operation.
+     */
+    public ImaginaryQuadraticInteger minus(int subtrahend) {
+        int subtractionRealPart = this.realPartMult;
+        if (this.denominator == 2) {
+            subtractionRealPart -= (2 * subtrahend);
+        } else {
+            subtractionRealPart -= subtrahend;
+        }
+        return new ImaginaryQuadraticInteger(subtractionRealPart, this.imagPartMult, this.imagQuadRing, this.denominator);
+
+    }
+    
+    /**
      * Multiplication operation, since operator* can't be overloaded. No overflow checking as of yet.
      * @param multiplicand The imaginary quadratic integer to be multiplied by this quadratic integer.
      * @return A new ImaginaryQuadraticInteger object with the result of the operation.
@@ -413,7 +448,9 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         return result;
     }
    
-    // PLACEHOLDER FOR divides()
+    // PLACEHOLDER FOR divides(IQI)
+    
+    // PLACEHOLDER FOR divides(int)
     
     /**
      * Class constructor
@@ -421,6 +458,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
      * @param b The part to be multiplied by sqrt(d), multiplied by 2 when applicable
      * @param R The ring to which this algebraic integer belongs to
      * @param denom In most cases 1, but may be 2 if a and b have the same parity and d = 1 mod 4
+     * @throws IllegalArgumentException If denom is anything other than 1 or 2, or if denom is 2 but a and b don't match parity.
      */
     public ImaginaryQuadraticInteger(int a, int b, ImaginaryQuadraticRing R, int denom) {
         
@@ -456,7 +494,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         
     }
     
-    public static int getIntFromConsole(Scanner input) {
+    private static int getIntFromConsole(Scanner input) {
         int enteredInteger = 0;
         boolean invalidInput = true;
         
@@ -489,7 +527,6 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         
         /*
         The idea here is that the user will be able to choose between a graphical interface and a text interface.
-        But the graphical interface is not ready yet, so for now there's only the text interface.
         
         if (args.length > 0) {
             if (args[0] == "-gui" || args[0] == "-GUI") {

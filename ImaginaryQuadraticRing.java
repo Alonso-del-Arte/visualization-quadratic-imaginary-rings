@@ -17,7 +17,9 @@
 package imaginaryquadraticinteger;
 
 /**
- *
+ * An object to represent a quadratic integer ring.
+ * A ring of quadratic integers contains infinitely many numbers.
+ * But, for the sake of this program, objects of type ImaginaryQuadraticRing are held by objects of type ImaginaryQuadraticInteger rather than the other way around.
  * @author Alonso del Arte
  */
 public class ImaginaryQuadraticRing {
@@ -69,10 +71,10 @@ public class ImaginaryQuadraticRing {
         String IQRString;
         switch (this.negRad) {
             case -1:
-                IQRString = "Z[i]";
+                IQRString = "Z[i]"; // i is the imaginary unit, sqrt(-1)
                 break;
             case -3:
-                IQRString = "Z[\u03C9]";
+                IQRString = "Z[\u03C9]"; // omega = -1/2 + sqrt(-3)/2 is a complex cubic root of 1
                 break;
             default:
                 if (this.d1mod4) {
@@ -160,7 +162,7 @@ public class ImaginaryQuadraticRing {
         if (!NumberTheoreticFunctionsCalculator.isSquareFree(d)) {
             throw new IllegalArgumentException("Squarefree integer required for parameter d.");
         }
-        this.d1mod4 = (d % 4 == -3);
+        this.d1mod4 = (d % 4 == -3); // For whatever reason, odd negative numbers modulo 4 are given as -3 and -1 rather than 1 and 3.
         this.negRad = d;
         this.absNegRad = Math.abs(negRad);
         this.absNegRadSqrt = Math.sqrt(absNegRad);

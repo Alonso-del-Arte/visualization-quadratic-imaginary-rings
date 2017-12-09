@@ -26,9 +26,11 @@ import java.util.*;
 public class NumberTheoreticFunctionsCalculator {
     
     /**
-     * Determines the prime factors of a given number
-     * @param num The integer for which to determine prime factors of
-     * @return A list of the prime factors, with some factors repeated as needed
+     * Determines the prime factors of a given number.
+     * Uses simple trial division with only basic optimization.
+     * @param num The integer for which to determine prime factors of.
+     * @return A list of the prime factors, with some factors repeated as needed.
+     * For example,
      */
     public static List<Integer> primeFactors(int num) {
         
@@ -42,7 +44,11 @@ public class NumberTheoreticFunctionsCalculator {
                 n *= (-1);
                 factors.add(-1);
             }
-            for (int i = 2; i <= n; i++) {
+            while (n % 2 == 0) {
+                factors.add(2); // Treating 2 as a special case
+                n /= 2;
+            }
+            for (int i = 3; i <= n; i += 2) {
                 while (n % i == 0) {
                     factors.add(i);
                     n /= i;
@@ -64,17 +70,23 @@ public class NumberTheoreticFunctionsCalculator {
             case -1:
             case 0:
             case 1:
-                return false;
+                return false; // break statement not needed in this case
+            case -2:
+            case 2:
+                return true; // break not needed for this one either
             default:
-                List<Integer> prFacts = primeFactors(num);
-                if (prFacts.size() == 1 && prFacts.get(0) > 0) {
-                    return true;
+                if (num % 2 == 0) {
+                    return false;
                 } else {
-                    if (prFacts.size() == 2 && prFacts.get(0) == -1) {
-                        return true;
+                    boolean primeFlag = true;
+                    int potentialFactor = 3;
+                    double numSqrt = Math.sqrt(Math.abs(num));
+                    while (primeFlag && potentialFactor <= numSqrt) {
+                        primeFlag = (num % potentialFactor != 0);
+                        potentialFactor += 2;
                     }
+                    return primeFlag;
                 }
-                return false;
         }
     }
     
@@ -133,10 +145,12 @@ public class NumberTheoreticFunctionsCalculator {
     }
     
     /**
-     * Computes the greatest common divisor (GCD) of two integers by using the Euclidean algorithm. Haven't tested it with a or b or both equal to 0 yet.
+     * Computes the greatest common divisor (GCD) of two purely real integers by using the Euclidean algorithm.
      * @param a One of the two integers. May be negative, need not be greater than the other.
      * @param b One of the two integers. May be negative, need not be greater than the other.
      * @return The GCD as an integer.
+     * If one of a or b is 0 and the other is nonzero, the result will be the nonzero number.
+     * If both a and b are 0, then the result will be 0, which is technically wrong, but I think it's good enough for the purpose here.
      */
     public static int euclideanGCD(int a, int b) {
         int currA, currB, currRemainder;
@@ -159,11 +173,13 @@ public class NumberTheoreticFunctionsCalculator {
     }
     
     /**
+     * A console program for testing the number theoretic functions with user inputs.
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         
         Scanner input = new Scanner(System.in);
+        int prevInteger = 0;
         int enteredInteger = 1;
         List<Integer> prFacts;
         boolean invalidInput = true;
@@ -190,6 +206,7 @@ public class NumberTheoreticFunctionsCalculator {
                 case 0:
                     System.out.println("0 is not prime, nor squarefree.");
                     System.out.println("\u03BC(0) = 0.");
+                    System.out.println("gcd(0, " + prevInteger + ") = " + euclideanGCD(0, prevInteger));
                     System.out.println(" ");
                     break;
                 default:
@@ -211,11 +228,12 @@ public class NumberTheoreticFunctionsCalculator {
                     }
                     System.out.println("\u03BC(" + enteredInteger + ") = " + moebiusMu(enteredInteger));
                     System.out.println(enteredInteger + " is congruent to " + (enteredInteger % 4) + " modulo 4.");
-                    System.out.println("gcd(" + enteredInteger + ", 30) = " + euclideanGCD(enteredInteger, 30));
+                    System.out.println("gcd(" + enteredInteger + ", " + prevInteger + ") = " + euclideanGCD(enteredInteger, prevInteger));
                     System.out.println(" ");
                     break;
             }
             invalidInput = true;
+            prevInteger = enteredInteger;
         }
     }
     

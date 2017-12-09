@@ -589,6 +589,11 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         repaint();
     }
     
+    /**
+     * Function to ask user to enter a new, negative, squarefree integer for the discriminant of a ring to diagram primes in.
+     * If the user enters a positive integer, the number will be multiplied by -1.
+     * And if that number is not squarefree, the function looks for the next lower squarefree number, taking care not to go below MINIMUM_RING_D.
+     */
     public void chooseDiscriminant() {
         String discrString = Integer.toString(this.imagQuadRing.negRad);
         String userChoice = (String) JOptionPane.showInputDialog(ringFrame, "Please enter a negative, squarefree integer:", discrString);
@@ -627,6 +632,10 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
 
     }
 
+    /**
+     * Function to choose for discriminant the next higher negative squarefree integer.
+     * If this brings us up to -1, then the "Increase discriminant" menu item is disabled.
+     */
     public void incrementDiscriminant() {
         int discr = this.imagQuadRing.negRad + 1;
         while (!NumberTheoreticFunctionsCalculator.isSquareFree(discr) && discr < -1) {
@@ -641,6 +650,10 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         switchToRing(discr);
     }
 
+    /**
+     * Function to choose for discriminant the next lower negative squarefree integer.
+     * If this brings us down to MINIMUM_RING_D, then the "Decrease discriminant" menu item is disabled.
+     */
     public void decrementDiscriminant() {
         int discr = this.imagQuadRing.negRad - 1;
         while (!NumberTheoreticFunctionsCalculator.isSquareFree(discr) && discr > (Integer.MIN_VALUE + 1)) {
@@ -656,30 +669,44 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     private void checkViewMenuEnablements() {
+        if (this.zoomInMenuItem.isEnabled() && (this.pixelsPerUnitInterval > (MAXIMUM_PIXELS_PER_UNIT_INTERVAL - zoomInterval))) {
+            this.zoomInMenuItem.setEnabled(false);
+        }
         if (!this.zoomInMenuItem.isEnabled() && (this.pixelsPerUnitInterval <= (MAXIMUM_PIXELS_PER_UNIT_INTERVAL - zoomInterval))) {
             this.zoomInMenuItem.setEnabled(true);
+        }
+        if (this.zoomOutMenuItem.isEnabled() && (this.pixelsPerUnitInterval < (MINIMUM_PIXELS_PER_UNIT_INTERVAL + zoomInterval))) {
+            this.zoomOutMenuItem.setEnabled(false);
         }
         if (!this.zoomOutMenuItem.isEnabled() && (this.pixelsPerUnitInterval >= (MINIMUM_PIXELS_PER_UNIT_INTERVAL + zoomInterval))) {
             this.zoomOutMenuItem.setEnabled(true);
         }
     }
     
+    /**
+     * Function to zoom in on the diagram.
+     * This is done by reducing pixelsPerUnitInterval by zoomInterval.
+     */
     public void zoomIn() {
-        int newPixelsPerUnitInterval = this.pixelsPerUnitInterval + zoomInterval;
+        int newPixelsPerUnitInterval = this.pixelsPerUnitInterval + this.zoomInterval;
         if (newPixelsPerUnitInterval <= MAXIMUM_PIXELS_PER_UNIT_INTERVAL) {
             setPixelsPerUnitInterval(newPixelsPerUnitInterval);
             repaint();
-            if ((newPixelsPerUnitInterval + zoomInterval) > MAXIMUM_PIXELS_PER_UNIT_INTERVAL) {
+            if ((newPixelsPerUnitInterval + this.zoomInterval) > MAXIMUM_PIXELS_PER_UNIT_INTERVAL) {
                 this.zoomInMenuItem.setEnabled(false);
             }
         }
-        if (!this.zoomOutMenuItem.isEnabled() && (newPixelsPerUnitInterval >= (MINIMUM_PIXELS_PER_UNIT_INTERVAL + zoomInterval))) {
+        if (!this.zoomOutMenuItem.isEnabled() && (newPixelsPerUnitInterval >= (MINIMUM_PIXELS_PER_UNIT_INTERVAL + this.zoomInterval))) {
             this.zoomOutMenuItem.setEnabled(true);
         }
     }
     
+    /**
+     * Function to zoom out on the diagram.
+     * This is done by increasing pixelsPerUnitInterval by zoomInterval.
+     */
     public void zoomOut() {
-        int newPixelsPerUnitInterval = this.pixelsPerUnitInterval - zoomInterval;
+        int newPixelsPerUnitInterval = this.pixelsPerUnitInterval - this.zoomInterval;
         if (newPixelsPerUnitInterval >= MINIMUM_PIXELS_PER_UNIT_INTERVAL) {
             setPixelsPerUnitInterval(newPixelsPerUnitInterval);
             repaint();
@@ -687,16 +714,20 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                 this.zoomOutMenuItem.setEnabled(false);
             }
         }
-        if (!this.zoomInMenuItem.isEnabled() && (newPixelsPerUnitInterval <= (MAXIMUM_PIXELS_PER_UNIT_INTERVAL - zoomInterval))) {
+        if (!this.zoomInMenuItem.isEnabled() && (newPixelsPerUnitInterval <= (MAXIMUM_PIXELS_PER_UNIT_INTERVAL - this.zoomInterval))) {
             this.zoomInMenuItem.setEnabled(true);
         }
     }
     
-    private void informZoomIntervalChange(boolean changeFlag) {
+    private void informZoomIntervalChange() {
         String notificationString = "Zoom interval is now " + this.zoomInterval + ".\nThere are " + this.pixelsPerUnitInterval + " pixels per unit interval.";
         JOptionPane.showMessageDialog(ringFrame, notificationString);
     }
     
+    /**
+     * Function to decrease the zoom interval.
+     * The zoom interval is decremented by 1, taking care that it not become less than MINIMUM_ZOOM_INTERVAL.
+     */
     public void decreaseZoomInterval() {
         int newZoomInterval = this.zoomInterval - 1;
         boolean newZoomIntervalFlag = false;
@@ -707,13 +738,19 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                 this.decreaseZoomIntervalMenuItem.setEnabled(false);
             }
         }
-        informZoomIntervalChange(newZoomIntervalFlag);
+        if (newZoomIntervalFlag) {
+            informZoomIntervalChange();
+        }
         if (!this.increaseZoomIntervalMenuItem.isEnabled() && (newZoomInterval < MAXIMUM_ZOOM_INTERVAL)) {
             this.increaseZoomIntervalMenuItem.setEnabled(true);
         }
         checkViewMenuEnablements();
     }
 
+    /**
+     * Function to increase the zoom interval.
+     * The zoom interval is incremented by 1, taking care that it not become more than MAXIMUM_ZOOM_INTERVAL.
+     */
     public void increaseZoomInterval() {
         int newZoomInterval = this.zoomInterval + 1;
         boolean newZoomIntervalFlag = false;
@@ -724,7 +761,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                 this.increaseZoomIntervalMenuItem.setEnabled(false);
             }
         }
-        informZoomIntervalChange(newZoomIntervalFlag);
+        if (newZoomIntervalFlag) {
+            informZoomIntervalChange();
+        }
         if (!this.decreaseZoomIntervalMenuItem.isEnabled() && (newZoomInterval > MINIMUM_ZOOM_INTERVAL)) {
             this.decreaseZoomIntervalMenuItem.setEnabled(true);
         }
@@ -792,7 +831,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     
     /**
      * Function to enable or disable the use of theta notation in the readout field for integer when imagQuadRing.d1mod4 is true.
-     * Of course updating of readouts has to be enabled.
+     * Of course updating of readouts has to be enabled for this to be any of consequence.
      */
     public void toggleThetaNotation() {
         this.preferenceForThetaNotation = this.preferThetaNotationMenuItem.isSelected();
@@ -800,7 +839,6 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     
     /**
      * Function to enable or disable updating of the readout fields for integer, trace, norm and polynomial.
-     * I don't know what it is that I forgot to do, but after enabling the readouts, the menu becomes hard to reach.
      */
     public void toggleReadOutsEnabled() {
         if (this.toggleReadOutsEnabledMenuItem.isSelected()) {
@@ -810,7 +848,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         }
     }
     
-    private void showAboutBox() {
+    public void showAboutBox() {
         JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.81\n\u00A9 2017 Alonso del Arte");
     }
     
@@ -886,7 +924,19 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     
     private void setUpRingFrame() {
         
-        ringFrame = new JFrame("Ring Diagram for " + this.imagQuadRing.toString());  
+        ringFrame = new JFrame("Ring Diagram for " + this.imagQuadRing.toString());
+        
+        boolean macOSFlag;
+        int maskCtrlCommand, maskCtrlAltCommandOption;
+        String operSysName = System.getProperty("os.name");
+        macOSFlag = operSysName.equals("Mac OS X");
+        if (macOSFlag) {
+            maskCtrlCommand = Event.META_MASK;
+            // maskCtrlAltCommandOption = Event.META_MASK + Event.ALT_MASK;
+        } else {
+            maskCtrlCommand = Event.CTRL_MASK;
+            // maskCtrlAltCommandOption = Event.CTRL_MASK + Event.ALT_MASK;
+        }
         
         ringWindowMenuBar = new JMenuBar();
         ringWindowMenu = new JMenu("Edit");
@@ -897,13 +947,17 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Let user enter new choice for ring discriminant");
         chooseDMenuItem = ringWindowMenu.add(ringWindowMenuItem);
         chooseDMenuItem.setActionCommand("chooseD");
-        chooseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, Event.CTRL_MASK));
+        chooseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, maskCtrlCommand));
         chooseDMenuItem.addActionListener(this);
         ringWindowMenuItem = new JMenuItem("Increment discriminant");
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Increment the discriminant to choose another ring");
         increaseDMenuItem = ringWindowMenu.add(ringWindowMenuItem);
         increaseDMenuItem.setActionCommand("incrD");
-        increaseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_UP, Event.CTRL_MASK));
+        if (macOSFlag) {
+            increaseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_U, maskCtrlCommand));
+        } else {
+            increaseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_UP, maskCtrlCommand));
+        }
         increaseDMenuItem.addActionListener(this);
         if (this.imagQuadRing.negRad == -1) {
             increaseDMenuItem.setEnabled(false);
@@ -912,7 +966,11 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Decrement the discriminant to choose another ring");
         decreaseDMenuItem = ringWindowMenu.add(ringWindowMenuItem);
         decreaseDMenuItem.setActionCommand("decrD");
-        decreaseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, Event.CTRL_MASK));
+        if (macOSFlag) {
+            decreaseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, maskCtrlCommand));
+        } else {
+            decreaseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, maskCtrlCommand));
+        }
         decreaseDMenuItem.addActionListener(this);
         if (this.imagQuadRing.negRad == Integer.MIN_VALUE + 1) {
             decreaseDMenuItem.setEnabled(false);
@@ -932,7 +990,11 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Zoom in, by increasing pixels per unit interval");
         zoomInMenuItem = ringWindowMenu.add(ringWindowMenuItem);
         zoomInMenuItem.setActionCommand("zoomIn");
-        zoomInMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ADD, Event.CTRL_MASK));
+        if (macOSFlag) {
+            zoomInMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_EQUALS, Event.SHIFT_MASK));
+        } else {
+            zoomInMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ADD, Event.CTRL_MASK));
+        }
         zoomInMenuItem.addActionListener(this);
         if (this.pixelsPerUnitInterval > (MAXIMUM_PIXELS_PER_UNIT_INTERVAL - zoomInterval)) {
             zoomInMenuItem.setEnabled(false);
@@ -941,7 +1003,11 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Zoom out, by decreasing pixels per unit interval");
         zoomOutMenuItem = ringWindowMenu.add(ringWindowMenuItem);
         zoomOutMenuItem.setActionCommand("zoomOut");
-        zoomOutMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_SUBTRACT, Event.CTRL_MASK));
+        if (macOSFlag) {
+            zoomOutMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, 0));
+        } else {
+            zoomOutMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_SUBTRACT, Event.CTRL_MASK));
+        }
         zoomOutMenuItem.addActionListener(this);
         if (this.pixelsPerUnitInterval < (MINIMUM_PIXELS_PER_UNIT_INTERVAL + zoomInterval)) {
             zoomInMenuItem.setEnabled(false);
@@ -951,7 +1017,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Decrease the zoom interval used by the zoom in and zoom out functions");
         decreaseZoomIntervalMenuItem = ringWindowMenu.add(ringWindowMenuItem);
         decreaseZoomIntervalMenuItem.setActionCommand("decrZoomInterval");
-        decreaseZoomIntervalMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, Event.CTRL_MASK + Event.SHIFT_MASK));
+        decreaseZoomIntervalMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, maskCtrlCommand + Event.SHIFT_MASK));
         decreaseZoomIntervalMenuItem.addActionListener(this);
         if (this.zoomInterval == MINIMUM_ZOOM_INTERVAL) {
             decreaseZoomIntervalMenuItem.setEnabled(false);
@@ -960,7 +1026,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Increase the zoom interval used by the zoom in and zoom out functions");
         increaseZoomIntervalMenuItem = ringWindowMenu.add(ringWindowMenuItem);
         increaseZoomIntervalMenuItem.setActionCommand("incrZoomInterval");
-        increaseZoomIntervalMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, Event.CTRL_MASK + Event.SHIFT_MASK));
+        increaseZoomIntervalMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, maskCtrlCommand + Event.SHIFT_MASK));
         increaseZoomIntervalMenuItem.addActionListener(this);
         if (this.zoomInterval == MAXIMUM_ZOOM_INTERVAL) {
             increaseZoomIntervalMenuItem.setEnabled(false);
@@ -970,7 +1036,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Decrease the dot radius used to draw the points on the grids");
         decreaseDotRadiusMenuItem = ringWindowMenu.add(ringWindowMenuItem);
         decreaseDotRadiusMenuItem.setActionCommand("decrDotRadius");
-        decreaseDotRadiusMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, Event.CTRL_MASK));
+        decreaseDotRadiusMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, maskCtrlCommand));
         decreaseDotRadiusMenuItem.addActionListener(this);
         if (this.dotRadius == MINIMUM_DOT_RADIUS) {
             decreaseDotRadiusMenuItem.setEnabled(false);
@@ -979,7 +1045,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Increase the dot radius used to draw the points on the grids");
         increaseDotRadiusMenuItem = ringWindowMenu.add(ringWindowMenuItem);
         increaseDotRadiusMenuItem.setActionCommand("incrDotRadius");
-        increaseDotRadiusMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, Event.CTRL_MASK));
+        increaseDotRadiusMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, maskCtrlCommand));
         increaseDotRadiusMenuItem.addActionListener(this);
         if (this.dotRadius == MAXIMUM_DOT_RADIUS) {
             increaseDotRadiusMenuItem.setEnabled(false);

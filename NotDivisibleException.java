@@ -23,18 +23,27 @@ package imaginaryquadraticinteger;
 public class NotDivisibleException extends Exception {
     
     private static final long serialVersionUID = 1;
-    private final int resultingFractionNumerator;
+    private final int resultingFractionRealPartNumerator;
+    private final int resultingFractionImagPartNumerator;
     private final int resultingFractionDenominator;
     private final int resultingFractionNegRad;
     
     /**
-     * Gives the numerator of the resulting fraction.
-     * @return The integer supplied at the time the exception was constructed.
+     * Gives the numerator of the real part of the resulting fraction.
+     * @return The integer for the real part supplied at the time the exception was constructed.
      */
-    public int getResFractNumer() {
-        return resultingFractionNumerator;
+    public int getResReFractNumer() {
+        return resultingFractionRealPartNumerator;
     }
-    
+
+    /**
+     * Gives the numerator of the imaginary part of the resulting fraction.
+     * @return The integer for the real part supplied at the time the exception was constructed.
+     */
+    public int getResImFractNumer() {
+        return resultingFractionImagPartNumerator;
+    }
+   
     /**
      * Gives the denominator of the resulting fraction.
      * @return The integer supplied at the time the exception was constructed. It may be almost any integer, but most certainly it should not be 0.
@@ -54,15 +63,17 @@ public class NotDivisibleException extends Exception {
     /**
      * This exception should be thrown when a division operation takes the resulting number out of the ring, to the larger field.
      * If the result is an algebraic number of degree 4, perhaps AlgebraicDegreeOverflowException should be thrown instead.
-     * And if there is an attempt to divide by 0, throw IllegalArgumentException.
+     * And if there is an attempt to divide by 0, the appropriate exception to throw would be IllegalArgumentException.
      * @param message A message to pass on to the Exception constructor.
-     * @param resFractNumer The numerator of the resulting fraction. For example, given 2 * sqrt(-5)/3, this parameter would be 2.
-     * @param resFractDenom The denominator of the resulting fraction. For example, given 2 * sqrt(-5)/3, this parameter would be 3.
-     * @param resFractNegRad The negative integer in the radical in the numerator of the resulting fraction. For example, given 2 * sqrt(-5)/3, this parameter would be -5.
+     * @param resFractReNumer The numerator of the real part of the resulting fraction. For example, given 7/3 + 2 * sqrt(-5)/3, this parameter would be 7.
+     * @param resFractImNumer The numerator of the imaginary part of the resulting fraction. For example, given 7/3 + 2 * sqrt(-5)/3, this parameter would be 2.
+     * @param resFractDenom The denominator of the resulting fraction. For example, given 7/3 + 2 * sqrt(-5)/3, this parameter would be 3.
+     * @param resFractNegRad The negative integer in the radical in the numerator of the resulting fraction. For example, given 7/3 + 2 * sqrt(-5)/3, this parameter would be -5.
      */
-    public NotDivisibleException(String message, int resFractNumer, int resFractDenom, int resFractNegRad) {
+    public NotDivisibleException(String message, int resFractReNumer, int resFractImNumer, int resFractDenom, int resFractNegRad) {
         super(message);
-        resultingFractionNumerator = resFractNumer;
+        resultingFractionRealPartNumerator = resFractReNumer;
+        resultingFractionImagPartNumerator = resFractImNumer;
         resultingFractionDenominator = resFractDenom;
         resultingFractionNegRad = resFractNegRad;
     }

@@ -144,6 +144,12 @@ public class NumberTheoreticFunctionsCalculatorTest {
         boolean expResult = false;
         boolean result = NumberTheoreticFunctionsCalculator.isSquareFree(num);
         assertEquals(expResult, result);
+        for (int i = 0; i < SLOANES_OEIS_A000040.length - 1; i++) {
+            num = SLOANES_OEIS_A000040[i] * SLOANES_OEIS_A000040[i + 1]; // A squarefree semiprime, pq
+            assertTrue(NumberTheoreticFunctionsCalculator.isSquareFree(num));
+            num *= SLOANES_OEIS_A000040[i]; // Repeat one prime factor, (p^2)q
+            assertFalse(NumberTheoreticFunctionsCalculator.isSquareFree(num));
+        }
     }
 
     /**
@@ -156,6 +162,21 @@ public class NumberTheoreticFunctionsCalculatorTest {
         byte expResult = -1;
         byte result = NumberTheoreticFunctionsCalculator.moebiusMu(num);
         assertEquals(expResult, result);
+        // The primes p should all have mu(p) = -1
+        for (int i = 0; i < SLOANES_OEIS_A000040.length; i++) {
+            assertEquals(expResult, NumberTheoreticFunctionsCalculator.moebiusMu(SLOANES_OEIS_A000040[i]));
+        }
+        // Now to test mu(n) = 0 with n being a multiple of 4
+        expResult = 0;
+        for (int j = 0; j < 97; j += 4) {
+            assertEquals(expResult, NumberTheoreticFunctionsCalculator.moebiusMu(j));
+        }
+        // And lastly, the products of two distinct primes p and q should give mu(pq) = 1
+        expResult = 1;
+        for (int k = 0; k < SLOANES_OEIS_A000040.length - 1; k++) {
+            num = SLOANES_OEIS_A000040[k] * SLOANES_OEIS_A000040[k + 1];
+            assertEquals(expResult, NumberTheoreticFunctionsCalculator.moebiusMu(num));
+        }
     }
 
     /**
@@ -174,7 +195,7 @@ public class NumberTheoreticFunctionsCalculatorTest {
             result = NumberTheoreticFunctionsCalculator.euclideanGCD(i, i + 1);
             assertEquals(expResult, result);
         }
-        // Now test with consecutive odd numbers, result should also be 1 each time
+        // Now test with consecutive odd numbers, result should also be 1 each time as well
         for (int i = -29; i < 31; i += 2) {
             result = NumberTheoreticFunctionsCalculator.euclideanGCD(i, i + 2);
             assertEquals(expResult, result);

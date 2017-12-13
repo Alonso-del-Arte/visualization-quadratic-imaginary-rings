@@ -448,22 +448,60 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         return result;
     }
    
-    // PLACEHOLDER FOR divides(IQI)
+    public ImaginaryQuadraticInteger divides(ImaginaryQuadraticInteger dividend) throws AlgebraicDegreeOverflowException, NotDivisibleException {
+        if (((this.imagPartMult != 0) && (dividend.imagPartMult != 0)) && (this.imagQuadRing.negRad != dividend.imagQuadRing.negRad)) {
+            throw new AlgebraicDegreeOverflowException("This operation would result in an algebraic integer of degree 4.", 2, 4);
+        }
+        if (dividend.realPartMult == 0 && dividend.imagPartMult == 0) {
+            throw new IllegalArgumentException("Division by 0 is not allowed.");
+        }
+        int intermediateRealPart = this.realPartMult * dividend.realPartMult + this.imagPartMult * dividend.imagPartMult * this.imagQuadRing.absNegRad;
+        int intermediateImagPart = this.imagPartMult * dividend.realPartMult - this.realPartMult * dividend.imagPartMult;
+        int intermediateDenom = dividend.norm() * this.denominator * dividend.denominator;
+        int realCutDown = NumberTheoreticFunctionsCalculator.euclideanGCD(intermediateRealPart, intermediateDenom);
+        int imagCutDown = NumberTheoreticFunctionsCalculator.euclideanGCD(intermediateImagPart, intermediateDenom);
+        if (realCutDown < imagCutDown) {
+            intermediateRealPart /= realCutDown;
+            intermediateImagPart /= realCutDown;
+            intermediateDenom /= realCutDown;
+        } else {
+            intermediateRealPart /= imagCutDown;
+            intermediateImagPart /= imagCutDown;
+            intermediateDenom /= imagCutDown;
+        }
+        boolean divisibleFlag;
+        if (this.imagQuadRing.d1mod4) {
+            divisibleFlag = (intermediateDenom == 1 || intermediateDenom == 2);
+        } else {
+            divisibleFlag = (intermediateDenom == 1);
+        }
+        if (!divisibleFlag) {
+            String exceptionMessage = this.toString() + " is not divisible by " + dividend.toString() + ".";
+            throw new NotDivisibleException(exceptionMessage, intermediateRealPart, intermediateImagPart, intermediateDenom, this.imagQuadRing.negRad);
+        }
+        ImaginaryQuadraticInteger result = new ImaginaryQuadraticInteger(intermediateRealPart, intermediateImagPart, this.imagQuadRing, intermediateDenom);
+        return result;
+    }
     
     // PLACEHOLDER FOR divides(int)
     
     /**
      * Class constructor
-     * @param a The real part of the imaginary quadratic integer, multiplied by 2 when applicable
-     * @param b The part to be multiplied by sqrt(d), multiplied by 2 when applicable
-     * @param R The ring to which this algebraic integer belongs to
-     * @param denom In most cases 1, but may be 2 if a and b have the same parity and d = 1 mod 4
-     * @throws IllegalArgumentException If denom is anything other than 1 or 2, or if denom is 2 but a and b don't match parity.
+     * @param a The real part of the imaginary quadratic integer, multiplied by 2 when applicable.
+     * @param b The part to be multiplied by sqrt(d), multiplied by 2 when applicable.
+     * @param R The ring to which this algebraic integer belongs to.
+     * @param denom In most cases 1, but may be 2 if a and b have the same parity and d = 1 mod 4.
+     * @throws IllegalArgumentException If denom is anything other than 1 or 2, or if denom is 2 but a and b don't match parity. However, if passed denom of -1 or -2, the constructor will quietly change it to 1 or 2, and multiply a and b by -1.
      */
     public ImaginaryQuadraticInteger(int a, int b, ImaginaryQuadraticRing R, int denom) {
         
         boolean abParityMatch;
         
+        if (denom == -1 || denom == -2) {
+            a *= -1;
+            b *= -1;
+            denom *= -1;
+        }
         if (denom < 1 || denom > 2) {
             throw new IllegalArgumentException("Parameter denom must be 1 or 2.");
         }

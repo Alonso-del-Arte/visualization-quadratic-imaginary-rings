@@ -435,7 +435,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         if (((this.imagPartMult != 0) && (multiplicand.imagPartMult != 0)) && (this.imagQuadRing.negRad != multiplicand.imagQuadRing.negRad)) {
             throw new AlgebraicDegreeOverflowException("This operation would result in an algebraic integer of degree 4.", 2, 4);
         }
-        int intermediateRealPart = this.realPartMult * multiplicand.realPartMult - this.imagPartMult * multiplicand.realPartMult * this.imagQuadRing.absNegRad;
+        int intermediateRealPart = this.realPartMult * multiplicand.realPartMult - this.imagPartMult * multiplicand.imagPartMult * this.imagQuadRing.absNegRad;
         int intermediateImagPart = this.realPartMult * multiplicand.imagPartMult + this.imagPartMult * multiplicand.realPartMult;
         int intermediateDenom = this.denominator * multiplicand.denominator;
         if (intermediateDenom == 4) {
@@ -447,17 +447,39 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         ImaginaryQuadraticInteger result = new ImaginaryQuadraticInteger(intermediateRealPart, intermediateImagPart, this.imagQuadRing, intermediateDenom);
         return result;
     }
+    
+    /**
+     * Multiplication operation, since operator* can't be overloaded. No overflow checking as of yet.
+     * Although the previous times function can be passed an ImaginaryQuadraticInteger with imagPartMult equal to 0, this function is to be preferred if you know for sure the multiplicand is purely real.
+     * With this times, there is no need to catch an AlgebraicDegreeOverflowException.    
+     * @param multiplicand The purely real integer to be multiplied by this quadratic integer.
+     * @return A new ImaginaryQuadraticInteger object with the result of the operation.
+     */
+    public ImaginaryQuadraticInteger times(int multiplicand) {
+        int multiplicationRealPart = this.realPartMult * multiplicand;
+        int multiplicationImagPart = this.imagPartMult * multiplicand;
+        ImaginaryQuadraticInteger result = new ImaginaryQuadraticInteger(multiplicationRealPart, multiplicationImagPart, this.imagQuadRing, this.denominator);
+        return result;
+    }
    
-    public ImaginaryQuadraticInteger divides(ImaginaryQuadraticInteger dividend) throws AlgebraicDegreeOverflowException, NotDivisibleException {
-        if (((this.imagPartMult != 0) && (dividend.imagPartMult != 0)) && (this.imagQuadRing.negRad != dividend.imagQuadRing.negRad)) {
+    /**
+     * Division operation, since operator/ can't be overloaded. No overflow checking as of yet.
+     * @param divisor The imaginary quadratic integer by which to divide this quadratic integer.
+     * @return A new ImaginaryQuadraticInteger object with the result of the operation.
+     * @throws AlgebraicDegreeOverflowException If the algebraic integers come from different quadratic rings, the result of the sum will be an algebraic integer of degree 4 and this exception will be thrown.
+     * @throws NotDivisibleException If the imaginary quadratic integer is not divisible by the divisor, this exception will be thrown.
+     * @throws IllegalArgumentException Division by 0 is not allowed.
+     */
+    public ImaginaryQuadraticInteger divides(ImaginaryQuadraticInteger divisor) throws AlgebraicDegreeOverflowException, NotDivisibleException {
+        if (((this.imagPartMult != 0) && (divisor.imagPartMult != 0)) && (this.imagQuadRing.negRad != divisor.imagQuadRing.negRad)) {
             throw new AlgebraicDegreeOverflowException("This operation would result in an algebraic integer of degree 4.", 2, 4);
         }
-        if (dividend.realPartMult == 0 && dividend.imagPartMult == 0) {
+        if (divisor.realPartMult == 0 && divisor.imagPartMult == 0) {
             throw new IllegalArgumentException("Division by 0 is not allowed.");
         }
-        int intermediateRealPart = this.realPartMult * dividend.realPartMult + this.imagPartMult * dividend.imagPartMult * this.imagQuadRing.absNegRad;
-        int intermediateImagPart = this.imagPartMult * dividend.realPartMult - this.realPartMult * dividend.imagPartMult;
-        int intermediateDenom = dividend.norm() * this.denominator * dividend.denominator;
+        int intermediateRealPart = this.realPartMult * divisor.realPartMult + this.imagPartMult * divisor.imagPartMult * this.imagQuadRing.absNegRad;
+        int intermediateImagPart = this.imagPartMult * divisor.realPartMult - this.realPartMult * divisor.imagPartMult;
+        int intermediateDenom = divisor.norm() * this.denominator * divisor.denominator;
         int realCutDown = NumberTheoreticFunctionsCalculator.euclideanGCD(intermediateRealPart, intermediateDenom);
         int imagCutDown = NumberTheoreticFunctionsCalculator.euclideanGCD(intermediateImagPart, intermediateDenom);
         if (realCutDown < imagCutDown) {
@@ -476,14 +498,53 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
             divisibleFlag = (intermediateDenom == 1);
         }
         if (!divisibleFlag) {
-            String exceptionMessage = this.toString() + " is not divisible by " + dividend.toString() + ".";
+            String exceptionMessage = this.toString() + " is not divisible by " + divisor.toString() + ".";
             throw new NotDivisibleException(exceptionMessage, intermediateRealPart, intermediateImagPart, intermediateDenom, this.imagQuadRing.negRad);
         }
         ImaginaryQuadraticInteger result = new ImaginaryQuadraticInteger(intermediateRealPart, intermediateImagPart, this.imagQuadRing, intermediateDenom);
         return result;
     }
     
-    // PLACEHOLDER FOR divides(int)
+    /**
+     * Division operation, since operator/ can't be overloaded.  No overflow checking as of yet.
+     * Although the previous divides function can be passed an ImaginaryQuadraticInteger with imagPartMult equal to 0, this function is to be preferred if you know for sure the divisor is purely real.
+     * With this divides, there is no need to catch an AlgebraicDegreeOverflowException.
+     * @param divisor The purely real integer by which to divide this quadratic integer.
+     * @return A new ImaginaryQuadraticInteger object with the result of the operation.
+     * @throws NotDivisibleException If the imaginary quadratic integer is not divisible by the divisor, this exception will be thrown.
+     * @throws IllegalArgumentException Division by 0 is not allowed.
+     */
+    public ImaginaryQuadraticInteger divides(int divisor) throws NotDivisibleException {
+        if (divisor == 0) {
+            throw new IllegalArgumentException("Division by 0 is not allowed.");
+        }
+        int intermediateRealPart = this.realPartMult;
+        int intermediateImagPart = this.imagPartMult;
+        int intermediateDenom = this.denominator * divisor;
+        int realCutDown = NumberTheoreticFunctionsCalculator.euclideanGCD(intermediateRealPart, intermediateDenom);
+        int imagCutDown = NumberTheoreticFunctionsCalculator.euclideanGCD(intermediateImagPart, intermediateDenom);
+        if (realCutDown < imagCutDown) {
+            intermediateRealPart /= realCutDown;
+            intermediateImagPart /= realCutDown;
+            intermediateDenom /= realCutDown;
+        } else {
+            intermediateRealPart /= imagCutDown;
+            intermediateImagPart /= imagCutDown;
+            intermediateDenom /= imagCutDown;
+        }
+        boolean divisibleFlag;
+        if (this.imagQuadRing.d1mod4) {
+            divisibleFlag = (intermediateDenom == 1 || intermediateDenom == 2);
+        } else {
+            divisibleFlag = (intermediateDenom == 1);
+        }
+        if (!divisibleFlag) {
+            String exceptionMessage = this.toString() + " is not divisible by " + divisor + ".";
+            throw new NotDivisibleException(exceptionMessage, intermediateRealPart, intermediateImagPart, intermediateDenom, this.imagQuadRing.negRad);
+        }
+        ImaginaryQuadraticInteger result = new ImaginaryQuadraticInteger(intermediateRealPart, intermediateImagPart, this.imagQuadRing, intermediateDenom);
+        return result;
+    }
     
     /**
      * Class constructor
@@ -560,7 +621,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         int chosenDenom;
         
         ImaginaryQuadraticRing imR;
-        ImaginaryQuadraticInteger currIQI;
+        ImaginaryQuadraticInteger currIQI, prevIQI, operIQI;
         int[] currPolCoeffs;
         
         /*
@@ -595,6 +656,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
                 } else {
                     chosenDenom = 1;
                 }
+                prevIQI = new ImaginaryQuadraticInteger(1, 1, imR, chosenDenom);
                 chosenImagPartMult = 1;
                 while (chosenImagPartMult != 0) {
                     System.out.print("Please enter real part of quadratic integer: ");
@@ -610,6 +672,33 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
                     System.out.println("Trace is " + currIQI.trace());
                     System.out.println("Norm is " + currIQI.norm());
                     System.out.println("Minimal polynomial is " + currIQI.minPolynomialString());
+                    try {
+                        operIQI = currIQI.plus(prevIQI);
+                        System.out.println("(" + currIQI.toString() + ") + (" + prevIQI.toString() + ") = " + operIQI.toString());
+                    } catch (AlgebraicDegreeOverflowException adoe) {
+                        System.out.println(adoe.toString());
+                    }
+                    try {
+                        operIQI = currIQI.minus(prevIQI);
+                        System.out.println("(" + currIQI.toString() + ") - (" + prevIQI.toString() + ") = " + operIQI.toString());
+                    } catch (AlgebraicDegreeOverflowException adoe) {
+                        System.out.println(adoe.toString());
+                    }
+                    try {
+                        operIQI = currIQI.times(prevIQI);
+                        System.out.println("(" + currIQI.toString() + ") * (" + prevIQI.toString() + ") = " + operIQI.toString());
+                    } catch (AlgebraicDegreeOverflowException adoe) {
+                        System.out.println(adoe.toString());
+                    }
+                    try {
+                        operIQI = currIQI.divides(prevIQI);
+                        System.out.println("(" + currIQI.toString() + ") / (" + prevIQI.toString() + ") = " + operIQI.toString());
+                    } catch (AlgebraicDegreeOverflowException adoe) {
+                        System.out.println(adoe.toString());
+                    } catch (NotDivisibleException nde) {
+                        System.out.println(currIQI.toString() + " is not divisible by " + prevIQI.toString() + ".");
+                    }
+                    prevIQI = currIQI;
                     System.out.println(" ");
                 }
             } 

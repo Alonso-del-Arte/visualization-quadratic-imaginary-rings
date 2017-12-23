@@ -118,19 +118,21 @@ public class NumberTheoreticFunctionsCalculatorTest {
 
     /**
      * Test of isPrime method, of class NumberTheoreticFunctionsCalculator.
+     * The numbers listed in Sloane's A000040, as well as those same numbers multiplied by -1, should all be identified as prime.
+     * Likewise, the numbers listed in Sloane's A018252, as well as those same numbers multiplied by -1, should all be identified as not prime.
+     * As for 0, I'm not sure; if you like you can uncomment the line for it and perhaps change assertFalse to assertTrue.
      */
     @Test
     public void testIsPrime() {
         System.out.println("isPrime");
-        int num = 537;
-        boolean expResult = false;
-        boolean result = NumberTheoreticFunctionsCalculator.isPrime(num);
-        assertEquals(expResult, result);
+        // assertFalse(NumberTheoreticFunctionsCalculator.isPrime(0));
         for (int i = 0; i < SLOANES_OEIS_A000040.length; i++) {
             assertTrue(NumberTheoreticFunctionsCalculator.isPrime(SLOANES_OEIS_A000040[i]));
+            assertTrue(NumberTheoreticFunctionsCalculator.isPrime(-SLOANES_OEIS_A000040[i]));
         }
         for (int j = 0; j < SLOANES_OEIS_A018252.length; j++) {
             assertFalse(NumberTheoreticFunctionsCalculator.isPrime(SLOANES_OEIS_A018252[j]));
+            assertFalse(NumberTheoreticFunctionsCalculator.isPrime(-SLOANES_OEIS_A018252[j]));
         }
     }
 
@@ -165,22 +167,27 @@ public class NumberTheoreticFunctionsCalculatorTest {
         // The primes p should all have mu(p) = -1
         for (int i = 0; i < SLOANES_OEIS_A000040.length; i++) {
             assertEquals(expResult, NumberTheoreticFunctionsCalculator.moebiusMu(SLOANES_OEIS_A000040[i]));
+            assertEquals(NumberTheoreticFunctionsCalculator.moebiusMu(SLOANES_OEIS_A000040[i]), NumberTheoreticFunctionsCalculator.moebiusMu(-SLOANES_OEIS_A000040[i]));
         }
         // Now to test mu(n) = 0 with n being a multiple of 4
         expResult = 0;
         for (int j = 0; j < 97; j += 4) {
             assertEquals(expResult, NumberTheoreticFunctionsCalculator.moebiusMu(j));
+            assertEquals(NumberTheoreticFunctionsCalculator.moebiusMu(j), NumberTheoreticFunctionsCalculator.moebiusMu(-j));
         }
         // And lastly, the products of two distinct primes p and q should give mu(pq) = 1
         expResult = 1;
         for (int k = 0; k < SLOANES_OEIS_A000040.length - 1; k++) {
             num = SLOANES_OEIS_A000040[k] * SLOANES_OEIS_A000040[k + 1];
             assertEquals(expResult, NumberTheoreticFunctionsCalculator.moebiusMu(num));
+            assertEquals(NumberTheoreticFunctionsCalculator.moebiusMu(num), NumberTheoreticFunctionsCalculator.moebiusMu(-num));
         }
     }
 
     /**
      * Test of euclideanGCD method, of class NumberTheoreticFunctionsCalculator.
+     * At this time, I choose not to test the case gcd(0, 0).
+     * The value of such a test would be philosophical rather than practical.
      */
     @Test
     public void testEuclideanGCD() {
@@ -205,6 +212,25 @@ public class NumberTheoreticFunctionsCalculatorTest {
             result = NumberTheoreticFunctionsCalculator.euclideanGCD(i, i + 2);
             assertEquals(expResult, result);
         }
+    }
+    
+    /**
+     * Test of randomNegativeSquarefreeNumber method, of class NumberTheoreticFunctionsCalculator.
+     */
+    @Test
+    public void testRandomNegativeSquarefreeNumber() {
+        System.out.println("randomNegativeSquarefreeNumber");
+        int potentialNegRanSqFreeNum = NumberTheoreticFunctionsCalculator.randomNegativeSquarefreeNumber(SLOANES_OEIS_A000040[SLOANES_OEIS_A000040.length - 1] * SLOANES_OEIS_A000040[SLOANES_OEIS_A000040.length - 1]);
+        System.out.println("Function came up with this pseudorandom number: " + potentialNegRanSqFreeNum);
+        double squaredPrime, ranNumDiv, flooredRanNumDiv;
+        for (int i = 0; i < SLOANES_OEIS_A000040.length; i++) {
+            squaredPrime = SLOANES_OEIS_A000040[i] * SLOANES_OEIS_A000040[i];
+            ranNumDiv = potentialNegRanSqFreeNum/squaredPrime;
+            flooredRanNumDiv = (int) Math.floor(ranNumDiv);
+            System.out.print(squaredPrime + ", " + ranNumDiv + ", " + flooredRanNumDiv + "; ");
+            assertFalse(ranNumDiv == flooredRanNumDiv);
+        }
+        System.out.println();
     }
     
 }

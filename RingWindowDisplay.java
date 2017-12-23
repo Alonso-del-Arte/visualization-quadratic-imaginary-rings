@@ -37,6 +37,11 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     public static final int MINIMUM_PIXELS_PER_UNIT_INTERVAL = 2;
     
     /**
+     * The minimum pixels per unit interval for which the program will draw grids.
+     */
+    private static final int MINIMUM_PIXELS_PER_UNIT_INTERVAL_TO_DRAW_GRIDS = 5;
+    
+    /**
      * The maximum pixels per unit interval. Even on an 8K display, this value might be much too large. Trying to set pixels per unit interval above this value will cause an exception.
      */
     public static final int MAXIMUM_PIXELS_PER_UNIT_INTERVAL = 6400;
@@ -65,6 +70,10 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      */
     public static final int RING_CANVAS_DEFAULT_VERTIC_MAX = 720;
     
+    /**
+     * The number to determine which imaginary quadratic integer ring diagram will be shown at start-up.
+     * This constant corresponds to the ring of Gaussian integers.
+     */
     public static final int DEFAULT_RING_D = -1;
     /**
      * The minimum integer the square root of which can be used to generate an imaginary quadratic integer ring for the purpose of display in this ring window.
@@ -513,7 +522,6 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         this.zoomInterval = newZoomInterval;
     }
     
-    
     /**
      * Function to change the coordinates of the point 0. I have not yet implemented a meaningful use for this function.
      * @param newCoordX The new x-coordinate for 0.
@@ -533,12 +541,14 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     @Override
     public void paintComponent(Graphics gr) {
         super.paintComponent(gr);
-        drawGrids(gr);
+        if (this.pixelsPerUnitInterval > MINIMUM_PIXELS_PER_UNIT_INTERVAL_TO_DRAW_GRIDS) {
+            drawGrids(gr);
+        }
         drawPoints(gr);
     }
     
     /**
-     * 
+     * Function to determine mouse position on the diagram and update readouts accordingly.
      * @param mauv 
      */
     @Override
@@ -849,7 +859,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     public void showAboutBox() {
-        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.81\n\u00A9 2017 Alonso del Arte");
+        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.82\n\u00A9 2017 Alonso del Arte");
     }
     
     /**
@@ -954,7 +964,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         increaseDMenuItem = ringWindowMenu.add(ringWindowMenuItem);
         increaseDMenuItem.setActionCommand("incrD");
         if (macOSFlag) {
-            increaseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_U, maskCtrlCommand));
+            increaseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, maskCtrlCommand));
         } else {
             increaseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_UP, maskCtrlCommand));
         }
@@ -1067,7 +1077,11 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         toggleReadOutsEnabledMenuItem = new JCheckBoxMenuItem("Update readouts", false);
         toggleReadOutsEnabledMenuItem.getAccessibleContext().setAccessibleDescription("Toggle whether the trace, norm and polynomial readouts are updated.");
         toggleReadOutsEnabledMenuItem.setActionCommand("toggleReadOuts");
-        toggleReadOutsEnabledMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0)); // Decided Ctrl-F2 is too uncomfortable, so changed it to just F2.
+        if (macOSFlag) {
+            toggleReadOutsEnabledMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, 0)); // On the Mac, fn-F2 is too much of a hassle, in my opinion.
+        } else {
+            toggleReadOutsEnabledMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0)); // Decided Ctrl-F2 is too uncomfortable, so changed it to just F2.
+        }
         toggleReadOutsEnabledMenuItem.addActionListener(this);
         ringWindowMenu.add(toggleReadOutsEnabledMenuItem);
         ringWindowMenu = new JMenu("Help");

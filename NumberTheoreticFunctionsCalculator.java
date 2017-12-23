@@ -16,10 +16,14 @@
  */
 package imaginaryquadraticinteger;
 
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.Scanner;
+import java.util.InputMismatchException;
 
 /**
- *
+ * A collection of number theoretic functions, including basic primality testing and the Euclidean GCD algorithm.
  * @author Alonso del Arte
  */
 
@@ -30,7 +34,10 @@ public class NumberTheoreticFunctionsCalculator {
      * Uses simple trial division with only basic optimization.
      * @param num The integer for which to determine prime factors of.
      * @return A list of the prime factors, with some factors repeated as needed.
-     * For example,
+     * For example, given num = 44100, the resulting list should be 2, 2, 3, 3, 5, 5, 7, 7.
+     * The factorization of 0 is given as just 0.
+     * For a negative number, the factorization starts with -1 followed by the factorization of its positive counterpart.
+     * For example, given num = -44100, the resulting list should be -1, 2, 2, 3, 3, 5, 5, 7, 7.
      */
     public static List<Integer> primeFactors(int num) {
         
@@ -60,9 +67,10 @@ public class NumberTheoreticFunctionsCalculator {
     }
     
     /**
-     * Determines whether a given number is prime or not
-     * @param num The number to be tested for primality
-     * @return true if the number is prime (even if negative), false otherwise
+     * Determines whether a given number is prime or not.
+     * @param num The number to be tested for primality.
+     * @return true if the number is prime (even if negative), false otherwise.
+     * For example, -2 and 47 should each return true, -25, 0 and 91 should each return false.
      */
     public static boolean isPrime(int num) {
         
@@ -70,10 +78,10 @@ public class NumberTheoreticFunctionsCalculator {
             case -1:
             case 0:
             case 1:
-                return false; // break statement not needed in this case
+                return false; // break statement not needed after return
             case -2:
             case 2:
-                return true; // break not needed for this one either
+                return true;
             default:
                 if (num % 2 == 0) {
                     return false;
@@ -91,9 +99,11 @@ public class NumberTheoreticFunctionsCalculator {
     }
     
     /**
-     * Determines whether a given number is squarefree or not 
-     * @param num The number to be tested for being squarefree
-     * @return true if the number is squarefree, false otherwise
+     * Determines whether a given number is squarefree or not.
+     * @param num The number to be tested for being squarefree.
+     * @return true if the number is squarefree, false otherwise.
+     * For example, -3 and 7 should each return true, -4, 0 and 25 should each return false.
+     * Note that 1 is considered squarefree. Therefore, for num = 1, this function should return true.
      */
     public static boolean isSquareFree(int num) {
         
@@ -117,9 +127,11 @@ public class NumberTheoreticFunctionsCalculator {
     }
     
     /**
-     * Computes the M\u00F6bius function \u03BC for a given integer
-     * @param num The integer for which to compute the M\u00F6bius function
-     * @return 1 if num is squarefree with an even number of prime factors, -1 if num is squarefree with an odd number of prime factors, 0 if num is not squarefree
+     * Computes the M\u00F6bius function \u03BC for a given integer.
+     * @param num The integer for which to compute the M\u00F6bius function.
+     * @return 1 if num is squarefree with an even number of prime factors, -1 if num is squarefree with an odd number of prime factors, 0 if num is not squarefree.
+     * Since -1 is a unit, not a prime, \u03BC(-n) = \u03BC(n).
+     * For example, \u03BC(31) = -1, \u03BC(32) = 0 and \u03BC(33) = 1.
      */
     public static byte moebiusMu(int num) {
         
@@ -170,6 +182,24 @@ public class NumberTheoreticFunctionsCalculator {
             currA *= -1;
         }
         return currA;
+    }
+    
+    /**
+     * Provides a pseudorandom negative squarefree integer.
+     * @param bound The lowest number desired (but may use a positive integer). For example, for a pseudorandom squarefree number between -97 and -1, you can pass -100 or 100.
+     * @return A pseudorandom negative squarefree integer.
+     */
+    public static int randomNegativeSquarefreeNumber(int bound) {
+        if (bound < 0) {
+            bound *= -1;
+        }
+        Random ranNumGen = new Random();
+        int randomNumber = ranNumGen.nextInt(bound);
+        randomNumber *= -1;
+        while (!isSquareFree(randomNumber)) {
+            randomNumber--;
+        }
+        return randomNumber;
     }
     
     /**

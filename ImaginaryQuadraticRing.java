@@ -17,7 +17,7 @@
 package imaginaryquadraticinteger;
 
 /**
- * An object to represent a quadratic integer ring.
+ * An object to represent an imaginary quadratic integer ring.
  * A ring of quadratic integers contains infinitely many numbers.
  * But, for the sake of this program, objects of type ImaginaryQuadraticRing are held by objects of type ImaginaryQuadraticInteger rather than the other way around.
  * @author Alonso del Arte
@@ -25,26 +25,35 @@ package imaginaryquadraticinteger;
 public class ImaginaryQuadraticRing {
 
     /**
-     * Ought to be a squarefree negative integer
+     * Ought to be a squarefree negative integer.
      */
     protected int negRad;
     
     /**
-     * A convenient holder for the absolute value of negRad
+     * A convenient holder for the absolute value of negRad.
      */
     protected int absNegRad;
     
     /**
-     * A convenient holder for the square root of the absNegRad
+     * A convenient holder for the square root of the absNegRad.
      */
     protected double absNegRadSqrt;
     
     /**
-     * Should be true only if negRad is congruent to 1 modulo 4
+     * Should be true only if negRad is congruent to 1 modulo 4.
      */
     protected boolean d1mod4;
     
     private static boolean preferenceForBlackboardBold = true;
+    
+    /**
+     * Tells whether the ring has what are imprecisely called "half-integers."
+     * These are numbers of the form a/2 + b sqrt(d)/2, with both a and b odd integers.
+     * @return True if d is congruent to 1 modulo 4, false otherwise.
+     */
+    public boolean hasHalfIntegers() {
+        return d1mod4;
+    }
     
     /**
      * Query the setting of the preference for blackboard bold.
@@ -63,7 +72,8 @@ public class ImaginaryQuadraticRing {
     }
     
     /**
-     * A text representation of the ring. In some contexts, toTeXString() or toHTMLString() may be preferable.
+     * A text representation of the ring's label.
+     * In some contexts, toTeXString(), toHTMLString() or toFilenameString may be preferable.
      * @return A String representing the imaginary quadratic ring which can be output to the console.
      */
     @Override
@@ -87,7 +97,8 @@ public class ImaginaryQuadraticRing {
     }
 
     /**
-     * I have not tested this function.
+     * A text representation of the ring's label suitable for use in a TeX document.
+     * I have not tested this function in the context of outputting to a TeX document.
      * @return A String suitable for use in a TeX document, if I haven't made any mistakes.
      */
     public String toTeXString() {
@@ -119,7 +130,8 @@ public class ImaginaryQuadraticRing {
     }
     
     /**
-     * I have not tested this function.
+     * A text representation of the ring's label suitable for use in an HTML document.
+     * I have not tested this function in the context of outputting to an HTML document.
      * @return A String suitable for use in an HTML document, if I haven't made any mistakes. If preferenceForBlackboardBold is true, this also assumes the font has the relevant Unicode characters.
      */
     public String toHTMLString() {
@@ -151,7 +163,33 @@ public class ImaginaryQuadraticRing {
     }
     
     /**
-     * Class constructor
+     * A text representation of the ring's label suitable for use in a filename.
+     * With our modern operating systems, it may be unnecessary to worry about illegal characters in toString().
+     * But just in case, here is a function whose output will hopefully help the calling program conform to the old MS-DOS 8.3 standard.
+     * There is one context in which I have definitely found this function useful, and that is in the output of the test suite, for which the font seems to lack Greek letters.
+     * @return A string suitable for use in a filename.
+     */
+    public String toFilenameString() {
+        String IQRString;
+        switch (this.negRad) {
+            case -1:
+                IQRString = "ZI";
+                break;
+            case -3:
+                IQRString = "ZW"; // It is frowned upon to use "w" as a makeshift omega, but for the purpose here it is acceptable.
+                break;
+            default:
+                if (this.d1mod4) {
+                    IQRString = "OQI" + this.absNegRad;
+                } else {
+                    IQRString = "ZI" + this.absNegRad;
+                }
+        }
+        return IQRString;
+    }
+    
+    /**
+     * Class constructor.
      * @param d A negative, squarefree integer.
      * @throws IllegalArgumentException If d is 0 or any positive integer, or if d is negative but not squarefree.
      */

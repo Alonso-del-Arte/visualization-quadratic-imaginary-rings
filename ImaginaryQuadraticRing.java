@@ -47,12 +47,36 @@ public class ImaginaryQuadraticRing {
     private static boolean preferenceForBlackboardBold = true;
     
     /**
+     * Gets the value of the discriminant, divided by 4 when necessary.
+     * @return The negative integer d for Q(sqrt(d)). For instance, for Z[i], returns -1, for Z[sqrt(-2)] returns -2, for Z[omega] returns -3, etc.
+     */
+    public int getNegRad() {
+        return this.negRad;
+    }
+    
+    /**
+     * Gets the absolute value of the discriminant, divided by 4 when necessary, but always multiplied by -1.
+     * @return The absolute value of the negative integer d for Q(sqrt(d)). For instance, for Z[i], returns 1, for Z[sqrt(-2)] returns 2, for Z[omega] returns 3, etc.
+     */
+    public int getAbsNegRad() {
+        return this.absNegRad;
+    }
+
+    /**
+     * Gets the square root of the absolute value of the discriminant, divided by 4 when necessary, but always multiplied by -1.
+     * @return sqrt(abs(d)). For example, for Z[i] this would 1, for Z[sqrt(-2)] this would be approximately 1.414213562373...
+     */
+    public double getAbsNegRadSqrt() {
+        return this.absNegRadSqrt;
+    }
+    
+    /**
      * Tells whether the ring has what are imprecisely called "half-integers."
      * These are numbers of the form a/2 + b sqrt(d)/2, with both a and b odd integers.
      * @return True if d is congruent to 1 modulo 4, false otherwise.
      */
     public boolean hasHalfIntegers() {
-        return d1mod4;
+        return this.d1mod4;
     }
     
     /**

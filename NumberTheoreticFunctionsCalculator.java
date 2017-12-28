@@ -16,17 +16,16 @@
  */
 package imaginaryquadraticinteger;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
-import java.util.InputMismatchException;
 
 /**
  * A collection of number theoretic functions, including basic primality testing and the Euclidean GCD algorithm.
  * @author Alonso del Arte
  */
-
 public class NumberTheoreticFunctionsCalculator {
     
     /**
@@ -68,6 +67,10 @@ public class NumberTheoreticFunctionsCalculator {
     
     /**
      * Determines whether a given number is prime or not.
+     * The numbers 0, -1, 1, -2, 2 are treated as special cases.
+     * For all others, the function searches only for the least prime factor.
+     * If the least prime factor is found to be unequal to the absolute value of the number, the function reports the number as composite and returns to the caller.
+     * Still, the function is open to optimization.
      * @param num The number to be tested for primality.
      * @return true if the number is prime (even if negative), false otherwise.
      * For example, -2 and 47 should each return true, -25, 0 and 91 should each return false.
@@ -183,6 +186,8 @@ public class NumberTheoreticFunctionsCalculator {
         }
         return currA;
     }
+    
+    // PLACEHOLDER FOR IQI euclideanGCD(IQI a, IQI b) {}
     
     /**
      * Provides a pseudorandom negative squarefree integer.

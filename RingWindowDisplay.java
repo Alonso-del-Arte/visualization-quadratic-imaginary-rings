@@ -17,8 +17,11 @@
 package imaginaryquadraticinteger;
 
 import java.awt.*;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import javax.swing.*;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  *
@@ -75,6 +78,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      * This constant corresponds to the ring of Gaussian integers.
      */
     public static final int DEFAULT_RING_D = -1;
+    
     /**
      * The minimum integer the square root of which can be used to generate an imaginary quadratic integer ring for the purpose of display in this ring window.
      * Although technically an ImaginaryQuadraticRing can be defined with the square root of -2147483647 (which is a prime number), this would quickly lead to arithmetic overflow problems.
@@ -95,13 +99,47 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     public static final Color DEFAULT_HALF_INTEGER_GRID_COLOR = Color.DARK_GRAY;
     public static final Color DEFAULT_INTEGER_GRID_COLOR = Color.BLACK;
     
+    /**
+     * The color for 0.
+     */
     public static final Color DEFAULT_ZERO_COLOR = Color.BLACK;
+    
+    /**
+     * The color for units.
+     * In Z[i], this would include i and -i.
+     * In Z[omega], this would include omega, omega + 1, -1 - omega and -omega.
+     * In all rings, this includes 1 and -1.
+     */
     public static final Color DEFAULT_UNIT_COLOR = Color.WHITE;
+    
+    /**
+     * The color for primes believed to be inert.
+     * If a prime does split but its prime factors are not in the current diagram view, the program is unaware of them.
+     * Though I have yet to think of a single example where it might actually be the case that the program erroneously identifies a prime as inert.
+     */
     public static final Color DEFAULT_INERT_PRIME_COLOR = Color.CYAN;
+    
+    /**
+     * The primes confirmed split.
+     * If a prime's splitting factors are in the current diagram view, the program uses this color for the split prime.
+     */
     public static final Color DEFAULT_SPLIT_PRIME_COLOR = Color.BLUE;
+    
+    /**
+     * The primes that are ramified.
+     * Regardless of current diagram view, the program checks if gcd(p, d) > 1.
+     */
     public static final Color DEFAULT_RAMIFIED_PRIME_COLOR = Color.GREEN;
     
+    /**
+     * How wide to make the readouts.
+     */
     public static final int DEFAULT_READOUT_FIELD_COLUMNS = 20;
+    
+    /**
+     * The maximum number of previous discriminants the program will remember for history in any given run.
+     */
+    public static final int MAXIMUM_HISTORY_ITEMS = 128;
     
     /**
      * The actual pixels per unit interval setting, should be initialized to DEFAULT_PIXELS_PER_UNIT_INTERVAL in the constructor. Use setPixelsPerUnitInterval(int pixelLength) to change, making sure pixelLength is greater than or equal to MINIMUM_PIXELS_PER_UNIT_INTERVAL but less than or equal to MAXIMUM_PIXELS_PER_UNIT_INTERVAL.
@@ -144,7 +182,10 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     private JMenuBar ringWindowMenuBar;
     private JMenu ringWindowMenu;
     private JMenuItem ringWindowMenuItem;
-    private JMenuItem chooseDMenuItem, increaseDMenuItem, decreaseDMenuItem;
+    private JMenuItem chooseDMenuItem;
+    private JMenuItem increaseDMenuItem, decreaseDMenuItem;
+    private JMenuItem prevDMenuItem, nextDMenuItem;
+    private JMenuItem copyReadOutsToClipboardMenuItem;
     private JMenuItem zoomInMenuItem, zoomOutMenuItem;
     private JMenuItem decreaseZoomIntervalMenuItem, increaseZoomIntervalMenuItem;
     private JMenuItem decreaseDotRadiusMenuItem, increaseDotRadiusMenuItem;
@@ -153,6 +194,16 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     private JMenuItem aboutMenuItem;
     
     private JTextField algIntReadOut, algIntTraceReadOut, algIntNormReadOut, algIntPolReadOut;
+    
+    /**
+     * The history list, with which to enable to user to view previous diagrams.
+     */
+    private final List<Integer> discrHistory;
+    
+    /**
+     * Where we are at in the history list.
+     */
+    private short currHistoryIndex;
     
     private void drawGrids(Graphics graphicsForGrids) {
         
@@ -594,9 +645,33 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     
     private void switchToRing(int d) {
         ImaginaryQuadraticRing imagRing = new ImaginaryQuadraticRing(d);
-        this.ringFrame.setTitle("Ring Diagram for " + imagRing.toString());
+        ringFrame.setTitle("Ring Diagram for " + imagRing.toString());
         setRing(imagRing);
         repaint();
+    }
+    
+    /**
+     * Function to update the history of previously viewed diagrams.
+     * @param d The discriminant to add to the history list.
+     */
+    private void updateDiscriminantHistory(int d) {
+        if (currHistoryIndex == discrHistory.size() - 1) {
+            discrHistory.add(d);
+            currHistoryIndex++;
+            if (!prevDMenuItem.isEnabled()) {
+                prevDMenuItem.setEnabled(true);
+            }
+        } else {
+            currHistoryIndex++;
+            discrHistory.add(currHistoryIndex, d);
+            while (currHistoryIndex < discrHistory.size() - 1) {
+                discrHistory.remove(currHistoryIndex + 1); // Remove the "forward arrow" history
+            }
+            nextDMenuItem.setEnabled(false);
+        }
+        if (currHistoryIndex > MAXIMUM_HISTORY_ITEMS) {
+            discrHistory.remove(0); // Remove the first item
+        }
     }
     
     /**
@@ -638,6 +713,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                 this.increaseDMenuItem.setEnabled(true);
             }
             switchToRing(discr);
+            updateDiscriminantHistory(discr);
         }
 
     }
@@ -658,6 +734,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             decreaseDMenuItem.setEnabled(true);
         }
         switchToRing(discr);
+        updateDiscriminantHistory(discr);
     }
 
     /**
@@ -676,8 +753,53 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             this.increaseDMenuItem.setEnabled(true);
         }
         switchToRing(discr);
+        updateDiscriminantHistory(discr);
     }
     
+    /**
+     * Bring up the previously displayed diagram.
+     */
+    public void previousDiscriminant() {
+        currHistoryIndex--;
+        switchToRing(discrHistory.get(currHistoryIndex));
+        if (currHistoryIndex == 0) {
+            prevDMenuItem.setEnabled(false);
+        }
+        if (!nextDMenuItem.isEnabled()) {
+            nextDMenuItem.setEnabled(true);
+        }
+    }
+
+    /**
+     * Bring up the next displayed diagram.
+     */
+    public void nextDiscriminant() {
+        currHistoryIndex++;
+        switchToRing(discrHistory.get(currHistoryIndex));
+        if (currHistoryIndex == discrHistory.size() - 1) {
+            nextDMenuItem.setEnabled(false);
+        }
+        if (!prevDMenuItem.isEnabled()) {
+            prevDMenuItem.setEnabled(true);
+        }
+    }
+    
+    /**
+     * Copies the readouts of the algebraic integer, trace, norm and polynomial to the clipboard.
+     */
+    public void copyReadoutsToClipboard() {
+        String agregReadouts = mouseIQI.toString();
+        if (this.imagQuadRing.d1mod4) {
+            agregReadouts = agregReadouts + " = " + mouseIQI.toStringAlt();
+        }
+        agregReadouts = agregReadouts + ", Trace: " + mouseIQI.trace() + ", Norm: " + mouseIQI.norm() + ", Polynomial: " + mouseIQI.minPolynomialString();
+        StringSelection ss = new StringSelection(agregReadouts);
+        this.getToolkit().getSystemClipboard().setContents(ss, ss);
+    }
+    
+    /**
+     * Checks whether the Zoom in and Zoom out menu items are enabled or not, and whether they should be, enabling them or disabling them as needed.
+     */
     private void checkViewMenuEnablements() {
         if (this.zoomInMenuItem.isEnabled() && (this.pixelsPerUnitInterval > (MAXIMUM_PIXELS_PER_UNIT_INTERVAL - zoomInterval))) {
             this.zoomInMenuItem.setEnabled(false);
@@ -808,6 +930,10 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         }
     }
     
+    /**
+     * Function to reset pixels per unit interval, dot radius and zoom interval.
+     * This does not change the discriminant, nor whether or not readouts are updated, nor the preference for theta notation.
+     */
     public void resetViewDefaults() {
         /* Since the program does not yet allow the user to change colors, the following three lines are for now unnecessary.
         changeBackgroundColor(DEFAULT_CANVAS_BACKGROUND_COLOR);
@@ -819,12 +945,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         changeDotRadius(DEFAULT_DOT_RADIUS);
         repaint();
         // Now to check if any menu items need to be re-enabled
-        if (!this.zoomInMenuItem.isEnabled() && (this.pixelsPerUnitInterval < (MAXIMUM_PIXELS_PER_UNIT_INTERVAL - zoomInterval))) {
-            this.zoomInMenuItem.setEnabled(true);
-        }
-        if (!this.zoomOutMenuItem.isEnabled() && (this.pixelsPerUnitInterval > (MINIMUM_PIXELS_PER_UNIT_INTERVAL + zoomInterval))) {
-            this.zoomOutMenuItem.setEnabled(true);
-        }
+        checkViewMenuEnablements(); // This takes care of the Zoom in and Zoom out menu items
         if (!this.increaseZoomIntervalMenuItem.isEnabled() && (this.zoomInterval < MAXIMUM_ZOOM_INTERVAL)) {
             this.increaseZoomIntervalMenuItem.setEnabled(true);
         }
@@ -858,27 +979,17 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         }
     }
     
-    public void showAboutBox() {
-        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.82\n\u00A9 2017 Alonso del Arte");
-    }
-    
     /**
-     * Set the imaginary quadratic ring for which to draw a window of
-     * @param iR The imaginary quadratic integer ring to work in
+     * Function to show the About box, a simple MessageDialog from JOptionPage.
      */
-    private void setRing(ImaginaryQuadraticRing iR) {
-        double imagInterval;
-        this.imagQuadRing = iR;
-        imagInterval = this.pixelsPerUnitInterval * this.imagQuadRing.absNegRadSqrt;
-        if (imagQuadRing.d1mod4) {
-            imagInterval /= 2;
-        }
-        this.pixelsPerBasicImaginaryInterval = (int) Math.floor(imagInterval);
+    public void showAboutBox() {
+        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.83\n\u00A9 2017 Alonso del Arte");
     }
     
+    
     /**
-     * Function to handle menu events
-     * @param ae Object giving information about the menu item selected
+     * Function to handle menu events.
+     * @param ae Object giving information about the menu item selected.
      */
     @Override
     public void actionPerformed(ActionEvent ae) {
@@ -891,6 +1002,15 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                 break;
             case "decrD":
                 decrementDiscriminant();
+                break;
+            case "prevD":
+                previousDiscriminant();
+                break;
+            case "nextD":
+                nextDiscriminant();
+                break;
+            case "copyReadouts":
+                copyReadoutsToClipboard();
                 break;
             case "zoomIn":
                 zoomIn();
@@ -931,7 +1051,21 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                 System.out.println("Command not recognized.");
         }
     }
-    
+
+    /**
+     * Set the imaginary quadratic ring for which to draw a window of
+     * @param iR The imaginary quadratic integer ring to work in
+     */
+    private void setRing(ImaginaryQuadraticRing iR) {
+        double imagInterval;
+        this.imagQuadRing = iR;
+        imagInterval = this.pixelsPerUnitInterval * this.imagQuadRing.absNegRadSqrt;
+        if (imagQuadRing.d1mod4) {
+            imagInterval /= 2;
+        }
+        this.pixelsPerBasicImaginaryInterval = (int) Math.floor(imagInterval);
+    }
+   
     private void setUpRingFrame() {
         
         ringFrame = new JFrame("Ring Diagram for " + this.imagQuadRing.toString());
@@ -959,6 +1093,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         chooseDMenuItem.setActionCommand("chooseD");
         chooseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, maskCtrlCommand));
         chooseDMenuItem.addActionListener(this);
+        ringWindowMenu.addSeparator();
         ringWindowMenuItem = new JMenuItem("Increment discriminant");
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Increment the discriminant to choose another ring");
         increaseDMenuItem = ringWindowMenu.add(ringWindowMenuItem);
@@ -985,17 +1120,48 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         if (this.imagQuadRing.negRad == Integer.MIN_VALUE + 1) {
             decreaseDMenuItem.setEnabled(false);
         }
+        ringWindowMenu.addSeparator();
+        ringWindowMenuItem = new JMenuItem("Copy readouts to clipboard");
+        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Copy the readouts (integer, trace, norm, polynomial) to the clipboard");
+        copyReadOutsToClipboardMenuItem = ringWindowMenu.add(ringWindowMenuItem);
+        copyReadOutsToClipboardMenuItem.setActionCommand("copyReadouts");
+        copyReadOutsToClipboardMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, maskCtrlCommand + Event.SHIFT_MASK));
+        copyReadOutsToClipboardMenuItem.addActionListener(this);
         
     /*    ringWindowMenu.addSeparator();
+        THIS IS FOR WHEN I GET AROUND TO ADDING THE CAPABILITY TO CHANGE GRID, POINT COLORS
         ringWindowMenuItem = new JMenuItem("Preferences...");
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Bring up a dialogue to adjust preferences");
         ringWindowMenu.add(ringWindowMenuItem); 
     */
-
+    
         ringWindowMenu = new JMenu("View");
         ringWindowMenu.setMnemonic(KeyEvent.VK_V);
         ringWindowMenu.getAccessibleContext().setAccessibleDescription("Menu to zoom in or zoom out");
         ringWindowMenuBar.add(ringWindowMenu);
+        ringWindowMenuItem = new JMenuItem("Previous discriminant");
+        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("View the diagram for the previous discriminant");
+        prevDMenuItem = ringWindowMenu.add(ringWindowMenuItem);
+        prevDMenuItem.setActionCommand("prevD");
+        if (macOSFlag) {
+            prevDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, maskCtrlCommand));
+        } else {
+            prevDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, maskCtrlCommand));
+        }
+        prevDMenuItem.addActionListener(this);
+        prevDMenuItem.setEnabled(false);
+        ringWindowMenuItem = new JMenuItem("Next discriminant");
+        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("View the diagram for the next discriminant");
+        nextDMenuItem = ringWindowMenu.add(ringWindowMenuItem);
+        nextDMenuItem.setActionCommand("nextD");
+        if (macOSFlag) {
+            nextDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_K, maskCtrlCommand));
+        } else {
+            nextDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, maskCtrlCommand));
+        }
+        nextDMenuItem.addActionListener(this);
+        nextDMenuItem.setEnabled(false);
+        ringWindowMenu.addSeparator();
         ringWindowMenuItem = new JMenuItem("Zoom in");
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Zoom in, by increasing pixels per unit interval");
         zoomInMenuItem = ringWindowMenu.add(ringWindowMenuItem);
@@ -1149,15 +1315,19 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         this.dotRadius = DEFAULT_DOT_RADIUS;
         this.zoomInterval = DEFAULT_ZOOM_INTERVAL;
         this.preferenceForThetaNotation = false;
+        this.discrHistory = new ArrayList<>();
         
         if (ringChoice > 0) {
             ringChoice *= -1;
         }
         if (NumberTheoreticFunctionsCalculator.isSquareFree(ringChoice)) {
             imR = new ImaginaryQuadraticRing(ringChoice);
+            discrHistory.add(ringChoice);
         } else {
             imR = new ImaginaryQuadraticRing(DEFAULT_RING_D);
+            discrHistory.add(DEFAULT_RING_D);
         }
+        this.currHistoryIndex = 0;
         this.setRing(imR);
         this.mouseIQI = new ImaginaryQuadraticInteger(0, 0, imR, 1);
         this.setBackground(this.backgroundColor);

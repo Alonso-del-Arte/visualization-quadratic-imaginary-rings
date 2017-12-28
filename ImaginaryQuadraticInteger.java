@@ -16,13 +16,14 @@
  */
 package imaginaryquadraticinteger;
 
-import java.util.*;
+import java.util.Objects;
+import java.util.Scanner;
+import java.util.InputMismatchException;
 
 /**
- *
+ * The main class, defines an imaginary quadratic integer.
  * @author Alonso del Arte
  */
-
 public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     
     /**
@@ -316,6 +317,55 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
  
     }
     
+    /**
+     * Returns a hash code value for the imaginary quadratic integer.
+     * The hash code is based on the real part (multiplied by 2 when applicable), the imaginary part (multiplied by 2 when applicable), the discriminant and the denominator.
+     * However, if the imaginary part is 0, the purely real integer is treated as a Gaussian integer. This was done in the hope of satisfying the contract that two objects that evaluate as equal also hash equal.
+     * Overriding {@link Object#hashCode} on account of needing to override {@link Object#equals}. 
+     * @return An integer which is hopefully unique from the hash codes of algebraic integers which are different that might occur in the same execution of the program.
+     */
+    @Override
+    public int hashCode() {
+        if (this.imagPartMult == 0) {
+            return Objects.hash(this.realPartMult, this.imagPartMult, -1, this.denominator);
+        } else {
+            return Objects.hash(this.realPartMult, this.imagPartMult, this.imagQuadRing.negRad, this.denominator);
+        }
+    }
+    
+    /**
+     * Compares whether an object is arithmetically equal to this imaginary quadratic integer.
+     * @param obj The object to compare, preferably an object that implements the AlgebraicInteger interface.
+     * @return True if the object is an imaginary quadratic integer arithmetically equal to this imaginary quadratic integer, false otherwise. Definitely false if obj is null.
+     * For example, if this is
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ImaginaryQuadraticInteger other = (ImaginaryQuadraticInteger) obj;
+        if (this.realPartMult != other.realPartMult) {
+            return false;
+        }
+        if (this.imagPartMult != other.imagPartMult) {
+            return false;
+        }
+        if (this.denominator != other.denominator) {
+            return false;
+        }
+        if (this.imagPartMult == 0 && other.imagPartMult == 0) {
+            return true; // negRad might be different, but its square root multiplied by 0 is still 0
+        }
+        return (this.imagQuadRing.negRad == other.imagQuadRing.negRad);
+    }
+  
     /**
      * Addition operation, since operator+ (plus) can't be overloaded. No overflow checking as of yet.
      * @param summand The imaginary quadratic integer to be added to this quadratic integer.

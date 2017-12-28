@@ -38,6 +38,12 @@ public class ImaginaryQuadraticRingTest {
     private static int randomDiscr;
     private static boolean ringRandomd1mod4;
     
+    /**
+     * The delta value to use when assertEquals() requires a delta value.
+     * Is this an appropriate value, or does it need to be smaller?
+     */
+    public static final double TEST_DELTA = 0.00001;
+    
     public ImaginaryQuadraticRingTest() {
     }
     
@@ -69,6 +75,42 @@ public class ImaginaryQuadraticRingTest {
     }
     
     /**
+     * Test of getNegRad method, of class ImaginaryQuadraticRing.
+     */
+    @Test
+    public void testGetNegRad() {
+        assertEquals(-1, ringGaussian.getNegRad());
+        assertEquals(-2, ringZi2.getNegRad());
+        assertEquals(-3, ringEisenstein.getNegRad());
+        assertEquals(-7, ringOQi7.getNegRad());
+        assertEquals(randomDiscr, ringRandom.getNegRad());
+    }
+
+    /**
+     * Test of getAbsNegRad method, of class ImaginaryQuadraticRing.
+     */
+    @Test
+    public void testGetAbsNegRad() {
+        assertEquals(1, ringGaussian.getAbsNegRad());
+        assertEquals(2, ringZi2.getAbsNegRad());
+        assertEquals(3, ringEisenstein.getAbsNegRad());
+        assertEquals(7, ringOQi7.getAbsNegRad());
+        assertEquals(-randomDiscr, ringRandom.getAbsNegRad());
+    }
+
+    /**
+     * Test of getAbsNegRadSqrt method, of class ImaginaryQuadraticRing.
+     */
+    @Test
+    public void testGetAbsNegRadSqrt() {
+        assertEquals(1.0, ringGaussian.getAbsNegRadSqrt(), TEST_DELTA);
+        assertEquals(Math.sqrt(2), ringZi2.getAbsNegRadSqrt(), TEST_DELTA);
+        assertEquals(Math.sqrt(3), ringEisenstein.getAbsNegRadSqrt(), TEST_DELTA);
+        assertEquals(Math.sqrt(7), ringOQi7.getAbsNegRadSqrt(), TEST_DELTA);
+        assertEquals(Math.sqrt(-randomDiscr), ringRandom.getAbsNegRadSqrt(), TEST_DELTA);
+    }
+    
+    /**
      * Test of hasHalfIntegers method, of class ImaginaryQuadraticRing.
      */
     @Test
@@ -77,7 +119,7 @@ public class ImaginaryQuadraticRingTest {
         assertFalse(ringZi2.hasHalfIntegers());
         assertTrue(ringEisenstein.hasHalfIntegers());
         assertTrue(ringOQi7.hasHalfIntegers());
-        assertEquals(ringRandom.hasHalfIntegers(), ringRandomd1mod4);
+        assertEquals(ringRandomd1mod4, ringRandom.hasHalfIntegers());
     }
 
     /**
@@ -252,6 +294,7 @@ public class ImaginaryQuadraticRingTest {
     
     /**
      * Test of ImaginaryQuadraticRing class constructor.
+     * The main thing we're testing here is that an invalid argument triggers an IllegalArgumentException.
      */
     @Test
     public void testConstructor() {
@@ -265,7 +308,14 @@ public class ImaginaryQuadraticRingTest {
             System.out.println("Somehow created " + ringZi12.toFilenameString() + " without problem.");
             fail("Attempt to use -12 should have caused an IllegalArgumentException.");
         } catch (IllegalArgumentException iae) {
-            System.out.println("Attempt to use -12 correctly triggered IllegalArgumentException " + iae.getMessage());
+            System.out.println("Attempt to use -12 correctly triggered IllegalArgumentException \"" + iae.getMessage() + "\"");
+        }
+        try {
+            ImaginaryQuadraticRing ringZ7 = new ImaginaryQuadraticRing(7);
+            System.out.println("Somehow created " + ringZ7.toFilenameString() + " without problem.");
+            fail("Attempt to use 7 should have caused an IllegalArgumentException.");
+        } catch (IllegalArgumentException iae) {
+            System.out.println("Attempt to use 7 correctly triggered IllegalArgumentException \"" + iae.getMessage() + "\"");
         }
     }
     

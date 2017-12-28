@@ -39,9 +39,10 @@ public class ImaginaryQuadraticIntegerTest {
     private static ImaginaryQuadraticRing ringRandom;
     
     private static List<ImaginaryQuadraticInteger> testIntegers, testAdditiveInverses, testConjugates, testNorms;
+    private static List<Integer> testNormsRealParts;
     private static ImaginaryQuadraticInteger zeroIQI;
     
-    private static int randomDiscr, randomRealPart, randomImagPart, randomRealForHalfInts, randomImagForHalfInts, totalTestIntegersSize;
+    private static int randomDiscr, randomRealPart, randomImagPart, randomRealForHalfInts, randomImagForHalfInts, totalTestIntegers;
     private static boolean ringRandomd1mod4;
     
     public ImaginaryQuadraticIntegerTest() {
@@ -76,6 +77,7 @@ public class ImaginaryQuadraticIntegerTest {
         testAdditiveInverses = new ArrayList<>();
         testConjugates = new ArrayList<>();
         testNorms = new ArrayList<>();
+        testNormsRealParts = new ArrayList<>();
         int currNorm;
         ImaginaryQuadraticInteger currIQI = new ImaginaryQuadraticInteger(randomRealPart, randomImagPart, ringGaussian, 1);
         testIntegers.add(currIQI);
@@ -86,6 +88,7 @@ public class ImaginaryQuadraticIntegerTest {
         currNorm = randomRealPart * randomRealPart + randomImagPart * randomImagPart;
         currIQI = new ImaginaryQuadraticInteger(currNorm, 0, ringGaussian, 1);
         testNorms.add(currIQI);
+        testNormsRealParts.add(currNorm);
         currIQI = new ImaginaryQuadraticInteger(randomRealPart, randomImagPart, ringZi2, 1);
         testIntegers.add(currIQI);
         currIQI = new ImaginaryQuadraticInteger(-randomRealPart, -randomImagPart, ringZi2, 1);
@@ -95,34 +98,38 @@ public class ImaginaryQuadraticIntegerTest {
         currNorm = randomRealPart * randomRealPart + 2 * randomImagPart * randomImagPart;
         currIQI = new ImaginaryQuadraticInteger(currNorm, 0, ringZi2, 1);
         testNorms.add(currIQI);
-        currIQI = new ImaginaryQuadraticInteger(randomRealForHalfInts, randomImagForHalfInts, ringEisenstein, 1);
+        testNormsRealParts.add(currNorm);
+        currIQI = new ImaginaryQuadraticInteger(randomRealForHalfInts, randomImagForHalfInts, ringEisenstein, 2);
         testIntegers.add(currIQI);
-        currIQI = new ImaginaryQuadraticInteger(-randomRealForHalfInts, -randomImagForHalfInts, ringEisenstein, 1);
+        currIQI = new ImaginaryQuadraticInteger(-randomRealForHalfInts, -randomImagForHalfInts, ringEisenstein, 2);
         testAdditiveInverses.add(currIQI);
-        currIQI = new ImaginaryQuadraticInteger(randomRealForHalfInts, -randomImagForHalfInts, ringEisenstein, 1);
+        currIQI = new ImaginaryQuadraticInteger(randomRealForHalfInts, -randomImagForHalfInts, ringEisenstein, 2);
         testConjugates.add(currIQI);
         currNorm = (randomRealForHalfInts * randomRealForHalfInts + 3 * randomImagForHalfInts * randomImagForHalfInts)/4;
         currIQI = new ImaginaryQuadraticInteger(currNorm, 0, ringEisenstein, 1);
         testNorms.add(currIQI);
-        currIQI = new ImaginaryQuadraticInteger(randomRealForHalfInts, randomImagForHalfInts, ringOQi7, 1);
+        testNormsRealParts.add(currNorm);
+        currIQI = new ImaginaryQuadraticInteger(randomRealForHalfInts, randomImagForHalfInts, ringOQi7, 2);
         testIntegers.add(currIQI);
-        currIQI = new ImaginaryQuadraticInteger(-randomRealForHalfInts, -randomImagForHalfInts, ringOQi7, 1);
+        currIQI = new ImaginaryQuadraticInteger(-randomRealForHalfInts, -randomImagForHalfInts, ringOQi7, 2);
         testAdditiveInverses.add(currIQI);
-        currIQI = new ImaginaryQuadraticInteger(randomRealForHalfInts, -randomImagForHalfInts, ringOQi7, 1);
+        currIQI = new ImaginaryQuadraticInteger(randomRealForHalfInts, -randomImagForHalfInts, ringOQi7, 2);
         testConjugates.add(currIQI);
         currNorm = (randomRealForHalfInts * randomRealForHalfInts + 7 * randomImagForHalfInts * randomImagForHalfInts)/4;
         currIQI = new ImaginaryQuadraticInteger(currNorm, 0, ringOQi7, 1);
         testNorms.add(currIQI);
+        testNormsRealParts.add(currNorm);
         if (ringRandomd1mod4) {
-            currIQI = new ImaginaryQuadraticInteger(randomRealForHalfInts, randomImagForHalfInts, ringRandom, 1);
+            currIQI = new ImaginaryQuadraticInteger(randomRealForHalfInts, randomImagForHalfInts, ringRandom, 2);
             testIntegers.add(currIQI);
-            currIQI = new ImaginaryQuadraticInteger(-randomRealForHalfInts, -randomImagForHalfInts, ringRandom, 1);
+            currIQI = new ImaginaryQuadraticInteger(-randomRealForHalfInts, -randomImagForHalfInts, ringRandom, 2);
             testAdditiveInverses.add(currIQI);
-            currIQI = new ImaginaryQuadraticInteger(randomRealForHalfInts, -randomImagForHalfInts, ringRandom, 1);
+            currIQI = new ImaginaryQuadraticInteger(randomRealForHalfInts, -randomImagForHalfInts, ringRandom, 2);
             testConjugates.add(currIQI);
-            currNorm = (randomRealForHalfInts * randomRealForHalfInts + randomDiscr * randomImagForHalfInts * randomImagForHalfInts)/4;
+            currNorm = (randomRealForHalfInts * randomRealForHalfInts + (-randomDiscr) * randomImagForHalfInts * randomImagForHalfInts)/4;
             currIQI = new ImaginaryQuadraticInteger(currNorm, 0, ringRandom, 1);
             testNorms.add(currIQI);
+            testNormsRealParts.add(currNorm);
         } else {
             currIQI = new ImaginaryQuadraticInteger(randomRealPart, randomImagPart, ringRandom, 1);
             testIntegers.add(currIQI);
@@ -130,11 +137,12 @@ public class ImaginaryQuadraticIntegerTest {
             testAdditiveInverses.add(currIQI);
             currIQI = new ImaginaryQuadraticInteger(randomRealPart, -randomImagPart, ringRandom, 1);
             testConjugates.add(currIQI);
-            currNorm = randomRealPart * randomRealPart + randomDiscr * randomImagPart * randomImagPart;
+            currNorm = randomRealPart * randomRealPart + (-randomDiscr) * randomImagPart * randomImagPart;
             currIQI = new ImaginaryQuadraticInteger(currNorm, 0, ringRandom, 1);
             testNorms.add(currIQI);
+            testNormsRealParts.add(currNorm);
         }
-        totalTestIntegersSize = totalTestIntegersSize;
+        totalTestIntegers = testIntegers.size();
     }
     
     @AfterClass
@@ -159,7 +167,7 @@ public class ImaginaryQuadraticIntegerTest {
         ImaginaryQuadraticInteger instance = new ImaginaryQuadraticInteger(1, 1, instanceRing, 1);
         int expResult = 2; // Quadratic integers with nonzero imaginary part should have algebraic degree 2
         int result;
-        for (int i = 0; i < totalTestIntegersSize; i++) {
+        for (int i = 0; i < totalTestIntegers; i++) {
             result = testIntegers.get(i).algebraicDegree();
             assertEquals(expResult, result);
             result = testAdditiveInverses.get(i).algebraicDegree();
@@ -184,33 +192,33 @@ public class ImaginaryQuadraticIntegerTest {
     public void testTrace() {
         System.out.println("trace");
         int expResult = 2 * randomRealPart;
-        int result; // First we're going to test the integers in rings without "half-integers"
-        for (int i = 0; i < totalTestIntegersSize; i++) {
-            if (!testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
-                result = testIntegers.get(i).trace();
-                assertEquals(expResult, result);
-            }
-        }
-        expResult = randomRealForHalfInts; // Now to test the "half-integers"
-        for (int j = 0; j < totalTestIntegersSize; j++) {
-            if (testIntegers.get(j).imagQuadRing.hasHalfIntegers()) {
-                result = testIntegers.get(j).trace();
+        int result;
+        for (int i = 0; i < totalTestIntegers; i++) {
+            result = testIntegers.get(i).trace();
+            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+                assertEquals(randomRealForHalfInts, result);
+            } else {
                 assertEquals(expResult, result);
             }
         }
     }
     
-    // Still working on the tests, so for now 2 tests pass, 13 fail
-
     /**
      * Test of norm method, of class ImaginaryQuadraticInteger.
      */
     @Test
     public void testNorm() {
         System.out.println("norm");
-        // For this particular test class, the code automatically generated by the IDE had an annoyingly high number of "dereferencing null pointer" warnings.
-        // So for the time being, my own placeholders for the tests.
-        fail("Haven't written the test yet, so perfunctory fail.");
+        int expResult, result;
+        for (int i = 0; i < totalTestIntegers; i++) {
+            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+                expResult = (randomRealForHalfInts * randomRealForHalfInts + testIntegers.get(i).imagQuadRing.getAbsNegRad() * randomImagForHalfInts * randomImagForHalfInts)/4;
+            } else {
+                expResult = randomRealPart * randomRealPart + testIntegers.get(i).imagQuadRing.getAbsNegRad() * randomImagPart * randomImagPart;
+            }
+            result = testIntegers.get(i).norm();
+            assertEquals(expResult, result);
+        }
     }
 
     /**
@@ -241,9 +249,16 @@ public class ImaginaryQuadraticIntegerTest {
     @Test
     public void testGetRealPartMult() {
         System.out.println("getRealPartMult");
-        // For this particular test class, the code automatically generated by the IDE had an annoyingly high number of "dereferencing null pointer" warnings.
-        // So for the time being, my own placeholders for the tests.
-        fail("Haven't written the test yet, so perfunctory fail.");
+        double expResult = (double) randomRealForHalfInts/2;
+        double result;
+        for (int i = 0; i < totalTestIntegers; i++) {
+            result = testIntegers.get(i).getRealPartMult();
+            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+                assertEquals(expResult, result, ImaginaryQuadraticRingTest.TEST_DELTA);
+            } else {
+                assertEquals(randomRealPart, result, ImaginaryQuadraticRingTest.TEST_DELTA);
+            }
+        }
     }
 
     /**
@@ -252,9 +267,16 @@ public class ImaginaryQuadraticIntegerTest {
     @Test
     public void testGetImagPartwRadMult() {
         System.out.println("getImagPartwRadMult");
-        // For this particular test class, the code automatically generated by the IDE had an annoyingly high number of "dereferencing null pointer" warnings.
-        // So for the time being, my own placeholders for the tests.
-        fail("Haven't written the test yet, so perfunctory fail.");
+        double expResult, result;
+        for (int i = 0; i < totalTestIntegers; i++) {
+            result = testIntegers.get(i).getImagPartwRadMult();
+            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+                expResult = ((double) randomImagForHalfInts * testIntegers.get(i).imagQuadRing.getAbsNegRadSqrt())/2;
+            } else {
+                expResult = (double) randomImagPart * testIntegers.get(i).imagQuadRing.getAbsNegRadSqrt();
+            }
+            assertEquals(expResult, result, ImaginaryQuadraticRingTest.TEST_DELTA);
+        }
     }
 
     /**
@@ -263,9 +285,16 @@ public class ImaginaryQuadraticIntegerTest {
     @Test
     public void testGetTwiceRealPartMult() {
         System.out.println("getTwiceRealPartMult");
-        // For this particular test class, the code automatically generated by the IDE had an annoyingly high number of "dereferencing null pointer" warnings.
-        // So for the time being, my own placeholders for the tests.
-        fail("Haven't written the test yet, so perfunctory fail.");
+        long expResult, result;
+        for (int i = 0; i < totalTestIntegers; i++) {
+            result = testIntegers.get(i).getTwiceRealPartMult();
+            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+                expResult = randomRealForHalfInts;
+            } else {
+                expResult = 2 * randomRealPart;
+            }
+            assertEquals(expResult, result);
+        }
     }
 
     /**
@@ -274,10 +303,19 @@ public class ImaginaryQuadraticIntegerTest {
     @Test
     public void testGetTwiceImagPartMult() {
         System.out.println("getTwiceImagPartMult");
-        // For this particular test class, the code automatically generated by the IDE had an annoyingly high number of "dereferencing null pointer" warnings.
-        // So for the time being, my own placeholders for the tests.
-        fail("Haven't written the test yet, so perfunctory fail.");
+        long expResult, result;
+        for (int i = 0; i < totalTestIntegers; i++) {
+            result = testIntegers.get(i).getTwiceImagPartMult();
+            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+                expResult = randomImagForHalfInts;
+            } else {
+                expResult = 2 * randomImagPart;
+            }
+            assertEquals(expResult, result);
+        }
     }
+    
+    // Still working on the tests, so for now 12 tests pass, 5 fail
 
     /**
      * Test of toString method, of class ImaginaryQuadraticInteger.
@@ -285,7 +323,7 @@ public class ImaginaryQuadraticIntegerTest {
     @Test
     public void testToString() {
         System.out.println("toString");
-        for (int i = 0; i < totalTestIntegersSize; i++) {
+        for (int i = 0; i < totalTestIntegers; i++) {
             System.out.println(testIntegers.get(i).toString());
             // TODO write assertEquals()
         }
@@ -299,49 +337,230 @@ public class ImaginaryQuadraticIntegerTest {
     @Test
     public void testToStringAlt() {
         System.out.println("toStringAlt");
+        // For the test integers in Z[i] and Z[sqrt(-2)], we expect toString() and toStringAlt() to give the same result.
+        assertEquals(testIntegers.get(0).toString(), testIntegers.get(0).toStringAlt());
+        assertEquals(testIntegers.get(1).toString(), testIntegers.get(1).toStringAlt());
         // For this particular test class, the code automatically generated by the IDE had an annoyingly high number of "dereferencing null pointer" warnings.
         // So for the time being, my own placeholders for the tests.
-        fail("Haven't written the test yet, so perfunctory fail.");
+        fail("Haven't quite written the whole test yet, so perfunctory fail.");
+    }
+    
+    /**
+     * Test of hashCode method, of class ImaginaryQuadraticInteger.
+     * It is expected that if two ImaginaryQuadraticInteger objects are equal, their hash codes are equal as well.
+     * It is also expected that a + b sqrt(c) and a + b sqrt(d) will get different hash codes.
+     * But by no means is it expected that hash codes will be unique among all possible ImaginaryQuadraticInteger objects.
+     */
+    @Test
+    public void testHashCode() {
+        ImaginaryQuadraticInteger temporaryHold;
+        int testHash, tempHash;
+        int prevHash = 0;
+        for (int i = 0; i < totalTestIntegers; i++) {
+            testHash = testIntegers.get(i).hashCode();
+            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+                temporaryHold = new ImaginaryQuadraticInteger(randomRealForHalfInts, randomImagForHalfInts, testIntegers.get(i).imagQuadRing, 2);
+            } else {
+                temporaryHold = new ImaginaryQuadraticInteger(randomRealPart, randomImagPart, testIntegers.get(i).imagQuadRing, 1);
+            }
+            tempHash = temporaryHold.hashCode();
+            System.out.println(testIntegers.get(i).toString().replace("\u221A", "sqrt") + " hashed to " + testHash);
+            System.out.println(temporaryHold.toString().replace("\u221A", "sqrt") + " hashed to " + tempHash);
+            assertEquals(testHash, tempHash);
+            assertFalse(testHash == prevHash);
+            prevHash = testHash;
+        }
+        // Now to test purely real integers register as equal regardless of what imagQuadRing might be
+        ImaginaryQuadraticInteger altZeroIQI = new ImaginaryQuadraticInteger(0, 0, testNorms.get(totalTestIntegers - 1).imagQuadRing, 1);
+        assertEquals(altZeroIQI, zeroIQI);
+        for (int j = 0; j < totalTestIntegers - 1; j++) {
+            temporaryHold = new ImaginaryQuadraticInteger(testNormsRealParts.get(j), 0, testNorms.get(totalTestIntegers - 1).imagQuadRing, 1);
+            tempHash = temporaryHold.hashCode();
+            testHash = testNorms.get(j).hashCode();
+            System.out.println(temporaryHold.toString() + " from " + temporaryHold.imagQuadRing.toFilenameString() + " hashed as " + tempHash);
+            System.out.println(testNorms.get(j).toString() + " from " + testNorms.get(j).imagQuadRing.toFilenameString() + " hashed as " + testHash);
+            assertEquals(tempHash, testHash);
+        }
+    }
+    
+    /**
+     * Test of equals method, of class ImaginaryQuadraticInteger.
+     */
+    @Test
+    public void testEquals() {
+        ImaginaryQuadraticInteger temporaryHold, transitiveHold, kindaDiffZero;
+        int normCalc;
+        boolean expResult, result;
+        for (int i = 0; i < totalTestIntegers; i++) {
+            assertTrue(testIntegers.get(i).equals(testIntegers.get(i))); // Reflexive test
+            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+                temporaryHold = new ImaginaryQuadraticInteger(randomRealForHalfInts, randomImagForHalfInts, testIntegers.get(i).imagQuadRing, 2);
+                transitiveHold = new ImaginaryQuadraticInteger(randomRealForHalfInts, randomImagForHalfInts, testIntegers.get(i).imagQuadRing, 2);
+                normCalc = (randomRealForHalfInts * randomRealForHalfInts + testIntegers.get(i).imagQuadRing.getAbsNegRad() * randomImagForHalfInts * randomImagForHalfInts)/4;
+            } else {
+                temporaryHold = new ImaginaryQuadraticInteger(randomRealPart, randomImagPart, testIntegers.get(i).imagQuadRing, 1);
+                transitiveHold = new ImaginaryQuadraticInteger(randomRealPart, randomImagPart, testIntegers.get(i).imagQuadRing, 1);
+                normCalc = randomRealPart * randomRealPart + testIntegers.get(i).imagQuadRing.getAbsNegRad() * randomImagPart * randomImagPart;
+            }
+            assertTrue(testIntegers.get(i).equals(testIntegers.get(i))); // First consistency test
+            assertEquals(testIntegers.get(i), temporaryHold);
+            assertEquals(temporaryHold, testIntegers.get(i)); // Symmetric test
+            assertEquals(temporaryHold, transitiveHold);
+            assertEquals(transitiveHold, testIntegers.get(i)); // Transitive test
+            assertTrue(testIntegers.get(i).equals(testIntegers.get(i))); // Second consistency test
+            // assertFalse(testIntegers.get(i).equals(null)); Null test is apparently unnecessary
+        }
+        for (int j = 0; j < totalTestIntegers - 1; j++) {
+            assertFalse(testIntegers.get(j).equals(testIntegers.get(j + 1)));
+            assertFalse(testIntegers.get(j + 1).equals(testIntegers.get(j))); // Symmetric test for not equals
+            temporaryHold = new ImaginaryQuadraticInteger(testNormsRealParts.get(j), 0, testNorms.get(j + 1).imagQuadRing, 1);
+            assertEquals(testNorms.get(j), temporaryHold);
+            kindaDiffZero = new ImaginaryQuadraticInteger(0, 0, testIntegers.get(j + 1).imagQuadRing, 1);
+            assertEquals(zeroIQI, kindaDiffZero); // Making sure purely real integers can register as equal
+        }
     }
 
     /**
      * Test of plus method, of class ImaginaryQuadraticInteger.
      */
     @Test
-    public void testPlus() throws Exception {
+    public void testPlus() {
         System.out.println("plus");
-        // For this particular test class, the code automatically generated by the IDE had an annoyingly high number of "dereferencing null pointer" warnings.
-        // So for the time being, my own placeholders for the tests.
-        fail("Haven't written the test yet, so perfunctory fail.");
+        ImaginaryQuadraticInteger expResult, result, testAddend;
+        for (int i = 0; i < totalTestIntegers; i++) {
+            for (int iterX = -3; iterX < 4; iterX++) {
+                for (int iterY = 1; iterY < 4; iterY++) {
+                    testAddend = new ImaginaryQuadraticInteger(iterX, iterY, testIntegers.get(i).imagQuadRing, 1);
+                    if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+                        expResult = new ImaginaryQuadraticInteger(randomRealForHalfInts + 2 * iterX, randomImagForHalfInts + 2 * iterY, testIntegers.get(i).imagQuadRing, 2);
+                    } else {
+                        expResult = new ImaginaryQuadraticInteger(randomRealPart + iterX, randomImagPart + iterY, testIntegers.get(i).imagQuadRing, 1);
+                    }
+                    try {
+                        result = testIntegers.get(i).plus(testAddend);
+                    } catch (AlgebraicDegreeOverflowException adoe) {
+                        result = zeroIQI; // This is just to avoid "variable result might not have been initialized" error
+                        fail("Adding test integer to another integer in the same ring should not have triggered AlgebraicDegreeOverflowException \"" + adoe.getMessage());
+                    }
+                    assertEquals(expResult, result);
+                }
+                // Now to test plus(int)
+                if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+                    expResult = new ImaginaryQuadraticInteger(randomRealForHalfInts + 2 * iterX, randomImagForHalfInts, testIntegers.get(i).imagQuadRing, 2);
+                } else {
+                    expResult = new ImaginaryQuadraticInteger(randomRealPart + iterX, randomImagPart, testIntegers.get(i).imagQuadRing, 1);
+                }
+                result = testIntegers.get(i).plus(iterX);
+                assertEquals(expResult, result);
+            }
+            // Testing that adding additive inverses give 0 each time
+            try {
+                result = testIntegers.get(i).plus(testAdditiveInverses.get(i));
+            } catch (AlgebraicDegreeOverflowException adoe) {
+                result = zeroIQI; // Again, this is just to avoid "variable result might not have been initialized" error
+                fail("Adding test integer to its additive inverse should not have triggered AlgebraicDegreeOverflowException \"" + adoe.getMessage());
+            }
+            assertEquals(zeroIQI, result);
+            // Now testing that adding 0 does not change the number
+            result = testIntegers.get(i).plus(0);
+            assertEquals(testIntegers.get(i), result);
+        }
+        // And now to test that adding algebraic integers from two different quadratic integer rings triggers AlgebraicDegreeOverflowException
+        for (int j = 0; j < totalTestIntegers - 1; j++) {
+            try {
+                result = testIntegers.get(j).plus(testIntegers.get(j + 1));
+                fail("Adding " + testIntegers.get(j).toString().replace("\u221A", "sqrt") + " to " + testIntegers.get(j + 1).toString().replace("\u221A", "sqrt") + " should not have resulted in " + result.toString().replace("\u221A", "sqrt") + " without triggering AlgebraicDegreeOverflowException.");
+            } catch (AlgebraicDegreeOverflowException adoe) {
+                System.out.println("Adding " + testIntegers.get(j).toString().replace("\u221A", "sqrt") + " to " + testIntegers.get(j + 1).toString().replace("\u221A", "sqrt") + " correctly triggered AlgebraicDegreeOverflowException.");
+                System.out.println("That calculation requires an implementation of AlgebraicInteger capable of handling algebraic degree " + adoe.getNecessaryAlgebraicDegree() + " or higher.");
+            }
+        }
     }
 
     /**
      * Test of minus method, of class ImaginaryQuadraticInteger.
      */
     @Test
-    public void testMinus() throws Exception {
+    public void testMinus() {
         System.out.println("minus");
-        // For this particular test class, the code automatically generated by the IDE had an annoyingly high number of "dereferencing null pointer" warnings.
-        // So for the time being, my own placeholders for the tests.
-        fail("Haven't written the test yet, so perfunctory fail.");
+        ImaginaryQuadraticInteger expResult, result, testMinuend;
+        for (int i = 0; i < totalTestIntegers; i++) {
+            for (int iterX = -3; iterX < 4; iterX++) {
+                for (int iterY = 1; iterY < 4; iterY++) {
+                    testMinuend = new ImaginaryQuadraticInteger(iterX, iterY, testIntegers.get(i).imagQuadRing, 1);
+                    if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+                        expResult = new ImaginaryQuadraticInteger(randomRealForHalfInts - 2 * iterX, randomImagForHalfInts - 2 * iterY, testIntegers.get(i).imagQuadRing, 2);
+                    } else {
+                        expResult = new ImaginaryQuadraticInteger(randomRealPart - iterX, randomImagPart - iterY, testIntegers.get(i).imagQuadRing, 1);
+                    }
+                    try {
+                        result = testIntegers.get(i).minus(testMinuend);
+                    } catch (AlgebraicDegreeOverflowException adoe) {
+                        result = zeroIQI; // This is just to avoid "variable result might not have been initialized" error
+                        fail("Subtracting test integer from an integer in the same ring should not have triggered AlgebraicDegreeOverflowException \"" + adoe.getMessage());
+                    }
+                    assertEquals(expResult, result);
+                }
+            }
+            // Testing that subtracting itself gives 0 each time
+            expResult = new ImaginaryQuadraticInteger(0, 0, testIntegers.get(i).imagQuadRing, 1);
+            try {
+                result = testIntegers.get(i).minus(testIntegers.get(i));
+            } catch (AlgebraicDegreeOverflowException adoe) {
+                result = zeroIQI; // Again, this is just to avoid "variable result might not have been initialized" error
+                fail("Subtracting test integer from itself should not have triggered AlgebraicDegreeOverflowException \"" + adoe.getMessage());
+            }
+            assertEquals(expResult, result);
+            // Now testing that subtracting 0 does not change the number
+            result = testIntegers.get(i).minus(0);
+            assertEquals(testIntegers.get(i), result);
+        }
+        // And now to test that subtracting algebraic integers from two different quadratic integer rings triggers AlgebraicDegreeOverflowException
+        for (int j = 0; j < totalTestIntegers - 1; j++) {
+            try {
+                result = testIntegers.get(j).minus(testIntegers.get(j + 1));
+                fail("Subtracting " + testIntegers.get(j + 1).toString().replace("\u221A", "sqrt") + " to " + testIntegers.get(j).toString().replace("\u221A", "sqrt") + " should not have resulted in " + result.toString().replace("\u221A", "sqrt") + " without triggering AlgebraicDegreeOverflowException.");
+            } catch (AlgebraicDegreeOverflowException adoe) {
+                System.out.println("Subtracting " + testIntegers.get(j + 1).toString().replace("\u221A", "sqrt") + " from " + testIntegers.get(j).toString().replace("\u221A", "sqrt") + " correctly triggered AlgebraicDegreeOverflowException.");
+                System.out.println("That calculation requires an implementation of AlgebraicInteger capable of handling algebraic degree " + adoe.getNecessaryAlgebraicDegree() + " or higher.");
+            }
+        }
     }
 
     /**
      * Test of times method, of class ImaginaryQuadraticInteger.
      */
     @Test
-    public void testTimes() throws Exception {
+    public void testTimes() {
         System.out.println("times");
-        // For this particular test class, the code automatically generated by the IDE had an annoyingly high number of "dereferencing null pointer" warnings.
-        // So for the time being, my own placeholders for the tests.
-        fail("Haven't written the test yet, so perfunctory fail.");
+        ImaginaryQuadraticInteger result;
+        for (int i = 0; i < totalTestIntegers; i++) {
+            try {
+                result = testIntegers.get(i).times(testConjugates.get(i));
+            } catch (AlgebraicDegreeOverflowException adoe) {
+                result = zeroIQI; // This is just to avoid "variable result might not have been initialized" error
+                fail("Multiplying an integer by its conjugate should not have triggered AlgebraicDegreeOverflowException \"" + adoe.getMessage());
+            }
+            System.out.println("Test norm is " + testNorms.get(i).toString() + " and recalculated norm is " + result.toString());
+            assertEquals(testNorms.get(i), result);
+        }
+        // And now to test that multiplying algebraic integers from two different quadratic integer rings triggers AlgebraicDegreeOverflowException
+        for (int j = 0; j < totalTestIntegers - 1; j++) {
+            try {
+                result = testIntegers.get(j).times(testIntegers.get(j + 1));
+                fail("Multiplying " + testIntegers.get(j).toString().replace("\u221A", "sqrt") + " by " + testIntegers.get(j + 1).toString().replace("\u221A", "sqrt") + " should not have resulted in " + result.toString().replace("\u221A", "sqrt") + " without triggering AlgebraicDegreeOverflowException.");
+            } catch (AlgebraicDegreeOverflowException adoe) {
+                System.out.println("Multiplying " + testIntegers.get(j).toString().replace("\u221A", "sqrt") + " by " + testIntegers.get(j + 1).toString().replace("\u221A", "sqrt") + " correctly triggered AlgebraicDegreeOverflowException.");
+                System.out.println("That calculation requires an implementation of AlgebraicInteger capable of handling algebraic degree " + adoe.getNecessaryAlgebraicDegree() + " or higher.");
+            }
+        }
     }
 
     /**
      * Test of divides method, of class ImaginaryQuadraticInteger.
      */
     @Test
-    public void testDivides() throws Exception {
+    public void testDivides() {
         System.out.println("divides");
         // For this particular test class, the code automatically generated by the IDE had an annoyingly high number of "dereferencing null pointer" warnings.
         // So for the time being, my own placeholders for the tests.

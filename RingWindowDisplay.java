@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Alonso del Arte
+ * Copyright (C) 2018 Alonso del Arte
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 /**
- *
+ * A Swing component in which to display diagrams of prime numbers in various quadratic integer rings.
  * @author Alonso del Arte
  */
 public final class RingWindowDisplay extends JPanel implements ActionListener, MouseMotionListener {
@@ -83,8 +83,10 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      * The minimum integer the square root of which can be used to generate an imaginary quadratic integer ring for the purpose of display in this ring window.
      * Although technically an ImaginaryQuadraticRing can be defined with the square root of -2147483647 (which is a prime number), this would quickly lead to arithmetic overflow problems.
      * Hopefully this value of -67108863 = (-1) * 3 * 2371 * 8191 is "small" enough not to cause arithmetic overflow problems with the largest zoom out setting, but "large" enough to be of no interest to most users of this program.
+     * That hope was dashed during unit testing of ImaginaryQuadraticInteger.divides().
+     * I now hope that the prime -8191 meets these requirements.
      */
-    public static final int MINIMUM_RING_D = Integer.MIN_VALUE/32 + 1;
+    public static final int MINIMUM_RING_D = -8191;
     
     public static final int DEFAULT_DOT_RADIUS = 5;
     public static final int MINIMUM_DOT_RADIUS = 1;

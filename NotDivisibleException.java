@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Alonso del Arte
+ * Copyright (C) 2018 Alonso del Arte
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,21 +18,22 @@ package imaginaryquadraticinteger;
 
 /**
  * An exception to indicate when the division of one algebraic integer by another algebraic integer results in an algebraic number that is in the relevant field but not the relevant ring.
+ * For example, sqrt(-2)/3 is in Q(sqrt(-2)) but not Z[sqrt(-2)].
  * @author Alonso del Arte
  */
 public class NotDivisibleException extends Exception {
     
     private static final long serialVersionUID = 1;
-    private final int resultingFractionRealPartNumerator;
-    private final int resultingFractionImagPartNumerator;
-    private final int resultingFractionDenominator;
+    private final long resultingFractionRealPartNumerator;
+    private final long resultingFractionImagPartNumerator;
+    private final long resultingFractionDenominator;
     private final int resultingFractionNegRad;
     
     /**
      * Gives the numerator of the real part of the resulting fraction.
      * @return The integer for the real part supplied at the time the exception was constructed.
      */
-    public int getResReFractNumer() {
+    public long getResReFractNumer() {
         return resultingFractionRealPartNumerator;
     }
 
@@ -40,7 +41,7 @@ public class NotDivisibleException extends Exception {
      * Gives the numerator of the imaginary part of the resulting fraction.
      * @return The integer for the real part supplied at the time the exception was constructed.
      */
-    public int getResImFractNumer() {
+    public long getResImFractNumer() {
         return resultingFractionImagPartNumerator;
     }
    
@@ -48,7 +49,7 @@ public class NotDivisibleException extends Exception {
      * Gives the denominator of the resulting fraction.
      * @return The integer supplied at the time the exception was constructed. It may be almost any integer, but most certainly it should not be 0.
      */
-    public int getResFractDenom() {
+    public long getResFractDenom() {
         return resultingFractionDenominator;
     }
     
@@ -70,7 +71,7 @@ public class NotDivisibleException extends Exception {
      * @param resFractDenom The denominator of the resulting fraction. For example, given 7/3 + 2 * sqrt(-5)/3, this parameter would be 3.
      * @param resFractNegRad The negative integer in the radical in the numerator of the resulting fraction. For example, given 7/3 + 2 * sqrt(-5)/3, this parameter would be -5.
      */
-    public NotDivisibleException(String message, int resFractReNumer, int resFractImNumer, int resFractDenom, int resFractNegRad) {
+    public NotDivisibleException(String message, long resFractReNumer, long resFractImNumer, long resFractDenom, int resFractNegRad) {
         super(message);
         resultingFractionRealPartNumerator = resFractReNumer;
         resultingFractionImagPartNumerator = resFractImNumer;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Alonso del Arte
+ * Copyright (C) 2018 Alonso del Arte
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -165,7 +165,7 @@ public class NumberTheoreticFunctionsCalculator {
      * @param b One of the two integers. May be negative, need not be greater than the other.
      * @return The GCD as an integer.
      * If one of a or b is 0 and the other is nonzero, the result will be the nonzero number.
-     * If both a and b are 0, then the result will be 0, which is technically wrong, but I think it's good enough for the purpose here.
+     * If both a and b are 0, then the result will be 0, which is perhaps technically wrong, but I think it's good enough for the purpose here.
      */
     public static int euclideanGCD(int a, int b) {
         int currA, currB, currRemainder;
@@ -186,6 +186,35 @@ public class NumberTheoreticFunctionsCalculator {
         }
         return currA;
     }
+
+    /**
+     * Computes the greatest common divisor (GCD) of two purely real integers by using the Euclidean algorithm.
+     * @param a One of the two integers. May be negative, need not be greater than the other.
+     * @param b One of the two integers. May be negative, need not be greater than the other.
+     * @return The GCD as an integer.
+     * If one of a or b is 0 and the other is nonzero, the result will be the nonzero number.
+     * If both a and b are 0, then the result will be 0, which is perhaps technically wrong, but I think it's good enough for the purpose here.
+     */
+    public static long euclideanGCD(long a, long b) {
+        long currA, currB, currRemainder;
+        if (a < b) {
+            currA = b;
+            currB = a;
+        } else {
+            currA = a;
+            currB = b;
+        }
+        while (currB != 0) {
+            currRemainder = currA % currB;
+            currA = currB;
+            currB = currRemainder;
+        }
+        if (currA < 0) {
+            currA *= -1;
+        }
+        return currA;
+    }
+
     
     // PLACEHOLDER FOR IQI euclideanGCD(IQI a, IQI b) {}
     

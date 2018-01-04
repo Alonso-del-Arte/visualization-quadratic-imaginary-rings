@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Alonso del Arte
+ * Copyright (C) 2018 Alonso del Arte
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@ package imaginaryquadraticinteger;
 
 /**
  * An exception to indicate when the result of an arithmetical operation results in an algebraic integer of higher algebraic degree than the implementation of AlgebraicInteger was designed for.
+ * For example, the square root of 2 times the fifth root of 3 is an algebraic integer with minimal polynomial x^10 - 288.
+ * So an AlgebraicInteger implementation for quadratic integers would be ill-suited to hold the result of the operation, as would an implementaion that can handle algebraic integers up to algebraic degree 5.
  * @author Alonso del Arte
  */
 public class AlgebraicDegreeOverflowException extends Exception {
@@ -50,11 +52,9 @@ public class AlgebraicDegreeOverflowException extends Exception {
      * @param necessaryDegree The algebraic degree the object should be capable of handling to properly represent the result (e.g., 4 in the case of two quadratic integers that multiply to an algebraic integer of degree 4).
      */
     public AlgebraicDegreeOverflowException(String message, int maxDegree, int necessaryDegree) {
-        
         super(message);
         maxExpectedAlgebraicDegree = maxDegree;
         necessaryAlgebraicDegree = necessaryDegree;
-        
     }
     
 }

@@ -1,5 +1,6 @@
 I HAVE DELETED THIS FILE FROM MY LOCAL COPY OF THE PROJECT BUT WILL KEEP THIS FILE HERE FOR HISTORICAL PURPOSES.
-
+    
+@Deprecated
 public class ImagQuadrIntDisplayComplexPlanePoint extends ImaginaryQuadraticInteger {
     
     protected int coordinateX;

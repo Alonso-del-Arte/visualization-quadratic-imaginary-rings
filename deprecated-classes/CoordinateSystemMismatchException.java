@@ -1,5 +1,6 @@
 I HAVE DELETED THIS FILE FROM MY LOCAL COPY OF THE PROJECT BUT WILL KEEP THIS FILE HERE FOR HISTORICAL PURPOSES.
 
+@Deprecated
 public class CoordinateSystemMismatchException extends IllegalArgumentException {
     
     private static final long serialVersionUID = 1;

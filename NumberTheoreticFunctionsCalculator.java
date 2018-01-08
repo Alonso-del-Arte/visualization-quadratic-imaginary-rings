@@ -162,7 +162,7 @@ public class NumberTheoreticFunctionsCalculator {
     /**
      * Computes the greatest common divisor (GCD) of two purely real integers by using the Euclidean algorithm.
      * @param a One of the two integers. May be negative, need not be greater than the other.
-     * @param b One of the two integers. May be negative, need not be greater than the other.
+     * @param b One of the two integers. May be negative, need not be smaller than the other.
      * @return The GCD as an integer.
      * If one of a or b is 0 and the other is nonzero, the result will be the nonzero number.
      * If both a and b are 0, then the result will be 0, which is perhaps technically wrong, but I think it's good enough for the purpose here.
@@ -190,7 +190,7 @@ public class NumberTheoreticFunctionsCalculator {
     /**
      * Computes the greatest common divisor (GCD) of two purely real integers by using the Euclidean algorithm.
      * @param a One of the two integers. May be negative, need not be greater than the other.
-     * @param b One of the two integers. May be negative, need not be greater than the other.
+     * @param b One of the two integers. May be negative, need not be smaller than the other.
      * @return The GCD as an integer.
      * If one of a or b is 0 and the other is nonzero, the result will be the nonzero number.
      * If both a and b are 0, then the result will be 0, which is perhaps technically wrong, but I think it's good enough for the purpose here.
@@ -215,8 +215,62 @@ public class NumberTheoreticFunctionsCalculator {
         return currA;
     }
 
-    
-    // PLACEHOLDER FOR IQI euclideanGCD(IQI a, IQI b) {}
+    /**
+     * Computes the greatest common divisor (GCD) of two imaginary quadratic integers by using the Euclidean algorithm.
+     * WARNING: I have not yet written a test for this function yet, so for now I can't guarantee that it works correctly, or at all.
+     * @param a One of the two imaginary quadratic integers. Need not have greater norm than the other.
+     * @param b One of the two imaginary quadratic integers. Need not have smaller norm than the other.
+     * @return The GCD.
+     * @throws AlgebraicDegreeOverflowException If the algebraic integers come from different quadratic rings, the GCD might be a number from a ring of degree 4 or higher. This may or may not be the case (quite likely the two algebraic integers will be coprime and so the answer is just good old 1); the function assumes that the GCD can't be calculated using the Euclidean algorithm and throws this checked exception.
+     * @throws NonEuclideanDomainException If the algebraic integers come from any imaginary quadratic ring other than Z[i], Z[sqrt(-2)], Z[omega], O_Q(sqrt(-7)) or O_Q(sqrt(-11)), the function assumes the Euclidean GCD algorithm will fail without even trying, and throws this checked exception.
+     * However, for some pairs drawn from a non-Euclidean domain, the Euclidean GCD algorithm might nevertheless work.
+     * For this reason, the exception has the method tryEuclideanGCDAnyway().
+     */
+    public static ImaginaryQuadraticInteger euclideanGCD(ImaginaryQuadraticInteger a, ImaginaryQuadraticInteger b) throws AlgebraicDegreeOverflowException, NonEuclideanDomainException {
+        if (((a.imagPartMult != 0) && (b.imagPartMult != 0)) && (a.imagQuadRing.negRad != b.imagQuadRing.negRad)) {
+            throw new AlgebraicDegreeOverflowException("This operation would result in an algebraic integer of degree 4.", 2, 4);
+        }
+        if (a.imagQuadRing.negRad < -11 || a.imagQuadRing.negRad == -10 || a.imagQuadRing.negRad == -6 || a.imagQuadRing.negRad == -5) {
+            String exceptionMessage = a.toASCIIString() + " and " + b.toASCIIString() + " are in non-Euclidean domain " + a.imagQuadRing.toFilenameString() + ".";
+            throw new NonEuclideanDomainException(exceptionMessage, a, b);
+        }
+        ImaginaryQuadraticInteger currA, currB, tempMultiple, currRemainder;
+        if (a.norm() < b.norm()) {
+            currA = b;
+            currB = a;
+        } else {
+            currA = a;
+            currB = b;
+        }
+        while (!currB.equalsInt(0)) {
+            try {
+                tempMultiple = currA.divides(currB);
+            } catch (AlgebraicDegreeOverflowException adoe) {
+                tempMultiple = currA; // This is just to avoid "variable might not be initialized" error
+            } catch (NotDivisibleException nde) {
+                tempMultiple = nde.roundTowardsZero();
+            }
+            try {
+                tempMultiple = tempMultiple.times(currB);
+                currRemainder = currA.minus(tempMultiple);
+            } catch (AlgebraicDegreeOverflowException adoe) {
+                currRemainder = currB; // Avoiding "variable might not be initialized" error
+            }
+            currA = currB;
+            currB = currRemainder;
+        }
+        // Make sure both real and imaginary parts of currA are positive or 0, that is, not negative
+        if (currA.realPartMult < 0 && currA.imagPartMult < 0) {
+            currA = currA.times(-1);
+        }
+        if (currA.realPartMult < 0 || currA.imagPartMult < 0) {
+            int absRealPart = Math.abs(currA.realPartMult);
+            int absImagPart = Math.abs(currA.imagPartMult);
+            int currDenom = currA.denominator;
+            currA = new ImaginaryQuadraticInteger(absRealPart, absImagPart, currB.imagQuadRing, currDenom);
+        }
+        return currA;
+    }
     
     /**
      * Provides a pseudorandom negative squarefree integer.
@@ -231,7 +285,7 @@ public class NumberTheoreticFunctionsCalculator {
         int randomNumber = ranNumGen.nextInt(bound);
         randomNumber *= -1;
         while (!isSquareFree(randomNumber)) {
-            randomNumber--;
+            randomNumber++;
         }
         return randomNumber;
     }

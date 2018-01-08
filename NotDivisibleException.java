@@ -19,6 +19,10 @@ package imaginaryquadraticinteger;
 /**
  * An exception to indicate when the division of one algebraic integer by another algebraic integer results in an algebraic number that is in the relevant field but not the relevant ring.
  * For example, sqrt(-2)/3 is in Q(sqrt(-2)) but not Z[sqrt(-2)].
+ * This is the wrong exception to throw for division by 0.
+ * Throwing this exception implies the result of a division is an algebraic number but not an algebraic integer.
+ * Whatever we think an algebraic integer divided by 0 is, it is neither algebraic number nor algebraic integer.
+ * Also, throwing this exception implies the result of a division can be rounded to an algebraic integer nearby in the relevant ring.
  * @author Alonso del Arte
  */
 public class NotDivisibleException extends Exception {
@@ -60,6 +64,14 @@ public class NotDivisibleException extends Exception {
     public int getResFractNegRad() {
         return resultingFractionNegRad;
     }
+    
+    // TODO: REPLACE PLACEHOLDER FUNCTION
+    public ImaginaryQuadraticInteger roundTowardsZero() {
+        return new ImaginaryQuadraticInteger(0, 0, new ImaginaryQuadraticRing(-1), 1);
+    }
+    
+    // I'M THINKING OF INCLUDING FOUR OR SIX ROUNDING FUNCTIONS.
+    // So part of what is holding me back is figuring out what to call these functions.
 
     /**
      * This exception should be thrown when a division operation takes the resulting number out of the ring, to the larger field.

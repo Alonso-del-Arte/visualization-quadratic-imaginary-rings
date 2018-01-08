@@ -67,8 +67,9 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * Calculates the trace of the imaginary quadratic integer (real part plus real integer times square root of a negative integer)
-     * @return Twice the real part
+     * Calculates the trace of the imaginary quadratic integer (real part plus real integer times square root of a negative integer).
+     * There is no overflow checking, but this should not be a problem as long as the real part a is within the range -(2^30) < a < 2^30.
+     * @return Twice the real part. For example, given 5/2 + sqrt(-7)/2, the trace would be 5.
      */
     @Override
     public int trace() {
@@ -82,7 +83,9 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     /**
      * Calculates the norm of the imaginary quadratic integer (real part plus real integer times square root of a negative integer).
      * WARNING: There is no overflow checking. That might slow things down unacceptably in RingWindowDisplay.drawPoints().
-     * @return Square of the real part minus square of the imaginary part. May be 0 but never negative.
+     * @return Square of the real part minus square of the imaginary part. For example, given 5/2 + sqrt(-7)/2, the norm would be 8.
+     * May be 0 but should never be negative. If it is negative, most likely an overflow has occurred.
+     * In general, the farther away negRad is from 0, the closer the real and imaginary parts have to be to 0 to avoid overflows.
      */
     @Override
     public int norm() {
@@ -99,7 +102,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * Gives the coefficients for the minimal polynomial of the algebraic integer
+     * Gives the coefficients for the minimal polynomial of the algebraic integer.
      * @return An array of three integers. If the algebraic integer is of degree 2, the array will be {norm, negative trace, 1}; if of degree 1, then {number, 1, 0}, and for 0, {0, 0, 0}.
      */
     @Override
@@ -125,6 +128,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     /**
      * Gives the polynomial in a format suitable for plain text or TeX.
      * @return A String. If the algebraic degree is 2, the String should start off with "x^2".
+     * For example, for 5/2 + sqrt(-7)/2, the result would be "x^2 - 5x + 8".
      */
     @Override
     public String minPolynomialString() {
@@ -624,7 +628,6 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         long intermediateDenom = (long) (divisor.norm() * (long) this.denominator * (long) divisor.denominator);
         long realCutDown = NumberTheoreticFunctionsCalculator.euclideanGCD(intermediateRealPart, intermediateDenom);
         long imagCutDown = NumberTheoreticFunctionsCalculator.euclideanGCD(intermediateImagPart, intermediateDenom);
-        System.out.println(intermediateRealPart + ", " + intermediateImagPart + ", " + intermediateDenom + ", " + realCutDown + ", " + imagCutDown);
         if (realCutDown < imagCutDown) {
             intermediateRealPart /= realCutDown;
             intermediateImagPart /= realCutDown;
@@ -634,7 +637,6 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
             intermediateImagPart /= imagCutDown;
             intermediateDenom /= imagCutDown;
         }
-        System.out.println(intermediateRealPart + ", " + intermediateImagPart + ", " + intermediateDenom + ", " + realCutDown + ", " + imagCutDown);
         boolean divisibleFlag;
         if (this.imagQuadRing.d1mod4) {
             divisibleFlag = (intermediateDenom == 1 || intermediateDenom == 2);
@@ -657,7 +659,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     /**
      * Division operation, since operator/ can't be overloaded.
      * Although the previous divides function can be passed an ImaginaryQuadraticInteger with imagPartMult equal to 0, this function is to be preferred if you know for sure the divisor is purely real.
-     * With this divides, there is no need to catch an AlgebraicDegreeOverflowException.
+     * With this divides, there is no need to catch an AlgebraicDegreeOverflowException, but there is one checked exception and two possible runtime exceptions to be concerned about.
      * Computations are done with 64-bit variables. Overflow checking is rudimentary.
      * @param divisor The purely real integer by which to divide this quadratic integer.
      * @return A new ImaginaryQuadraticInteger object with the result of the operation.
@@ -682,6 +684,11 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
             intermediateRealPart /= imagCutDown;
             intermediateImagPart /= imagCutDown;
             intermediateDenom /= imagCutDown;
+        }
+        if (intermediateDenom < 0) {
+            intermediateRealPart *= -1;
+            intermediateImagPart *= -1;
+            intermediateDenom *= -1;
         }
         boolean divisibleFlag;
         if (this.imagQuadRing.d1mod4) {

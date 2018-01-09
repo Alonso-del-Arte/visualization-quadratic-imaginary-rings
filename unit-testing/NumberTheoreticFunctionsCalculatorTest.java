@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Alonso del Arte
+ * Copyright (C) 2018 Alonso del Arte
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,8 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- *
+ * Tests for a collection of number theoretic functions, including basic primality testing and the Euclidean GCD algorithm.
+ * Some of these tests use a finite list of small primes and another finite list of non-prime numbers.
  * @author Alonso del Arte
  */
 public class NumberTheoreticFunctionsCalculatorTest {
@@ -49,6 +50,10 @@ public class NumberTheoreticFunctionsCalculatorTest {
     public NumberTheoreticFunctionsCalculatorTest() {
     }
     
+    /**
+     * Sets up an array list of the factors of 44100 and another array list with the factors of 86436000.
+     * The static final fields provide most of everything else needed for the tests.
+     */
     @BeforeClass
     public static void setUpClass() {
         // 44100 = 2^2 * 3^2 * 5^2 * 7^2
@@ -186,6 +191,7 @@ public class NumberTheoreticFunctionsCalculatorTest {
 
     /**
      * Test of euclideanGCD method, of class NumberTheoreticFunctionsCalculator.
+     * TO DO: Write test for euclideanGCD(IQI, IQI).
      * At this time, I choose not to test the case gcd(0, 0).
      * The value of such a test would be philosophical rather than practical.
      */
@@ -212,6 +218,18 @@ public class NumberTheoreticFunctionsCalculatorTest {
             result = NumberTheoreticFunctionsCalculator.euclideanGCD(i, i + 2);
             assertEquals(expResult, result);
         }
+        // And now some of the same tests again but with the long data type
+        long expResultLong = 1;
+        long resultLong;
+        for (long j = Integer.MAX_VALUE; j < Integer.MAX_VALUE + 32; j++) {
+            resultLong = NumberTheoreticFunctionsCalculator.euclideanGCD(j, j + 1);
+            assertEquals(expResultLong, resultLong);
+        }
+        expResultLong = 2;
+        for (long j = Integer.MAX_VALUE; j < Integer.MAX_VALUE + 32; j += 2) {
+            resultLong = NumberTheoreticFunctionsCalculator.euclideanGCD(j, j + 2);
+            assertEquals(expResultLong, resultLong);
+        }
     }
     
     /**
@@ -220,8 +238,10 @@ public class NumberTheoreticFunctionsCalculatorTest {
     @Test
     public void testRandomNegativeSquarefreeNumber() {
         System.out.println("randomNegativeSquarefreeNumber");
-        int potentialNegRanSqFreeNum = NumberTheoreticFunctionsCalculator.randomNegativeSquarefreeNumber(SLOANES_OEIS_A000040[SLOANES_OEIS_A000040.length - 1] * SLOANES_OEIS_A000040[SLOANES_OEIS_A000040.length - 1]);
+        int testBound = SLOANES_OEIS_A000040[SLOANES_OEIS_A000040.length - 1] * SLOANES_OEIS_A000040[SLOANES_OEIS_A000040.length - 1];
+        int potentialNegRanSqFreeNum = NumberTheoreticFunctionsCalculator.randomNegativeSquarefreeNumber(testBound);
         System.out.println("Function came up with this pseudorandom number: " + potentialNegRanSqFreeNum);
+        // Check that the pseudorandom number is indeed squarefree
         double squaredPrime, ranNumDiv, flooredRanNumDiv;
         for (int i = 0; i < SLOANES_OEIS_A000040.length; i++) {
             squaredPrime = SLOANES_OEIS_A000040[i] * SLOANES_OEIS_A000040[i];
@@ -231,6 +251,9 @@ public class NumberTheoreticFunctionsCalculatorTest {
             assertFalse(ranNumDiv == flooredRanNumDiv);
         }
         System.out.println();
+        // And lastly, check that it is at least the negated test bound but not more than or equal to 0
+        assertFalse(potentialNegRanSqFreeNum < (-1) * testBound);
+        assertTrue(potentialNegRanSqFreeNum < 0);
     }
     
 }

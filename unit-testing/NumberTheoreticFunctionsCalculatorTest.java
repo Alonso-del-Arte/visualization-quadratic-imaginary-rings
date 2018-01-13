@@ -131,7 +131,8 @@ public class NumberTheoreticFunctionsCalculatorTest {
     public void testIsPrime() {
         System.out.println("isPrime");
         // assertFalse(NumberTheoreticFunctionsCalculator.isPrime(0));
-        for (int i = 0; i < SLOANES_OEIS_A000040.length; i++) {
+        int A40Len = SLOANES_OEIS_A000040.length;
+        for (int i = 0; i < A40Len; i++) {
             assertTrue(NumberTheoreticFunctionsCalculator.isPrime(SLOANES_OEIS_A000040[i]));
             assertTrue(NumberTheoreticFunctionsCalculator.isPrime(-SLOANES_OEIS_A000040[i]));
         }
@@ -139,8 +140,27 @@ public class NumberTheoreticFunctionsCalculatorTest {
             assertFalse(NumberTheoreticFunctionsCalculator.isPrime(SLOANES_OEIS_A018252[j]));
             assertFalse(NumberTheoreticFunctionsCalculator.isPrime(-SLOANES_OEIS_A018252[j]));
         }
+        // Now we're going to test odd integers greater than the last prime listed in the SLOANES_OEIS_A000040 array but smaller than the square root of that prime.
+        int maxNumForTest = SLOANES_OEIS_A000040[A40Len - 1] * SLOANES_OEIS_A000040[A40Len - 1];
+        int primeIndex = 1; // Which of course corresponds to 3, not 2, in a zero-indexed array
+        boolean possiblyPrime = true; // Presume k to be prime until finding otherwise
+        for (int k = SLOANES_OEIS_A000040[A40Len - 1] + 2; k < maxNumForTest; k += 2) {
+            while (primeIndex < A40Len && possiblyPrime) {
+                possiblyPrime = (k % SLOANES_OEIS_A000040[primeIndex] != 0);
+                primeIndex++;
+            }
+            if (possiblyPrime) {
+                assertTrue(NumberTheoreticFunctionsCalculator.isPrime(k));
+                assertTrue(NumberTheoreticFunctionsCalculator.isPrime(-k));
+            } else {
+                assertFalse(NumberTheoreticFunctionsCalculator.isPrime(k));
+                assertFalse(NumberTheoreticFunctionsCalculator.isPrime(-k));
+            }
+            primeIndex = 1; // Reset for next k
+            possiblyPrime = true; // Reset for next k
+        }
     }
-
+    
     /**
      * Test of isSquareFree method, of class NumberTheoreticFunctionsCalculator.
      */

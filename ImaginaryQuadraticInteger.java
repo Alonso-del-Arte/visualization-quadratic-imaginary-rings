@@ -710,7 +710,20 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * Class constructor
+     * Alternative object constructor, may be used when the denominator is known to be 1.
+     * @param a The real part of the imaginary quadratic integer.
+     * @param b The part to be multiplied by sqrt(d).
+     * @param R The ring to which this algebraic integer belongs to.
+     */
+    public ImaginaryQuadraticInteger(int a, int b, ImaginaryQuadraticRing R) {
+        this.realPartMult = a;
+        this.imagPartMult = b;
+        this.imagQuadRing = R;
+        this.denominator = 1;
+    }
+    
+    /**
+     * Primary object constructor.
      * @param a The real part of the imaginary quadratic integer, multiplied by 2 when applicable.
      * @param b The part to be multiplied by sqrt(d), multiplied by 2 when applicable.
      * @param R The ring to which this algebraic integer belongs to.

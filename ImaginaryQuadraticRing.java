@@ -27,22 +27,22 @@ public class ImaginaryQuadraticRing {
     /**
      * Ought to be a squarefree negative integer.
      */
-    protected int negRad;
+    protected final int negRad;
     
     /**
      * A convenient holder for the absolute value of negRad.
      */
-    protected int absNegRad;
+    protected final int absNegRad;
     
     /**
      * A convenient holder for the square root of the absNegRad.
      */
-    protected double absNegRadSqrt;
+    protected final double absNegRadSqrt;
     
     /**
      * Should be true only if negRad is congruent to 1 modulo 4.
      */
-    protected boolean d1mod4;
+    protected final boolean d1mod4;
     
     private static boolean preferenceForBlackboardBold = true;
     

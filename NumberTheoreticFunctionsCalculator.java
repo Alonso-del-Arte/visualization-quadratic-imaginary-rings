@@ -23,20 +23,22 @@ import java.util.Random;
 import java.util.Scanner;
 
 /**
- * A collection of number theoretic functions, including basic primality testing and the Euclidean GCD algorithm.
+ * A collection of number theoretic functions, including basic primality testing 
+ * and the Euclidean GCD algorithm.
  * @author Alonso del Arte
  */
 public class NumberTheoreticFunctionsCalculator {
     
     /**
-     * Determines the prime factors of a given number.
-     * Uses simple trial division with only basic optimization.
+     * Determines the prime factors of a given number. Uses simple trial 
+     * division with only basic optimization.
      * @param num The integer for which to determine prime factors of.
-     * @return A list of the prime factors, with some factors repeated as needed.
-     * For example, given num = 44100, the resulting list should be 2, 2, 3, 3, 5, 5, 7, 7.
-     * The factorization of 0 is given as just 0.
-     * For a negative number, the factorization starts with -1 followed by the factorization of its positive counterpart.
-     * For example, given num = -44100, the resulting list should be -1, 2, 2, 3, 3, 5, 5, 7, 7.
+     * @return A list of the prime factors, with some factors repeated as 
+     * needed. For example, given num = 44100, the resulting list should be 2, 
+     * 2, 3, 3, 5, 5, 7, 7. The factorization of 0 is given as just 0. For a 
+     * negative number, the factorization starts with -1 followed by the 
+     * factorization of its positive counterpart. For example, given num = 
+     * -44100, the resulting list should be -1, 2, 2, 3, 3, 5, 5, 7, 7.
      */
     public static List<Integer> primeFactors(int num) {
         
@@ -66,14 +68,16 @@ public class NumberTheoreticFunctionsCalculator {
     }
     
     /**
-     * Determines whether a given number is prime or not.
-     * The numbers 0, -1, 1, -2, 2 are treated as special cases.
-     * For all others, the function searches only for the least prime factor.
-     * If the least prime factor is found to be unequal to the absolute value of the number, the function reports the number as composite and returns to the caller.
-     * Still, the function is open to optimization.
+     * Determines whether a given number is prime or not. The numbers 0, -1, 1, 
+     * -2, 2 are treated as special cases. For all others, the function searches 
+     * only for the least prime factor. If the least prime factor is found to be 
+     * unequal to the absolute value of the number, the function reports the 
+     * number as composite and returns to the caller. Still, the function is 
+     * open to optimization.
      * @param num The number to be tested for primality.
      * @return true if the number is prime (even if negative), false otherwise.
-     * For example, -2 and 47 should each return true, -25, 0 and 91 should each return false.
+     * For example, -2 and 47 should each return true, -25, 0 and 91 should each 
+     * return false.
      */
     public static boolean isPrime(int num) {
         
@@ -105,8 +109,10 @@ public class NumberTheoreticFunctionsCalculator {
      * Determines whether a given number is squarefree or not.
      * @param num The number to be tested for being squarefree.
      * @return true if the number is squarefree, false otherwise.
-     * For example, -3 and 7 should each return true, -4, 0 and 25 should each return false.
-     * Note that 1 is considered squarefree. Therefore, for num = 1, this function should return true.
+     * For example, -3 and 7 should each return true, -4, 0 and 25 should each 
+     * return false.
+     * Note that 1 is considered squarefree. Therefore, for num = 1, this 
+     * function should return true.
      */
     public static boolean isSquareFree(int num) {
         
@@ -132,9 +138,10 @@ public class NumberTheoreticFunctionsCalculator {
     /**
      * Computes the M\u00F6bius function \u03BC for a given integer.
      * @param num The integer for which to compute the M\u00F6bius function.
-     * @return 1 if num is squarefree with an even number of prime factors, -1 if num is squarefree with an odd number of prime factors, 0 if num is not squarefree.
-     * Since -1 is a unit, not a prime, \u03BC(-n) = \u03BC(n).
-     * For example, \u03BC(31) = -1, \u03BC(32) = 0 and \u03BC(33) = 1.
+     * @return 1 if num is squarefree with an even number of prime factors, -1 
+     * if num is squarefree with an odd number of prime factors, 0 if num is not 
+     * squarefree. Since -1 is a unit, not a prime, \u03BC(-n) = \u03BC(n). For 
+     * example, \u03BC(31) = -1, \u03BC(32) = 0 and \u03BC(33) = 1.
      */
     public static byte moebiusMu(int num) {
         
@@ -160,12 +167,17 @@ public class NumberTheoreticFunctionsCalculator {
     }
     
     /**
-     * Computes the greatest common divisor (GCD) of two purely real integers by using the Euclidean algorithm.
-     * @param a One of the two integers. May be negative, need not be greater than the other.
-     * @param b One of the two integers. May be negative, need not be smaller than the other.
+     * Computes the greatest common divisor (GCD) of two purely real integers by 
+     * using the Euclidean algorithm.
+     * @param a One of the two integers. May be negative, need not be greater 
+     * than the other.
+     * @param b One of the two integers. May be negative, need not be smaller 
+     * than the other.
      * @return The GCD as an integer.
-     * If one of a or b is 0 and the other is nonzero, the result will be the nonzero number.
-     * If both a and b are 0, then the result will be 0, which is perhaps technically wrong, but I think it's good enough for the purpose here.
+     * If one of a or b is 0 and the other is nonzero, the result will be the 
+     * nonzero number.
+     * If both a and b are 0, then the result will be 0, which is perhaps 
+     * technically wrong, but I think it's good enough for the purpose here.
      */
     public static int euclideanGCD(int a, int b) {
         int currA, currB, currRemainder;
@@ -188,12 +200,16 @@ public class NumberTheoreticFunctionsCalculator {
     }
 
     /**
-     * Computes the greatest common divisor (GCD) of two purely real integers by using the Euclidean algorithm.
-     * @param a One of the two integers. May be negative, need not be greater than the other.
-     * @param b One of the two integers. May be negative, need not be smaller than the other.
-     * @return The GCD as an integer.
-     * If one of a or b is 0 and the other is nonzero, the result will be the nonzero number.
-     * If both a and b are 0, then the result will be 0, which is perhaps technically wrong, but I think it's good enough for the purpose here.
+     * Computes the greatest common divisor (GCD) of two purely real integers by 
+     * using the Euclidean algorithm.
+     * @param a One of the two integers. May be negative, need not be greater 
+     * than the other.
+     * @param b One of the two integers. May be negative, need not be smaller 
+     * than the other.
+     * @return The GCD as an integer. If one of a or b is 0 and the other is 
+     * nonzero, the result will be the nonzero number. If both a and b are 0, 
+     * then the result will be 0, which is perhaps technically wrong, but I 
+     * think it's good enough for the purpose here.
      */
     public static long euclideanGCD(long a, long b) {
         long currA, currB, currRemainder;
@@ -216,15 +232,28 @@ public class NumberTheoreticFunctionsCalculator {
     }
 
     /**
-     * Computes the greatest common divisor (GCD) of two imaginary quadratic integers by using the Euclidean algorithm.
-     * WARNING: I have not yet written a test for this function yet, so for now I can't guarantee that it works correctly, or at all.
-     * @param a One of the two imaginary quadratic integers. Need not have greater norm than the other.
-     * @param b One of the two imaginary quadratic integers. Need not have smaller norm than the other.
+     * Computes the greatest common divisor (GCD) of two imaginary quadratic 
+     * integers by using the Euclidean algorithm. WARNING: I have not yet 
+     * written a test for this function yet, so for now I can't guarantee that 
+     * it works correctly, or at all.
+     * @param a One of the two imaginary quadratic integers. Need not have 
+     * greater norm than the other.
+     * @param b One of the two imaginary quadratic integers. Need not have 
+     * smaller norm than the other.
      * @return The GCD.
-     * @throws AlgebraicDegreeOverflowException If the algebraic integers come from different quadratic rings, the GCD might be a number from a ring of degree 4 or higher. This may or may not be the case (quite likely the two algebraic integers will be coprime and so the answer is just good old 1); the function assumes that the GCD can't be calculated using the Euclidean algorithm and throws this checked exception.
-     * @throws NonEuclideanDomainException If the algebraic integers come from any imaginary quadratic ring other than Z[i], Z[sqrt(-2)], Z[omega], O_Q(sqrt(-7)) or O_Q(sqrt(-11)), the function assumes the Euclidean GCD algorithm will fail without even trying, and throws this checked exception.
-     * However, for some pairs drawn from a non-Euclidean domain, the Euclidean GCD algorithm might nevertheless work.
-     * For this reason, the exception has the method tryEuclideanGCDAnyway().
+     * @throws AlgebraicDegreeOverflowException If the algebraic integers come 
+     * from different quadratic rings, the GCD might be a number from a ring of 
+     * degree 4 or higher. This may or may not be the case (quite likely the two 
+     * algebraic integers will be coprime and so the answer is just good old 1); 
+     * the function assumes that the GCD can't be calculated using the Euclidean 
+     * algorithm and throws this checked exception.
+     * @throws NonEuclideanDomainException If the algebraic integers come from 
+     * any imaginary quadratic ring other than Z[i], Z[sqrt(-2)], Z[omega], 
+     * O_Q(sqrt(-7)) or O_Q(sqrt(-11)), the function assumes the Euclidean GCD 
+     * algorithm will fail without even trying, and throws this checked 
+     * exception. However, for some pairs drawn from a non-Euclidean domain, the 
+     * Euclidean GCD algorithm might nevertheless work. For this reason, the 
+     * exception has (will have) the method tryEuclideanGCDAnyway().
      */
     public static ImaginaryQuadraticInteger euclideanGCD(ImaginaryQuadraticInteger a, ImaginaryQuadraticInteger b) throws AlgebraicDegreeOverflowException, NonEuclideanDomainException {
         if (((a.imagPartMult != 0) && (b.imagPartMult != 0)) && (a.imagQuadRing.negRad != b.imagQuadRing.negRad)) {
@@ -274,7 +303,9 @@ public class NumberTheoreticFunctionsCalculator {
     
     /**
      * Provides a pseudorandom negative squarefree integer.
-     * @param bound The lowest number desired (but may use a positive integer). For example, for a pseudorandom squarefree number between -97 and -1, you can pass -100 or 100.
+     * @param bound The lowest number desired (but may use a positive integer). 
+     * For example, for a pseudorandom squarefree number between -97 and -1, you 
+     * can pass -100 or 100.
      * @return A pseudorandom negative squarefree integer.
      */
     public static int randomNegativeSquarefreeNumber(int bound) {
@@ -291,7 +322,8 @@ public class NumberTheoreticFunctionsCalculator {
     }
     
     /**
-     * A console program for testing the number theoretic functions with user inputs.
+     * A console program for testing the number theoretic functions with user 
+     * inputs.
      * @param args the command line arguments
      */
     public static void main(String[] args) {

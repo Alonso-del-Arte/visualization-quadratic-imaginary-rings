@@ -24,72 +24,96 @@ import java.util.List;
 import java.util.ArrayList;
 
 /**
- * A Swing component in which to display diagrams of prime numbers in various quadratic integer rings.
+ * A Swing component in which to display diagrams of prime numbers in various 
+ * quadratic integer rings.
  * @author Alonso del Arte
  */
 public final class RingWindowDisplay extends JPanel implements ActionListener, MouseMotionListener {
     
     /**
-     * The default number of pixels per unit interval. The protected variable pixelsPerUnitInterval is initialized to this value.
+     * The default number of pixels per unit interval. The protected variable 
+     * pixelsPerUnitInterval is initialized to this value.
      */
     public static final int DEFAULT_PIXELS_PER_UNIT_INTERVAL = 40;
     
     /**
-     * The minimum pixels per unit interval. Trying to set pixels per unit interval below this value will cause an exception.
+     * The minimum pixels per unit interval. Trying to set pixels per unit 
+     * interval below this value will cause an exception.
      */
     public static final int MINIMUM_PIXELS_PER_UNIT_INTERVAL = 2;
     
     /**
-     * The minimum pixels per unit interval for which the program will draw grids.
+     * The minimum pixels per unit interval for which the program will draw 
+     * grids.
      */
     private static final int MINIMUM_PIXELS_PER_UNIT_INTERVAL_TO_DRAW_GRIDS = 5;
     
     /**
-     * The maximum pixels per unit interval. Even on an 8K display, this value might be much too large. Trying to set pixels per unit interval above this value will cause an exception.
+     * The maximum pixels per unit interval. Even on an 8K display, this value 
+     * might be much too large. Trying to set pixels per unit interval above 
+     * this value will cause an exception.
      */
     public static final int MAXIMUM_PIXELS_PER_UNIT_INTERVAL = 6400;
     
     /**
-     * The minimum horizontal pixel dimension for the canvas in which to draw the diagram.
-     * This should be small even on moderately obsolete mobile devices.
+     * The minimum horizontal pixel dimension for the canvas in which to draw 
+     * the diagram. This should be small even on moderately obsolete mobile 
+     * devices.
      */
     public static final int RING_CANVAS_HORIZ_MIN = 100;
     
     /**
-     * The minimum vertical pixel dimension for the canvas in which to draw the diagram.
-     * This should be small even on moderately obsolete mobile devices.
+     * The minimum vertical pixel dimension for the canvas in which to draw the 
+     * diagram. This should be small even on moderately obsolete mobile devices.
      */
     public static final int RING_CANVAS_VERTIC_MIN = 178;
     
     /**
-     * The default horizontal pixel dimension for the canvas in which to draw the diagram.
-     * This fills up most of the screen on a 1440 by 900 (16:10 aspect ration) display.
+     * The default horizontal pixel dimension for the canvas in which to draw 
+     * the diagram. This fills up most of the screen on a 1440 by 900 (16:10 
+     * aspect ration) display.
      */
     public static final int RING_CANVAS_DEFAULT_HORIZ_MAX = 1280;
     
     /**
-     * The default vertical pixel dimension for the canvas in which to draw the diagram.
-     * This fills up most of the screen on a 1440 by 900 (16:10 aspect ration) display.
+     * The default vertical pixel dimension for the canvas in which to draw the 
+     * diagram. This fills up most of the screen on a 1440 by 900 (16:10 aspect 
+     * ratio) display.
      */
     public static final int RING_CANVAS_DEFAULT_VERTIC_MAX = 720;
     
     /**
-     * The number to determine which imaginary quadratic integer ring diagram will be shown at start-up.
-     * This constant corresponds to the ring of Gaussian integers.
+     * The number to determine which imaginary quadratic integer ring diagram 
+     * will be shown at start-up. This constant corresponds to the ring of 
+     * Gaussian integers.
      */
     public static final int DEFAULT_RING_D = -1;
     
     /**
-     * The minimum integer the square root of which can be used to generate an imaginary quadratic integer ring for the purpose of display in this ring window.
-     * Although technically an ImaginaryQuadraticRing can be defined with the square root of -2147483647 (which is a prime number), this would quickly lead to arithmetic overflow problems.
-     * Hopefully this value of -67108863 = (-1) * 3 * 2371 * 8191 is "small" enough not to cause arithmetic overflow problems with the largest zoom out setting, but "large" enough to be of no interest to most users of this program.
-     * That hope was dashed during unit testing of ImaginaryQuadraticInteger.divides().
-     * I now hope that the prime -8191 meets these requirements.
+     * The minimum integer the square root of which can be used to generate an 
+     * imaginary quadratic integer ring for the purpose of display in this ring 
+     * window. Although technically an ImaginaryQuadraticRing can be defined 
+     * with the square root of -2147483647 (which is a prime number), this would 
+     * quickly lead to arithmetic overflow problems. Hopefully this value of 
+     * 8191 (also a prime) is "small" enough not to cause arithmetic overflow 
+     * problems with the largest zoom out setting, but "large" enough to be of 
+     * no interest to most users of this program.
      */
     public static final int MINIMUM_RING_D = -8191;
     
+    /**
+     * The default pixel radius for the dots in the diagram.
+     */
     public static final int DEFAULT_DOT_RADIUS = 5;
+    
+    /**
+     * The minimum pixel radius for the dots in the diagram.
+     */
     public static final int MINIMUM_DOT_RADIUS = 1;
+    
+    /**
+     * The maximum pixel radius for the dots in the diagram.
+     */
     public static final int MAXIMUM_DOT_RADIUS = 128;
     
     public static final int DEFAULT_ZOOM_INTERVAL = 5;
@@ -115,15 +139,18 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     public static final Color DEFAULT_UNIT_COLOR = Color.WHITE;
     
     /**
-     * The color for primes believed to be inert.
-     * If a prime does split but its prime factors are not in the current diagram view, the program is unaware of them.
-     * Though I have yet to think of a single example where it might actually be the case that the program erroneously identifies a prime as inert.
+     * The color for primes believed to be inert. If a prime does split but its 
+     * prime factors are not in the current diagram view, the program is unaware 
+     * of them. Though I have yet to think of a single example where it might 
+     * actually be the case that the program erroneously identifies a prime as 
+     * inert.
      */
     public static final Color DEFAULT_INERT_PRIME_COLOR = Color.CYAN;
     
     /**
      * The primes confirmed split.
-     * If a prime's splitting factors are in the current diagram view, the program uses this color for the split prime.
+     * If a prime's splitting factors are in the current diagram view, the 
+     * program uses this color for the split prime.
      */
     public static final Color DEFAULT_SPLIT_PRIME_COLOR = Color.BLUE;
     
@@ -139,12 +166,17 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     public static final int DEFAULT_READOUT_FIELD_COLUMNS = 20;
     
     /**
-     * The maximum number of previous discriminants the program will remember for history in any given run.
+     * The maximum number of previous discriminants the program will remember 
+     * for history in any given run.
      */
     public static final int MAXIMUM_HISTORY_ITEMS = 128;
     
     /**
-     * The actual pixels per unit interval setting, should be initialized to DEFAULT_PIXELS_PER_UNIT_INTERVAL in the constructor. Use setPixelsPerUnitInterval(int pixelLength) to change, making sure pixelLength is greater than or equal to MINIMUM_PIXELS_PER_UNIT_INTERVAL but less than or equal to MAXIMUM_PIXELS_PER_UNIT_INTERVAL.
+     * The actual pixels per unit interval setting, should be initialized to 
+     * DEFAULT_PIXELS_PER_UNIT_INTERVAL in the constructor. Use 
+     * setPixelsPerUnitInterval(int pixelLength) to change, making sure 
+     * pixelLength is greater than or equal to MINIMUM_PIXELS_PER_UNIT_INTERVAL 
+     * but less than or equal to MAXIMUM_PIXELS_PER_UNIT_INTERVAL.
      */
     protected int pixelsPerUnitInterval;
     protected ImaginaryQuadraticRing imagQuadRing;
@@ -152,8 +184,10 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     protected int pixelsPerBasicImaginaryInterval;
     
     /**
-     * When imagQuadRing.d1mod4 is true, some users may prefer to see "half-integers" notated with theta notation rather than fractions with 2s for denominators.
-     * With this preference turned on and d = -3, omega will be used rather than theta.
+     * When imagQuadRing.d1mod4 is true, some users may prefer to see 
+     * "half-integers" notated with theta notation rather than fractions with 2s 
+     * for denominators. With this preference turned on and d = -3, omega will 
+     * be used rather than theta.
      * omega = -1/2 + sqrt(-3)/2.
      * theta = 1/2 + sqrt(d)/2.
      */
@@ -456,8 +490,13 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
 
     /**
-     * Change how many pixels there are per unit interval. Also concomitantly changes how many pixels there are per basic imaginary interval.
-     * @param pixelLength An integer greater than or equal to MINIMUM_PIXELS_PER_UNIT_INTERVAL but less than or equal to MAXIMUM_PIXELS_PER_UNIT_INTERVAL. A value outside of this range will cause an IllegalArgumentException.
+     * Change how many pixels there are per unit interval. Also concomitantly 
+     * changes how many pixels there are per basic imaginary interval.
+     * @param pixelLength An integer greater than or equal to 
+     * MINIMUM_PIXELS_PER_UNIT_INTERVAL but less than or equal to 
+     * MAXIMUM_PIXELS_PER_UNIT_INTERVAL.
+     * @throws IllegalArgumentException If pixelLength is outside the range 
+     * specified above.
      */
     public void setPixelsPerUnitInterval(int pixelLength) {
         if (pixelLength < MINIMUM_PIXELS_PER_UNIT_INTERVAL) {
@@ -475,9 +514,16 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     /**
-     * Function to change the size of the canvas on which the ring diagrams are drawn. I have not completely thought this one through, and I certainly haven't tested it.
-     * @param newHorizMax The new width of the ring window. This needs to be at least equal to RING_CANVAS_HORIZ_MIN.
-     * @param newVerticMax The new height of the ring window. This needs to be at least equal to RING_CANVAS_VERTIC_MIN.
+     * Function to change the size of the canvas on which the ring diagrams are 
+     * drawn. I have not completely thought this one through, and I certainly 
+     * haven't tested it.
+     * @param newHorizMax The new width of the ring window. This needs to be at 
+     * least equal to RING_CANVAS_HORIZ_MIN.
+     * @param newVerticMax The new height of the ring window. This needs to be 
+     * at least equal to RING_CANVAS_VERTIC_MIN.
+     * @throws IllegalArgumentException If either newHorizMax is less than 
+     * RING_CANVAS_HORIZ_MIN or newVerticMax is less than 
+     * RING_CANVAS_VERTIC_MIN.
      */
     public void changeRingWindowDimensions(int newHorizMax, int newVerticMax) {
         if (newHorizMax < RING_CANVAS_HORIZ_MIN || newVerticMax < RING_CANVAS_VERTIC_MIN) {
@@ -489,7 +535,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     
     /**
      * Function to change the background color. I have not tested this one yet.
-     * @param newBackgroundColor Preferably a color that will contrast nicely with the foreground points but which the grids can blend into.
+     * @param newBackgroundColor Preferably a color that will contrast nicely 
+     * with the foreground points but which the grids can blend into.
      */
     public void changeBackgroundColor(Color newBackgroundColor) {
         this.backgroundColor = newBackgroundColor;
@@ -497,8 +544,12 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     
     /**
      * Function to change the grid colors.
-     * @param newHalfIntegerGridColor Applicable only when this.imagQuadRing.d1mod4 is true. In choosing this color, keep in mind that, when applicable, the "half-integer" grid is drawn first.
-     * @param newIntegerGridColor In choosing this color, keep in mind that, when applicable, the "full" integer grid is drawn second, after the "half-integer" grid.
+     * @param newHalfIntegerGridColor Applicable only when 
+     * this.imagQuadRing.d1mod4 is true. In choosing this color, keep in mind 
+     * that, when applicable, the "half-integer" grid is drawn first.
+     * @param newIntegerGridColor In choosing this color, keep in mind that, 
+     * when applicable, the "full" integer grid is drawn second, after the 
+     * "half-integer" grid.
      */
     public void changeGridColors(Color newHalfIntegerGridColor, Color newIntegerGridColor) {
         this.halfIntegerGridColor = newHalfIntegerGridColor;
@@ -507,10 +558,13 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      /**
      * Function to change the colors of the points.
      * @param newZeroColor The color for the point 0.
-     * @param newUnitColor The color for the units. In most imaginary quadratic rings, this color will only be used for -1 and 1.
-     * @param newInertPrimeColor The color for inert primes, or at least primes having no splitting or ramifying factors in view.
+     * @param newUnitColor The color for the units. In most imaginary quadratic 
+     * rings, this color will only be used for -1 and 1.
+     * @param newInertPrimeColor The color for inert primes, or at least primes 
+     * having no splitting or ramifying factors in view.
      * @param newSplitPrimeColor The color for confirmed split primes.
-     * @param newRamifiedPrimeColor The color for primes that are factors of the discriminant.
+     * @param newRamifiedPrimeColor The color for primes that are factors of the 
+     * discriminant.
      */
     public void changePointColors(Color newZeroColor, Color newUnitColor, Color newInertPrimeColor, Color newSplitPrimeColor, Color newRamifiedPrimeColor) {
         this.zeroColor = newZeroColor;
@@ -522,7 +576,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
    
     /**
      * Function to change the dot radius.
-     * @param newDotRadius Needs to be at least MINIMUM_DOT_RADIUS pixels, or else an IllegalArgumentException will be triggered.
+     * @param newDotRadius Needs to be at least MINIMUM_DOT_RADIUS pixels.
+     * @throws IllegalArgumentException If newDotRadius is less than 
+     * MINIMUM_DOT_RADIUS.
      */
     public void changeDotRadius(int newDotRadius) {
         boolean dotRadiusOutOfBounds = false;
@@ -550,7 +606,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     
     /**
      * Function to change the zoom interval.
-     * @param newZoomInterval Needs to be at least MINIMUM_ZOOM_INTERVAL pixels, or else an IllegalArgumentException will be triggered.
+     * @param newZoomInterval Needs to be at least MINIMUM_ZOOM_INTERVAL pixels. 
+     * @throws IllegalArgumentException If newZoomInterval is less than 
+     * MINIMUM_ZOOM_INTERVAL.
      */
     public void changeZoomInterval(int newZoomInterval) {
         boolean zoomIntervalOutOfBounds = false;
@@ -576,7 +634,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     /**
-     * Function to change the coordinates of the point 0. I have not yet implemented a meaningful use for this function.
+     * Function to change the coordinates of the point 0. I have not yet 
+     * implemented a meaningful use for this function.
      * @param newCoordX The new x-coordinate for 0.
      * @param newCoordY The new y-coordinate for 0.
      */
@@ -601,8 +660,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     /**
-     * Function to determine mouse position on the diagram and update readouts accordingly.
-     * @param mauv 
+     * Function to determine mouse position on the diagram and update readouts 
+     * accordingly.
+     * @param mauv A MouseEvent object with the relevant information.
      */
     @Override
     public void mouseMoved(MouseEvent mauv) {
@@ -637,7 +697,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     /**
-     * No implementation for time being. Hope to add the capability to drag the diagram in a future version.
+     * No implementation for time being. Hope to add the capability to drag the 
+     * diagram in a future version.
      * @param mauv Mouse event to respond to.
      */
     @Override
@@ -677,9 +738,11 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     /**
-     * Function to ask user to enter a new, negative, squarefree integer for the discriminant of a ring to diagram primes in.
-     * If the user enters a positive integer, the number will be multiplied by -1.
-     * And if that number is not squarefree, the function looks for the next lower squarefree number, taking care not to go below MINIMUM_RING_D.
+     * Function to ask user to enter a new, negative, squarefree integer for the 
+     * discriminant of a ring to diagram primes in. If the user enters a 
+     * positive integer, the number will be multiplied by -1. And if that number 
+     * is not squarefree, the function looks for the next lower squarefree 
+     * number, taking care not to go below MINIMUM_RING_D.
      */
     public void chooseDiscriminant() {
         String discrString = Integer.toString(this.imagQuadRing.negRad);
@@ -721,8 +784,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
 
     /**
-     * Function to choose for discriminant the next higher negative squarefree integer.
-     * If this brings us up to -1, then the "Increase discriminant" menu item is disabled.
+     * Function to choose for discriminant the next higher negative squarefree 
+     * integer. If this brings us up to -1, then the "Increase discriminant" 
+     * menu item is disabled.
      */
     public void incrementDiscriminant() {
         int discr = this.imagQuadRing.negRad + 1;
@@ -740,8 +804,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
 
     /**
-     * Function to choose for discriminant the next lower negative squarefree integer.
-     * If this brings us down to MINIMUM_RING_D, then the "Decrease discriminant" menu item is disabled.
+     * Function to choose for discriminant the next lower negative squarefree 
+     * integer. If this brings us down to MINIMUM_RING_D, then the "Decrease 
+     * discriminant" menu item is disabled.
      */
     public void decrementDiscriminant() {
         int discr = this.imagQuadRing.negRad - 1;
@@ -787,7 +852,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     /**
-     * Copies the readouts of the algebraic integer, trace, norm and polynomial to the clipboard.
+     * Copies the readouts of the algebraic integer, trace, norm and polynomial 
+     * to the clipboard.
      */
     public void copyReadoutsToClipboard() {
         String agregReadouts = mouseIQI.toString();
@@ -800,7 +866,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     /**
-     * Checks whether the Zoom in and Zoom out menu items are enabled or not, and whether they should be, enabling them or disabling them as needed.
+     * Checks whether the Zoom in and Zoom out menu items are enabled or not, 
+     * and whether they should be, enabling them or disabling them as needed.
      */
     private void checkViewMenuEnablements() {
         if (this.zoomInMenuItem.isEnabled() && (this.pixelsPerUnitInterval > (MAXIMUM_PIXELS_PER_UNIT_INTERVAL - zoomInterval))) {
@@ -818,8 +885,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     /**
-     * Function to zoom in on the diagram.
-     * This is done by reducing pixelsPerUnitInterval by zoomInterval.
+     * Function to zoom in on the diagram. This is done by reducing 
+     * pixelsPerUnitInterval by zoomInterval and calling repaint().
      */
     public void zoomIn() {
         int newPixelsPerUnitInterval = this.pixelsPerUnitInterval + this.zoomInterval;
@@ -836,8 +903,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     /**
-     * Function to zoom out on the diagram.
-     * This is done by increasing pixelsPerUnitInterval by zoomInterval.
+     * Function to zoom out on the diagram. This is done by increasing 
+     * pixelsPerUnitInterval by zoomInterval and calling repaint().
      */
     public void zoomOut() {
         int newPixelsPerUnitInterval = this.pixelsPerUnitInterval - this.zoomInterval;
@@ -859,8 +926,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     /**
-     * Function to decrease the zoom interval.
-     * The zoom interval is decremented by 1, taking care that it not become less than MINIMUM_ZOOM_INTERVAL.
+     * Function to decrease the zoom interval. The zoom interval is decremented 
+     * by 1, taking care that it not become less than MINIMUM_ZOOM_INTERVAL.
      */
     public void decreaseZoomInterval() {
         int newZoomInterval = this.zoomInterval - 1;
@@ -882,8 +949,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
 
     /**
-     * Function to increase the zoom interval.
-     * The zoom interval is incremented by 1, taking care that it not become more than MAXIMUM_ZOOM_INTERVAL.
+     * Function to increase the zoom interval. The zoom interval is incremented 
+     * by 1, taking care that it not become more than MAXIMUM_ZOOM_INTERVAL.
      */
     public void increaseZoomInterval() {
         int newZoomInterval = this.zoomInterval + 1;
@@ -934,7 +1001,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     
     /**
      * Function to reset pixels per unit interval, dot radius and zoom interval.
-     * This does not change the discriminant, nor whether or not readouts are updated, nor the preference for theta notation.
+     * This does not change the discriminant, nor whether or not readouts are 
+     * updated, nor the preference for theta notation.
      */
     public void resetViewDefaults() {
         /* Since the program does not yet allow the user to change colors, the following three lines are for now unnecessary.
@@ -963,15 +1031,17 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     /**
-     * Function to enable or disable the use of theta notation in the readout field for integer when imagQuadRing.d1mod4 is true.
-     * Of course updating of readouts has to be enabled for this to be any of consequence.
+     * Function to enable or disable the use of theta notation in the readout 
+     * field for integer when imagQuadRing.d1mod4 is true. Of course updating of 
+     * readouts has to be enabled for this to be any of consequence.
      */
     public void toggleThetaNotation() {
         this.preferenceForThetaNotation = this.preferThetaNotationMenuItem.isSelected();
     }
     
     /**
-     * Function to enable or disable updating of the readout fields for integer, trace, norm and polynomial.
+     * Function to enable or disable updating of the readout fields for integer, 
+     * trace, norm and polynomial.
      */
     public void toggleReadOutsEnabled() {
         if (this.toggleReadOutsEnabledMenuItem.isSelected()) {
@@ -985,7 +1055,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      * Function to show the About box, a simple MessageDialog from JOptionPage.
      */
     public void showAboutBox() {
-        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.83\n\u00A9 2017 Alonso del Arte");
+        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.831\n\u00A9 2018 Alonso del Arte");
     }
     
     
@@ -1055,7 +1125,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
 
     /**
-     * Set the imaginary quadratic ring for which to draw a window of
+     * Sets the imaginary quadratic ring for which to draw a window of.
      * @param iR The imaginary quadratic integer ring to work in
      */
     private void setRing(ImaginaryQuadraticRing iR) {
@@ -1114,7 +1184,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         decreaseDMenuItem = ringWindowMenu.add(ringWindowMenuItem);
         decreaseDMenuItem.setActionCommand("decrD");
         if (macOSFlag) {
-            decreaseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, maskCtrlCommand));
+            decreaseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_B, maskCtrlCommand));
         } else {
             decreaseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, maskCtrlCommand));
         }
@@ -1157,7 +1227,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         nextDMenuItem = ringWindowMenu.add(ringWindowMenuItem);
         nextDMenuItem.setActionCommand("nextD");
         if (macOSFlag) {
-            nextDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_K, maskCtrlCommand));
+            nextDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_H, maskCtrlCommand));
         } else {
             nextDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, maskCtrlCommand));
         }

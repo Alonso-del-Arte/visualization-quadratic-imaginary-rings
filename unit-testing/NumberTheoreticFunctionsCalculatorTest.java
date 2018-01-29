@@ -33,10 +33,20 @@ import static org.junit.Assert.*;
 public class NumberTheoreticFunctionsCalculatorTest {
     
     /**
-     * The prime numbers listed in <a href="http://oeis.org/A000040">Sloane's A000040</a>.
-     * A lot more primes are listed in the B-file, but these should be sufficient to test isPrime().
+     * setUp() will generate a List of the first few consecutive primes. This 
+     * constant determines how long that list will be.
      */
-    public static final int[] SLOANES_OEIS_A000040 = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271};
+    public static final int PRIME_LIST_SIZE = 1000;
+    
+    /**
+     * A List of the first few prime numbers, to be used in some of the tests.
+     */
+    private static List<Integer> primeList;
+    
+    /**
+     * The size of primeList
+     */
+    private static int primeListLength;
     
     /**
      * The composite numbers, and 1, listed in <a href="http://oeis.org/A018252">Sloane's A018252</a>.
@@ -44,18 +54,64 @@ public class NumberTheoreticFunctionsCalculatorTest {
      */
     public static final int[] SLOANES_OEIS_A018252 = {1, 4, 6, 8, 9, 10, 12, 14, 15, 16, 18, 20, 21, 22, 24, 25, 26, 27, 28, 30, 32, 33, 34, 35, 36, 38, 39, 40, 42, 44, 45, 46, 48, 49, 50, 51, 52, 54, 55, 56, 57, 58, 60, 62, 63, 64, 65, 66, 68, 69, 70, 72, 74, 75, 76, 77, 78, 80, 81, 82, 84, 85, 86, 87, 88};
     
+    /**
+     * A List to be populated with the factors of 44100.
+     * The prime factorization of 44100 is: 2^2 * 3^2 * 5^2 * 7^2.
+     */
     public static List<Integer> factors44100;
+    
+    /**
+     * A List to be populated with the factors of 86436000, a multiple of 44100.
+     * The prime factorization of 86436000 is: 2^5 * 3^2 * 5^3 * 7^4.
+     */
     public static List<Integer> factors86436000;
     
     public NumberTheoreticFunctionsCalculatorTest() {
     }
     
     /**
-     * Sets up an array list of the factors of 44100 and another array list with the factors of 86436000.
-     * The static final fields provide most of everything else needed for the tests.
+     * Sets up a List of the first few consecutive primes, a List of the factors 
+     * of 44100 and another List with the factors of 86436000. The static final 
+     * fields provide most of everything else needed for the tests.
      */
     @BeforeClass
     public static void setUpClass() {
+        /* First, to generate a list of the first few consecutive primes, using 
+        the sieve of Eratosthenes. */
+        int threshold, halfThreshold;
+        if (PRIME_LIST_SIZE < 0) {
+            threshold = (-1) * PRIME_LIST_SIZE;
+        } else {
+            threshold = PRIME_LIST_SIZE;
+        }
+        if (threshold % 2 == 1) {
+            halfThreshold = (threshold + 1)/2;
+        } else {
+            halfThreshold = threshold/2;
+        }
+        primeList = new ArrayList<>();
+        primeList.add(2); // Add 2 as a special case
+        boolean[] primeFlags = new boolean[halfThreshold];
+        for (int i = 0; i < halfThreshold; i++) {
+            primeFlags[i] = true; // Presume all odd numbers prime for now
+        }
+        int currPrime = 3;
+        int twiceCurrPrime, currIndex;
+        while (currPrime < threshold) {
+            primeList.add(currPrime);
+            twiceCurrPrime = 2 * currPrime;
+            for (int j = currPrime * currPrime; j < threshold; j += twiceCurrPrime) {
+                currIndex = (j - 3)/2;
+                primeFlags[currIndex] = false;
+            }
+            do {
+                currPrime += 2;
+                currIndex = (currPrime - 3)/2;
+            } while (currIndex < (halfThreshold - 1) && primeFlags[currIndex] == false);
+        }
+        primeListLength = primeList.size();
+        System.out.println("setUpClass() has generated a list of the first " + primeListLength + " consecutive primes.");
+        System.out.println("prime(" + primeListLength + ") = " + primeList.get(primeListLength - 1));
         // 44100 = 2^2 * 3^2 * 5^2 * 7^2
         factors44100 = new ArrayList<>();
         factors44100.add(2);
@@ -131,22 +187,22 @@ public class NumberTheoreticFunctionsCalculatorTest {
     public void testIsPrime() {
         System.out.println("isPrime");
         // assertFalse(NumberTheoreticFunctionsCalculator.isPrime(0));
-        int A40Len = SLOANES_OEIS_A000040.length;
-        for (int i = 0; i < A40Len; i++) {
-            assertTrue(NumberTheoreticFunctionsCalculator.isPrime(SLOANES_OEIS_A000040[i]));
-            assertTrue(NumberTheoreticFunctionsCalculator.isPrime(-SLOANES_OEIS_A000040[i]));
+        for (int i = 0; i < primeListLength; i++) {
+            assertTrue(NumberTheoreticFunctionsCalculator.isPrime(primeList.get(i)));
+            assertTrue(NumberTheoreticFunctionsCalculator.isPrime(-primeList.get(i)));
         }
         for (int j = 0; j < SLOANES_OEIS_A018252.length; j++) {
             assertFalse(NumberTheoreticFunctionsCalculator.isPrime(SLOANES_OEIS_A018252[j]));
             assertFalse(NumberTheoreticFunctionsCalculator.isPrime(-SLOANES_OEIS_A018252[j]));
         }
-        // Now we're going to test odd integers greater than the last prime listed in the SLOANES_OEIS_A000040 array but smaller than the square root of that prime.
-        int maxNumForTest = SLOANES_OEIS_A000040[A40Len - 1] * SLOANES_OEIS_A000040[A40Len - 1];
+        /* Now we're going to test odd integers greater than the last prime 
+        in our List but smaller than the square of that prime. */
+        int maxNumForTest = primeList.get(primeListLength - 1) * primeList.get(primeListLength - 1);
         int primeIndex = 1; // Which of course corresponds to 3, not 2, in a zero-indexed array
         boolean possiblyPrime = true; // Presume k to be prime until finding otherwise
-        for (int k = SLOANES_OEIS_A000040[A40Len - 1] + 2; k < maxNumForTest; k += 2) {
-            while (primeIndex < A40Len && possiblyPrime) {
-                possiblyPrime = (k % SLOANES_OEIS_A000040[primeIndex] != 0);
+        for (int k = primeList.get(primeListLength - 1) + 2; k < maxNumForTest; k += 2) {
+            while (primeIndex < primeListLength && possiblyPrime) {
+                possiblyPrime = (k % primeList.get(primeIndex) != 0);
                 primeIndex++;
             }
             if (possiblyPrime) {
@@ -171,16 +227,18 @@ public class NumberTheoreticFunctionsCalculatorTest {
         boolean expResult = false;
         boolean result = NumberTheoreticFunctionsCalculator.isSquareFree(num);
         assertEquals(expResult, result);
-        for (int i = 0; i < SLOANES_OEIS_A000040.length - 1; i++) {
-            num = SLOANES_OEIS_A000040[i] * SLOANES_OEIS_A000040[i + 1]; // A squarefree semiprime, pq
+        for (int i = 0; i < primeListLength - 1; i++) {
+            num = primeList.get(i) * primeList.get(i + 1); // A squarefree semiprime, pq
             assertTrue(NumberTheoreticFunctionsCalculator.isSquareFree(num));
-            num *= SLOANES_OEIS_A000040[i]; // Repeat one prime factor, (p^2)q
+            num *= primeList.get(i); // Repeat one prime factor, (p^2)q
             assertFalse(NumberTheoreticFunctionsCalculator.isSquareFree(num));
         }
     }
 
     /**
      * Test of moebiusMu method, of class NumberTheoreticFunctionsCalculator.
+     * I expect that mu(-n) = mu(n), so this test checks for that.
+     * If you wish to limit the test to positive integers, you can just remove some of the assertions.
      */
     @Test
     public void testMoebiusMu() {
@@ -190,9 +248,9 @@ public class NumberTheoreticFunctionsCalculatorTest {
         byte result = NumberTheoreticFunctionsCalculator.moebiusMu(num);
         assertEquals(expResult, result);
         // The primes p should all have mu(p) = -1
-        for (int i = 0; i < SLOANES_OEIS_A000040.length; i++) {
-            assertEquals(expResult, NumberTheoreticFunctionsCalculator.moebiusMu(SLOANES_OEIS_A000040[i]));
-            assertEquals(NumberTheoreticFunctionsCalculator.moebiusMu(SLOANES_OEIS_A000040[i]), NumberTheoreticFunctionsCalculator.moebiusMu(-SLOANES_OEIS_A000040[i]));
+        for (int i = 0; i < primeListLength; i++) {
+            assertEquals(expResult, NumberTheoreticFunctionsCalculator.moebiusMu(primeList.get(i)));
+            assertEquals(NumberTheoreticFunctionsCalculator.moebiusMu(primeList.get(i)), NumberTheoreticFunctionsCalculator.moebiusMu(-primeList.get(i)));
         }
         // Now to test mu(n) = 0 with n being a multiple of 4
         expResult = 0;
@@ -202,8 +260,8 @@ public class NumberTheoreticFunctionsCalculatorTest {
         }
         // And lastly, the products of two distinct primes p and q should give mu(pq) = 1
         expResult = 1;
-        for (int k = 0; k < SLOANES_OEIS_A000040.length - 1; k++) {
-            num = SLOANES_OEIS_A000040[k] * SLOANES_OEIS_A000040[k + 1];
+        for (int k = 0; k < primeListLength - 1; k++) {
+            num = primeList.get(k) * primeList.get(k + 1);
             assertEquals(expResult, NumberTheoreticFunctionsCalculator.moebiusMu(num));
             assertEquals(NumberTheoreticFunctionsCalculator.moebiusMu(num), NumberTheoreticFunctionsCalculator.moebiusMu(-num));
         }
@@ -258,16 +316,17 @@ public class NumberTheoreticFunctionsCalculatorTest {
     @Test
     public void testRandomNegativeSquarefreeNumber() {
         System.out.println("randomNegativeSquarefreeNumber");
-        int testBound = SLOANES_OEIS_A000040[SLOANES_OEIS_A000040.length - 1] * SLOANES_OEIS_A000040[SLOANES_OEIS_A000040.length - 1];
+        // Our test bound will be the square of the largest prime in our finite list
+        int testBound = primeList.get(primeListLength - 1) * primeList.get(primeListLength - 1);
         int potentialNegRanSqFreeNum = NumberTheoreticFunctionsCalculator.randomNegativeSquarefreeNumber(testBound);
         System.out.println("Function came up with this pseudorandom number: " + potentialNegRanSqFreeNum);
         // Check that the pseudorandom number is indeed squarefree
         double squaredPrime, ranNumDiv, flooredRanNumDiv;
-        for (int i = 0; i < SLOANES_OEIS_A000040.length; i++) {
-            squaredPrime = SLOANES_OEIS_A000040[i] * SLOANES_OEIS_A000040[i];
+        for (int i = 0; i < primeListLength; i++) {
+            squaredPrime = primeList.get(i) * primeList.get(i);
             ranNumDiv = potentialNegRanSqFreeNum/squaredPrime;
             flooredRanNumDiv = (int) Math.floor(ranNumDiv);
-            System.out.print(squaredPrime + ", " + ranNumDiv + ", " + flooredRanNumDiv + "; ");
+            // System.out.print(squaredPrime + ", " + ranNumDiv + ", " + flooredRanNumDiv + "; ");
             assertFalse(ranNumDiv == flooredRanNumDiv);
         }
         System.out.println();

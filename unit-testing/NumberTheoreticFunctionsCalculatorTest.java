@@ -28,7 +28,18 @@ import static org.junit.Assert.*;
 /**
  * Tests for a collection of number theoretic functions, including basic 
  * primality testing and the Euclidean GCD algorithm. Some of these tests use a 
- * finite list of small primes and another finite list of non-prime numbers.
+ * finite list of small primes and another finite list of non-prime numbers, as 
+ * well as a small list of Fibonacci numbers.
+ * 
+ * The relevant entries in Sloane's On-Line Encyclopedia of Integer Sequences 
+ * (OEIS) are: 
+ * <ul>
+ * <li><a href="http://oeis.org/A000040">A000040</a>: The prime numbers</li>
+ * <li><a href="http://oeis.org/A000045">A000040</a>: The Fibonacci numbers</li>
+ * <li><a href="http://oeis.org/A002808">A002808</a>: The composite numbers</li>
+ * <li><a href="http://oeis.org/A018252">A018252</a>: 1 and the composite 
+ * numbers</li>
+ * </ul>
  * @author Alonso del Arte
  */
 public class NumberTheoreticFunctionsCalculatorTest {
@@ -44,26 +55,31 @@ public class NumberTheoreticFunctionsCalculatorTest {
     /**
      * A List of the first few prime numbers, to be used in some of the tests.
      */
-    private static List<Integer> primeList;
+    private static List<Integer> primesList;
     
     /**
-     * The size of primeList.
+     * The size of primesList.
      */
-    private static int primeListLength;
+    private static int primesListLength;
     
     /**
-     * The composite numbers, and 1, listed in <a href="http://oeis.org/A018252">Sloane's A018252</a>.
-     * A lot more of these are listed in the B-file (see link), but these should 
-     * be sufficient to test isPrime().
+     * A List of composite numbers, which may or may not include 
+     * PRIME_LIST_THRESHOLD.
      */
-    public static final int[] SLOANES_OEIS_A018252 = {1, 4, 6, 8, 9, 10, 12, 14, 15, 16, 18, 20, 21, 22, 24, 25, 26, 27, 28, 30, 32, 33, 34, 35, 36, 38, 39, 40, 42, 44, 45, 46, 48, 49, 50, 51, 52, 54, 55, 56, 57, 58, 60, 62, 63, 64, 65, 66, 68, 69, 70, 72, 74, 75, 76, 77, 78, 80, 81, 82, 84, 85, 86, 87, 88};
+    private static List<Integer> compositesList;
+    
+    /**
+     * A List of Fibonacci numbers.
+     */
+    private static List<Integer> fibonacciList;
     
     public NumberTheoreticFunctionsCalculatorTest() {
     }
     
     /**
-     * Sets up a List of the first few consecutive primes. The static final 
-     * fields provide most of everything else needed for the tests.
+     * Sets up a List of the first few consecutive primes, the first few 
+     * composite numbers and the first few Fibonacci numbers. This provides most 
+     * of what is needed for the tests.
      */
     @BeforeClass
     public static void setUpClass() {
@@ -80,8 +96,8 @@ public class NumberTheoreticFunctionsCalculatorTest {
         } else {
             halfThreshold = threshold/2;
         }
-        primeList = new ArrayList<>();
-        primeList.add(2); // Add 2 as a special case
+        primesList = new ArrayList<>();
+        primesList.add(2); // Add 2 as a special case
         boolean[] primeFlags = new boolean[halfThreshold];
         for (int i = 0; i < halfThreshold; i++) {
             primeFlags[i] = true; // Presume all odd numbers prime for now
@@ -89,7 +105,7 @@ public class NumberTheoreticFunctionsCalculatorTest {
         int currPrime = 3;
         int twiceCurrPrime, currIndex;
         while (currPrime < threshold) {
-            primeList.add(currPrime);
+            primesList.add(currPrime);
             twiceCurrPrime = 2 * currPrime;
             for (int j = currPrime * currPrime; j < threshold; j += twiceCurrPrime) {
                 currIndex = (j - 3)/2;
@@ -100,9 +116,34 @@ public class NumberTheoreticFunctionsCalculatorTest {
                 currIndex = (currPrime - 3)/2;
             } while (currIndex < (halfThreshold - 1) && primeFlags[currIndex] == false);
         }
-        primeListLength = primeList.size();
-        System.out.println("setUpClass() has generated a list of the first " + primeListLength + " consecutive primes.");
-        System.out.println("prime(" + primeListLength + ") = " + primeList.get(primeListLength - 1));
+        primesListLength = primesList.size();
+        /* Now to make a list of composite numbers, from 4 up to and perhaps 
+           including PRIME_LIST_THRESHOLD. */
+        compositesList = new ArrayList<>();
+        for (int c = 4; c < PRIME_LIST_THRESHOLD; c += 2) {
+            compositesList.add(c);
+            if (!primeFlags[c/2 - 1]) {
+                compositesList.add(c + 1);
+            }
+        }
+        System.out.println("setUpClass() has generated a list of the first " + primesListLength + " consecutive primes.");
+        System.out.println("prime(" + primesListLength + ") = " + primesList.get(primesListLength - 1));
+        System.out.println("There are " + (PRIME_LIST_THRESHOLD - (primesListLength + 1)) + " composite numbers up to " + PRIME_LIST_THRESHOLD + ".");
+        // Last but not least, a list of Fibonacci numbers
+        fibonacciList = new ArrayList<>();
+        fibonacciList.add(0);
+        fibonacciList.add(1);
+        threshold = (Integer.MAX_VALUE - 3)/4; // Repurposing this variable
+        currIndex = 2; // Also repurposing this one
+        int currFibo = 1;
+        while (currFibo < threshold) {
+            currFibo = fibonacciList.get(currIndex - 2) + fibonacciList.get(currIndex - 1);
+            fibonacciList.add(currFibo);
+            currIndex++;
+        }
+        currIndex--; // Step one back to index last added Fibonacci number
+        System.out.println("setUpClass() has generated a list of the first " + fibonacciList.size() + " Fibonacci numbers.");
+        System.out.println("Fibonacci(" + currIndex + ") = " + fibonacciList.get(currIndex));
     }
     
     @AfterClass
@@ -136,11 +177,11 @@ public class NumberTheoreticFunctionsCalculatorTest {
         boolean withinRange = true;
         int lastNumTested = 1;
         while (withinRange) {
-            num *= primeList.get(primeIndex);
-            expResult.add(primeList.get(primeIndex));
+            num *= primesList.get(primeIndex);
+            expResult.add(primesList.get(primeIndex));
             /* Check the number has not overflown the integer data type and that
             we're not going beyond our finite list of primes */
-            withinRange = (num > 0 && num < Integer.MAX_VALUE) && (primeIndex < primeListLength - 1);
+            withinRange = (num > 0 && num < Integer.MAX_VALUE) && (primeIndex < primesListLength - 1);
             if (withinRange) {
                 result = NumberTheoreticFunctionsCalculator.primeFactors(num);
                 assertEquals(result, expResult);
@@ -152,8 +193,8 @@ public class NumberTheoreticFunctionsCalculatorTest {
                 num *= -1; // And back to positive
                 expResult.remove(0);
                 // Now to test factorization on the square of a primorial
-                num *= primeList.get(primeIndex);
-                expResult.add(primeList.get(primeIndex));
+                num *= primesList.get(primeIndex);
+                expResult.add(primesList.get(primeIndex));
                 // Checking for integer data type overflow only at this point
                 withinRange = (num > 0 && num < Integer.MAX_VALUE);
                 if (withinRange) {
@@ -191,22 +232,24 @@ public class NumberTheoreticFunctionsCalculatorTest {
     public void testIsPrime() {
         System.out.println("isPrime");
         // assertFalse(NumberTheoreticFunctionsCalculator.isPrime(0));
-        for (int i = 0; i < primeListLength; i++) {
-            assertTrue(NumberTheoreticFunctionsCalculator.isPrime(primeList.get(i)));
-            assertTrue(NumberTheoreticFunctionsCalculator.isPrime(-primeList.get(i)));
+        for (int i = 0; i < primesListLength; i++) {
+            assertTrue(NumberTheoreticFunctionsCalculator.isPrime(primesList.get(i)));
+            assertTrue(NumberTheoreticFunctionsCalculator.isPrime(-primesList.get(i)));
         }
-        for (int j = 0; j < SLOANES_OEIS_A018252.length; j++) {
-            assertFalse(NumberTheoreticFunctionsCalculator.isPrime(SLOANES_OEIS_A018252[j]));
-            assertFalse(NumberTheoreticFunctionsCalculator.isPrime(-SLOANES_OEIS_A018252[j]));
+        assertFalse(NumberTheoreticFunctionsCalculator.isPrime(1));
+        assertFalse(NumberTheoreticFunctionsCalculator.isPrime(-1));
+        for (int j = 0; j < compositesList.size(); j++) {
+            assertFalse(NumberTheoreticFunctionsCalculator.isPrime(compositesList.get(j)));
+            assertFalse(NumberTheoreticFunctionsCalculator.isPrime(-compositesList.get(j)));
         }
         /* Now we're going to test odd integers greater than the last prime 
         in our List but smaller than the square of that prime. */
-        int maxNumForTest = primeList.get(primeListLength - 1) * primeList.get(primeListLength - 1);
+        int maxNumForTest = primesList.get(primesListLength - 1) * primesList.get(primesListLength - 1);
         int primeIndex = 1; // Which of course corresponds to 3, not 2, in a zero-indexed array
         boolean possiblyPrime = true; // Presume k to be prime until finding otherwise
-        for (int k = primeList.get(primeListLength - 1) + 2; k < maxNumForTest; k += 2) {
-            while (primeIndex < primeListLength && possiblyPrime) {
-                possiblyPrime = (k % primeList.get(primeIndex) != 0);
+        for (int k = primesList.get(primesListLength - 1) + 2; k < maxNumForTest; k += 2) {
+            while (primeIndex < primesListLength && possiblyPrime) {
+                possiblyPrime = (k % primesList.get(primeIndex) != 0);
                 primeIndex++;
             }
             if (possiblyPrime) {
@@ -219,6 +262,13 @@ public class NumberTheoreticFunctionsCalculatorTest {
             primeIndex = 1; // Reset for next k
             possiblyPrime = true; // Reset for next k
         }
+        /* And lastly, we're going to test indices of Fibonacci primes greater 
+           than 4, which corresponds to 3 */
+        for  (int m = 5; m < fibonacciList.size(); m++) {
+            if (NumberTheoreticFunctionsCalculator.isPrime(fibonacciList.get(m))) {
+                assertTrue(NumberTheoreticFunctionsCalculator.isPrime(m));
+            }
+        }
     }
     
     /**
@@ -228,10 +278,10 @@ public class NumberTheoreticFunctionsCalculatorTest {
     public void testIsSquareFree() {
         System.out.println("isSquareFree");
         int num;
-        for (int i = 0; i < primeListLength - 1; i++) {
-            num = primeList.get(i) * primeList.get(i + 1); // A squarefree semiprime, pq
+        for (int i = 0; i < primesListLength - 1; i++) {
+            num = primesList.get(i) * primesList.get(i + 1); // A squarefree semiprime, pq
             assertTrue(NumberTheoreticFunctionsCalculator.isSquareFree(num));
-            num *= primeList.get(i); // Repeat one prime factor, (p^2)q
+            num *= primesList.get(i); // Repeat one prime factor, (p^2)q
             assertFalse(NumberTheoreticFunctionsCalculator.isSquareFree(num));
         }
     }
@@ -248,10 +298,10 @@ public class NumberTheoreticFunctionsCalculatorTest {
         byte expResult = -1;
         byte result;
         // The primes p should all have mu(p) = -1
-        for (int i = 0; i < primeListLength; i++) {
-            result = NumberTheoreticFunctionsCalculator.moebiusMu(primeList.get(i));
+        for (int i = 0; i < primesListLength; i++) {
+            result = NumberTheoreticFunctionsCalculator.moebiusMu(primesList.get(i));
             assertEquals(expResult, result);
-            assertEquals(result, NumberTheoreticFunctionsCalculator.moebiusMu(-primeList.get(i)));
+            assertEquals(result, NumberTheoreticFunctionsCalculator.moebiusMu(-primesList.get(i)));
         }
         // Now to test mu(n) = 0 with n being a multiple of 4
         expResult = 0;
@@ -263,8 +313,8 @@ public class NumberTheoreticFunctionsCalculatorTest {
         // And lastly, the products of two distinct primes p and q should give mu(pq) = 1
         expResult = 1;
         int num;
-        for (int k = 0; k < primeListLength - 1; k++) {
-            num = primeList.get(k) * primeList.get(k + 1);
+        for (int k = 0; k < primesListLength - 1; k++) {
+            num = primesList.get(k) * primesList.get(k + 1);
             result = NumberTheoreticFunctionsCalculator.moebiusMu(num);
             assertEquals(expResult, result);
             assertEquals(result, NumberTheoreticFunctionsCalculator.moebiusMu(-num));
@@ -288,9 +338,15 @@ public class NumberTheoreticFunctionsCalculatorTest {
             assertEquals(expResult, result);
         }
         /* Now test with consecutive odd numbers, result should also be 1 each 
-        time as well */
-        for (int i = -29; i < 31; i += 2) {
-            result = NumberTheoreticFunctionsCalculator.euclideanGCD(i, i + 2);
+           time as well */
+        for (int j = -29; j < 31; j += 2) {
+            result = NumberTheoreticFunctionsCalculator.euclideanGCD(j, j + 2);
+            assertEquals(expResult, result);
+        }
+        /* And now consecutive Fibonacci numbers before moving on to even 
+           numbers. This will probably be the longest part of the test. */
+        for (int k = 1; k < fibonacciList.size(); k++) {
+            result = NumberTheoreticFunctionsCalculator.euclideanGCD(fibonacciList.get(k - 1), fibonacciList.get(k));
             assertEquals(expResult, result);
         }
         expResult = 2; /* Now to test with consecutive even integers, result 
@@ -307,8 +363,8 @@ public class NumberTheoreticFunctionsCalculatorTest {
             assertEquals(expResultLong, resultLong);
         }
         expResultLong = 2;
-        for (long j = Integer.MAX_VALUE; j < Integer.MAX_VALUE + 32; j += 2) {
-            resultLong = NumberTheoreticFunctionsCalculator.euclideanGCD(j, j + 2);
+        for (long k = Integer.MAX_VALUE; k < Integer.MAX_VALUE + 32; k += 2) {
+            resultLong = NumberTheoreticFunctionsCalculator.euclideanGCD(k, k + 2);
             assertEquals(expResultLong, resultLong);
         }
     }
@@ -321,13 +377,13 @@ public class NumberTheoreticFunctionsCalculatorTest {
     public void testRandomNegativeSquarefreeNumber() {
         System.out.println("randomNegativeSquarefreeNumber");
         // Our test bound will be the square of the largest prime in our finite list
-        int testBound = primeList.get(primeListLength - 1) * primeList.get(primeListLength - 1);
+        int testBound = primesList.get(primesListLength - 1) * primesList.get(primesListLength - 1);
         int potentialNegRanSqFreeNum = NumberTheoreticFunctionsCalculator.randomNegativeSquarefreeNumber(testBound);
         System.out.println("Function came up with this pseudorandom number: " + potentialNegRanSqFreeNum);
         // Check that the pseudorandom number is indeed squarefree
         double squaredPrime, ranNumDiv, flooredRanNumDiv;
-        for (int i = 0; i < primeListLength; i++) {
-            squaredPrime = primeList.get(i) * primeList.get(i);
+        for (int i = 0; i < primesListLength; i++) {
+            squaredPrime = primesList.get(i) * primesList.get(i);
             ranNumDiv = potentialNegRanSqFreeNum/squaredPrime;
             flooredRanNumDiv = (int) Math.floor(ranNumDiv);
             // System.out.print(squaredPrime + ", " + ranNumDiv + ", " + flooredRanNumDiv + "; ");

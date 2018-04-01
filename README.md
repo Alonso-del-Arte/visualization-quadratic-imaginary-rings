@@ -24,15 +24,19 @@ It's possible to zoom out or zoom in, but the program does not yet allow the use
 
 ## Menu commands
 
+Keyboard shortcuts using the Ctrl key are understood to be Windows keyboard shortcuts, while keyboard shortcuts using the Command key are understood to be Mac OS X keyboard shortcuts. The operating system will be specified only when absolutely necessary for clarity. I have not tested this program on Mac OS 9 nor earlier, nor Linux nor any other operating system.
+
 File - There is no File menu yet.
 
-Edit -> Choose discriminant... (Ctrl-D) Brings up a text box asking user to enter a negative, squarefree integer. But you can enter a positive integer and the program will multiply it by -1. And if that number is not squarefree, the program will simply move on to the next lower squarefree number (or to -1 in the case of -67108864).
+Edit -> Choose discriminant... (Ctrl-D or Command-D) Brings up a text box asking user to enter a negative, squarefree integer. But you can enter a positive integer and the program will multiply it by -1. And if that number is not squarefree, the program will simply move on to the next lower squarefree number (or to -1 in the case of -67108864).
 
 Technically "discriminant" is not the right term. What is meant is the variable usually designated d, which is equal to the discriminant only when it is congruent to 1 modulo 4 (otherwise the disciminant is 4d).
 
-Edit -> Increment discriminant (Ctrl-Up arrow) Changes d to the next higher negative, squarefree integer. Disabled when d = -1.
+Edit -> Increment discriminant (Ctrl-Up arrow or Command-Y). Changes d to the next higher negative, squarefree integer. Disabled when d = -1.
 
-Edit -> Decrement discriminant (Ctrl-Down arrow) Changes d to the next lower negative, squarefree integer. Disabled when d = -67108863 (this is a somewhat arbitrary value chosen to avoid arithmetic overflow problems).
+Edit -> Decrement discriminant (Ctrl-Down arrow or Command-B). Changes d to the next lower negative, squarefree integer. Disabled when d = -67108863 (this is a somewhat arbitrary value chosen to avoid arithmetic overflow problems).
+
+Edit -> Copy readouts to clipboard (Ctrl-Shift-C or Command-Shift-C). This copies the readouts about a given imaginary quadratic integer to the clipboard.
 
 View -> Zoom in (Ctrl-Number pad plus) Zooms in by increasing pixels per unit interval by the specified zoom interval (initially 5 pixels), drawing the dots representing numbers further apart.
 
@@ -50,7 +54,7 @@ View -> Reset view defaults (F7)
 
 View -> Use theta notation in readouts (T)
 
-View -> Update readouts (F2)
+View -> Update readouts (F2 on Windows or R on Mac OS X)
 
 Help -> About... Shows the about box with the version number and copyright notice.
 

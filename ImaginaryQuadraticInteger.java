@@ -21,37 +21,44 @@ import java.util.Scanner;
 import java.util.InputMismatchException;
 
 /**
- * The main class, defines an imaginary quadratic integer.
- * The real part, and the real number to be multiplied by an imaginary number, are held in 32-bit fields.
- * However, some of the computations are done with 64-bit variables.
- * There is some overflow checking; the documentation for some of the methods gives more details.
+ * The main class, defines an imaginary quadratic integer. The real part, and 
+ * the real number to be multiplied by an imaginary number, are held in 32-bit 
+ * fields. However, some of the computations are done with 64-bit variables. 
+ * There is some overflow checking; the documentation for some of the methods 
+ * gives more details.
  * @author Alonso del Arte
  */
 public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     
     /**
-     * The real part of the imaginary quadratic integer. If the denominator is 2, the real part should be odd.
+     * The real part of the imaginary quadratic integer. If the denominator is 
+     * 2, the real part should be odd.
      */
     protected int realPartMult;
     
     /**
-     * The imaginary part of the imaginary quadratic integer. If the denominator is 2, the real part should be odd.
+     * The imaginary part of the imaginary quadratic integer. If the denominator 
+     * is 2, the real part should be odd.
      */
     protected int imagPartMult;
     
     /**
-     * Really this is an object that stores information about the ring that we're working in, such as whether the denominator may be 2.
+     * Really this is an object that stores information about the ring that 
+     * we're working in, such as whether the denominator may be 2.
      */
     protected ImaginaryQuadraticRing imagQuadRing;
     
     /**
-     * If imagQuadRing.d1mod4 is true, then denominator may be 1 or 2, otherwise denominator should be 1.
+     * If imagQuadRing.d1mod4 is true, then denominator may be 1 or 2, otherwise 
+     * denominator should be 1.
      */
     protected int denominator;
 
     /**
-     * Gives the algebraic degree of the algebraic integer. Should not be higher than 2.
-     * @return 0 if the algebraic integer is 0, 1 if it's a purely real integer, 2 otherwise.
+     * Gives the algebraic degree of the algebraic integer. Should not be higher 
+     * than 2.
+     * @return 0 if the algebraic integer is 0, 1 if it's a purely real integer, 
+     * 2 otherwise.
      */
     @Override
     public int algebraicDegree() {
@@ -67,9 +74,12 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * Calculates the trace of the imaginary quadratic integer (real part plus real integer times square root of a negative integer).
-     * There is no overflow checking, but this should not be a problem as long as the real part a is within the range -(2^30) < a < 2^30.
-     * @return Twice the real part. For example, given 5/2 + sqrt(-7)/2, the trace would be 5.
+     * Calculates the trace of the imaginary quadratic integer (real part plus 
+     * real integer times square root of a negative integer). There is no 
+     * overflow checking, but this should not be a problem as long as the real 
+     * part a is within the range -(2^30) < a < 2^30.
+     * @return Twice the real part. For example, given 5/2 + sqrt(-7)/2, the 
+     * trace would be 5.
      */
     @Override
     public int trace() {
@@ -81,11 +91,16 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * Calculates the norm of the imaginary quadratic integer (real part plus real integer times square root of a negative integer).
-     * WARNING: There is no overflow checking. That might slow things down unacceptably in RingWindowDisplay.drawPoints().
-     * @return Square of the real part minus square of the imaginary part. For example, given 5/2 + sqrt(-7)/2, the norm would be 8.
-     * May be 0 but should never be negative. If it is negative, most likely an overflow has occurred.
-     * In general, the farther away negRad is from 0, the closer the real and imaginary parts have to be to 0 to avoid overflows.
+     * Calculates the norm of the imaginary quadratic integer (real part plus 
+     * real integer times square root of a negative integer).
+     * WARNING: There is no overflow checking. That might slow things down 
+     * unacceptably in RingWindowDisplay.drawPoints().
+     * @return Square of the real part minus square of the imaginary part. For 
+     * example, given 5/2 + sqrt(-7)/2, the norm would be 8.
+     * May be 0 but should never be negative. If it is negative, most likely an 
+     * overflow has occurred.
+     * In general, the farther away negRad is from 0, the closer the real and 
+     * imaginary parts have to be to 0 to avoid overflows.
      */
     @Override
     public int norm() {
@@ -102,8 +117,12 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * Gives the coefficients for the minimal polynomial of the algebraic integer.
-     * @return An array of three integers. If the algebraic integer is of degree 2, the array will be {norm, negative trace, 1}; if of degree 1, then {number, 1, 0}, and for 0, {0, 0, 0}.
+     * Gives the coefficients for the minimal polynomial of the algebraic 
+     * integer.
+     * @return An array of three integers. If the algebraic integer is of degree 
+     * 2, the array will be {norm, negative trace, 1}; if of degree 1, then 
+     * {number, 1, 0}, and for 0, {0, 1, 0}. For example, for 5/2 + sqrt(-7)/2, 
+     * the result would be {8, -5, 1}.
      */
     @Override
     public int[] minPolynomial() {
@@ -127,8 +146,9 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     
     /**
      * Gives the polynomial in a format suitable for plain text or TeX.
-     * @return A String. If the algebraic degree is 2, the String should start off with "x^2".
-     * For example, for 5/2 + sqrt(-7)/2, the result would be "x^2 - 5x + 8".
+     * @return A String. If the algebraic degree is 2, the String should start 
+     * off with "x^2". For example, for 5/2 + sqrt(-7)/2, the result would be 
+     * "x^2 - 5x + 8".
      */
     @Override
     public String minPolynomialString() {
@@ -170,8 +190,24 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * Gets the real part of the imaginary quadratic integer. May be half an integer.
-     * @return The real part of the imaginary quadratic integer. For example, for -1/2 + sqrt(-7)/2, the result should be -0.5.
+     * Computes the conjugate of the given algebraic integer.
+     * Remember: an imaginary quadratic integer times its conjugate is its norm.
+     * @return The conjugate. For example, given 5/2 + sqrt(-7)/2, the conjugate 
+     * would be 5/2 - sqrt(-7)/2.
+     */
+    public ImaginaryQuadraticInteger conjugate() {
+        if (this.imagPartMult == 0) {
+            return this;
+        } else {
+            return new ImaginaryQuadraticInteger(this.realPartMult, -this.imagPartMult, this.imagQuadRing, this.denominator);
+        }
+    }
+    
+    /**
+     * Gets the real part of the imaginary quadratic integer. May be half an 
+     * integer.
+     * @return The real part of the imaginary quadratic integer. For example, 
+     * for -1/2 + sqrt(-7)/2, the result should be -0.5.
      */
     public double getRealPartMult() {
         double realPart = this.realPartMult;
@@ -182,8 +218,11 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * Gets the imaginary part of the imaginary quadratic integer multiplied by -i. May be the rational approximation of an irrational real number.
-     * @return The imaginary part of the imaginary quadratic integer multiplied by -i. For example, for -1/2 + sqrt(-7)/2, the result should be something like 1.32287565553229529525.
+     * Gets the imaginary part of the imaginary quadratic integer multiplied by 
+     * -i. May be the rational approximation of an irrational real number.
+     * @return The imaginary part of the imaginary quadratic integer multiplied 
+     * by -i. For example, for -1/2 + sqrt(-7)/2, the result should be something 
+     * like 1.32287565553229529525.
      */
     public double getImagPartwRadMult() {
         double imagPartwRad = this.imagPartMult * this.imagQuadRing.absNegRadSqrt;
@@ -195,7 +234,9 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     
     /**
      * Gets the real part of the imaginary quadratic integer multiplied by 2.
-     * @return The real part of the imaginary quadratic integer multiplied by 2. For example, for -1/2 + sqrt(-7)/2, the result should be -1; and for -1 + sqrt(-7), the result should be -2.
+     * @return The real part of the imaginary quadratic integer multiplied by 2. 
+     * For example, for -1/2 + sqrt(-7)/2, the result should be -1; and for -1 + 
+     * sqrt(-7), the result should be -2.
      */
     public long getTwiceRealPartMult() {
         long twiceRealPartMult = this.realPartMult;
@@ -206,8 +247,11 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * Gets the imaginary part of the imaginary quadratic integer multiplied by -2i.
-     * @return The real part of the imaginary quadratic integer multiplied by -2i. For example, for -1/2 + sqrt(-7)/2, the result should be 1; and for -1 + sqrt(-7), the result should be 2.
+     * Gets the imaginary part of the imaginary quadratic integer multiplied by 
+     * -2i.
+     * @return The real part of the imaginary quadratic integer multiplied by 
+     * -2i. For example, for -1/2 + sqrt(-7)/2, the result should be 1; and for 
+     * -1 + sqrt(-7), the result should be 2.
      */
     public long getTwiceImagPartMult() {
         long twiceImagPartMult = this.imagPartMult;
@@ -218,8 +262,10 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * A text representation of the imaginary quadratic integer, with the real part first and the imaginary part second.
-     * @return A String representing the imaginary quadratic integer which can be used in a JTextField.
+     * A text representation of the imaginary quadratic integer, with the real 
+     * part first and the imaginary part second.
+     * @return A String representing the imaginary quadratic integer which can 
+     * be used in a JTextField.
      */
     @Override
     public String toString() {
@@ -276,8 +322,11 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * A text representation of the imaginary quadratic integer, using theta notation when imagQuadRing.d1mod4 is true.
-     * @return A String representing the imaginary quadratic integer which can be used in a JTextField. If imagQuadRing.d1mod4 is false, this just returns the same String as toString().
+     * A text representation of the imaginary quadratic integer, using theta 
+     * notation when imagQuadRing.d1mod4 is true.
+     * @return A String representing the imaginary quadratic integer which can 
+     * be used in a JTextField. If imagQuadRing.d1mod4 is false, this just 
+     * returns the same String as toString().
      */
     public String toStringAlt() {
 
@@ -329,19 +378,24 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * A text representation of the integer using only ASCII characters.
-     * I wrote this function only because the font used in the test suite lacks the square root character "&radic;".
+     * A text representation of the integer using only ASCII characters. I wrote 
+     * this function only because the font used in the test suite output 
+     * (NetBeans on Windows) lacks the square root character "&radic;".
      * All this function does is replace "&radic;" with "sqrt".
-     * @return A String using only ASCII characters. For example, for "&radic;(-2)", the result will be "sqrt(-2)".
+     * @return A String using only ASCII characters. For example, for 
+     * "&radic;(-2)", the result will be "sqrt(-2)".
      */
     public String toASCIIString() {
         return this.toString().replace("\u221A", "sqrt");
     }
     
     /**
-     * A text representation of the integer with theta notation when applicable, but using only ASCII characters.
-     * After writing toASCIIString, it only made sense to write this one as well.
-     * @return A String using only ASCII characters. For instance, for "-1 + &theta;", the result will be "-1 + theta". If imagQuadRing.d1mod4 is false, this just returns the same String as toASCIIString().
+     * A text representation of the integer with theta notation when applicable, 
+     * but using only ASCII characters. After writing toASCIIString, it only 
+     * made sense to write this one as well.
+     * @return A String using only ASCII characters. For instance, for "-1 + 
+     * &theta;", the result will be "-1 + theta". If imagQuadRing.d1mod4 is 
+     * false, this just returns the same String as toASCIIString().
      */
     public String toASCIIStringAlt() {
         if (this.imagQuadRing.d1mod4) {
@@ -358,11 +412,17 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * Returns a hash code value for the imaginary quadratic integer.
-     * The hash code is based on the real part (multiplied by 2 when applicable), the imaginary part (multiplied by 2 when applicable), the discriminant and the denominator.
-     * However, if the imaginary part is 0, the purely real integer is treated as a Gaussian integer. This was done in the hope of satisfying the contract that two objects that evaluate as equal also hash equal.
-     * Overriding {@link Object#hashCode} on account of needing to override {@link Object#equals}. 
-     * @return An integer which is hopefully unique from the hash codes of algebraic integers which are different that might occur in the same execution of the program.
+     * Returns a hash code value for the imaginary quadratic integer. Overriding 
+     * {@link Object#hashCode} on account of needing to override 
+     * {@link Object#equals}. The hash code is based on the real part 
+     * (multiplied by 2 when applicable), the imaginary part (multiplied by 2 
+     * when applicable), the discriminant and the denominator. However, if the 
+     * imaginary part is 0, the purely real integer is treated as a Gaussian 
+     * integer. This was done in the hope of satisfying the contract that two 
+     * objects that evaluate as equal also hash equal.
+     * @return An integer which is hopefully unique from the hash codes of 
+     * algebraic integers which are different that might occur in the same 
+     * execution of the program.
      */
     @Override
     public int hashCode() {
@@ -374,9 +434,12 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * Compares whether an object is arithmetically equal to this imaginary quadratic integer.
-     * @param obj The object to compare, preferably an object that implements the AlgebraicInteger interface.
-     * @return True if the object is an imaginary quadratic integer arithmetically equal to this imaginary quadratic integer, false otherwise. Definitely false if obj is null.
+     * Compares whether an object is arithmetically equal to this imaginary 
+     * quadratic integer.
+     * @param obj The object to compare, preferably an object that implements 
+     * the AlgebraicInteger interface.
+     * @return True if the object is an imaginary quadratic integer 
+     * arithmetically equal to this imaginary quadratic integer, false otherwise. Definitely false if obj is null.
      * For example, if this is
      */
     @Override

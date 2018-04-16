@@ -68,12 +68,12 @@ public class NumberTheoreticFunctionsCalculator {
     }
     
     /**
-     * Determines whether a given number is prime or not. The numbers 0, -1, 1, 
-     * -2, 2 are treated as special cases. For all others, the function searches 
-     * only for the least prime factor. If the least prime factor is found to be 
-     * unequal to the absolute value of the number, the function reports the 
-     * number as composite and returns to the caller. Still, the function is 
-     * open to optimization.
+     * Determines whether a given purely real number is prime or not. The 
+     * numbers 0, -1, 1, -2, 2 are treated as special cases. For all others, the 
+     * function searches only for the least prime factor. If the least prime 
+     * factor is found to be unequal to the absolute value of the number, the 
+     * function reports the number as composite and returns to the caller. 
+     * Still, the function is open to optimization.
      * @param num The number to be tested for primality.
      * @return true if the number is prime (even if negative), false otherwise.
      * For example, -2 and 47 should each return true, -25, 0 and 91 should each 
@@ -102,6 +102,160 @@ public class NumberTheoreticFunctionsCalculator {
                     }
                     return primeFlag;
                 }
+        }
+    }
+    
+    /**
+     * Determines whether a given number, not necessarily purely real, is prime 
+     * or not.
+     * @param num The number for which to make the determination.
+     * @return true if the number is prime, false otherwise. For example, 1 + i,
+     * which has a norm of 2, is prime.
+     * @throws NonUniqueFactorizationDomainException If called upon to determine 
+     * the primality of a number from a domain that is not a unique 
+     * factorization domain. Generally this should only be a problem for purely 
+     * real numbers that are prime in <b>Z</b>.
+     * @throws ArithmeticException If a norm computation error occurs (this is a 
+     * runtime exception).
+     */
+    public static boolean isPrime(ImaginaryQuadraticInteger num) throws NonUniqueFactorizationDomainException {
+        if (num.norm() < 0) {
+            String exceptionMessage = "Overflow has occurred for the computation of the norm of " + num.toASCIIString();
+            throw new ArithmeticException(exceptionMessage);
+        }
+        if (isPrime(num.norm())) {
+            return true;
+        } else {
+            if (num.imagPartMult == 0) {
+                int absRealPartMult = Math.abs(num.realPartMult);
+                if (isPrime(absRealPartMult)) {
+                    switch (num.imagQuadRing.negRad) {
+                        case -1:
+                            return (absRealPartMult % 4 == 3);
+                        case -2:
+                            return (absRealPartMult % 8 == 5 || absRealPartMult % 8 == 7);
+                        case -3:
+                            return (absRealPartMult % 3 == 2);
+                        case -7:
+                            return (absRealPartMult != 2 || absRealPartMult != 7);
+                        case -11:
+                            return true; // TO DO: FILL IN MISSING LOGIC
+                        case -19:
+                            return true; // TO DO: FILL IN MISSING LOGIC
+                        case -43:
+                            return true; // TO DO: FILL IN MISSING LOGIC
+                        case -67:
+                            return true; // TO DO: FILL IN MISSING LOGIC
+                        case -163:
+                            return true; // TO DO: FILL IN MISSING LOGIC
+                        default:
+                            String exceptionMessage = num.imagQuadRing.toASCIIString() + " is not a unique factorization domain.";
+                            throw new NonUniqueFactorizationDomainException(exceptionMessage, num);
+                    }
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+    }
+    
+    /**
+     * Determines whether a given number is irreducible, not necessarily prime.
+     * @param num The number for which to make the determination.
+     * @return true if num is irreducible, false if not. For example, 1 + 
+     * sqrt(-5) is famously irreducible but not prime.
+     * @throws ArithmeticException If a norm computation error occurs (this is a 
+     * runtime exception).
+     */
+    public static boolean isIrreducible(ImaginaryQuadraticInteger num) {
+        if (num.norm() < 0) {
+            String exceptionMessage = "Overflow has occurred for the computation of the norm of " + num.toASCIIString();
+            throw new ArithmeticException(exceptionMessage);
+        }
+        if (isPrime(num.norm())) {
+            return true;
+        } else {
+            if (num.norm() < 2) {
+                return true;
+            } else {
+                switch (num.imagQuadRing.negRad) {
+                    case -1:
+                    case -2:
+                    case -3:
+                    case -7:
+                    case -11:
+                    case -19:
+                    case -43:
+                    case -67:
+                    case -163:
+                        try {
+                            return isPrime(num);
+                        } catch (NonUniqueFactorizationDomainException nufde) {
+                            System.err.println("NonUniqueFactorizationDomainException should not have happened in this context: " + nufde.getMessage());
+                            System.exit(-1);
+                        }
+                    default:
+                        boolean withinRange = true;
+                        boolean presumedIrreducible = true;
+                        ImaginaryQuadraticInteger testDivisor, currDivision;
+                        int maxTestDivNorm = num.norm() - 1;
+                        int currTestDivNorm;
+                        int testDivRealPartMult = 2;
+                        int testDivImagPartMult = 0;
+                        while (withinRange && presumedIrreducible) {
+                            testDivisor = new ImaginaryQuadraticInteger(testDivRealPartMult, testDivImagPartMult, num.imagQuadRing);
+                            currTestDivNorm = testDivisor.norm();
+                            withinRange = (currTestDivNorm < maxTestDivNorm);
+                            while (withinRange && presumedIrreducible) {
+                                try {
+                                    currDivision = num.divides(testDivisor);
+                                    presumedIrreducible = false;
+                                } catch (AlgebraicDegreeOverflowException adoe) {
+                                    System.err.println("AlgebraicDegreeOverflowException should not have happened in this context. " + adoe.getMessage());
+                                    System.exit(-1);
+                                } catch (NotDivisibleException nde) {
+                                    testDivRealPartMult++;
+                                    testDivisor = new ImaginaryQuadraticInteger(testDivRealPartMult, testDivImagPartMult, num.imagQuadRing);
+                                    currTestDivNorm = testDivisor.norm();
+                                    withinRange = (currTestDivNorm < maxTestDivNorm);
+                                }
+                            }
+                            testDivRealPartMult = 0;
+                            testDivImagPartMult++;
+                        }
+                        /* If the number is from a domain with "half-integers," 
+                           we should try dividing by some of those, too */
+                        if (presumedIrreducible && num.imagQuadRing.d1mod4) {
+                            withinRange = true;
+                            testDivRealPartMult = 1;
+                            testDivImagPartMult = 1;
+                            while (withinRange && presumedIrreducible) {
+                                testDivisor = new ImaginaryQuadraticInteger(testDivRealPartMult, testDivImagPartMult, num.imagQuadRing, 2);
+                                currTestDivNorm = testDivisor.norm();
+                                withinRange = (currTestDivNorm < maxTestDivNorm);
+                                while (withinRange && presumedIrreducible) {
+                                    try {
+                                        currDivision = num.divides(testDivisor);
+                                        presumedIrreducible = false;
+                                    } catch (AlgebraicDegreeOverflowException adoe) {
+                                        System.err.println("AlgebraicDegreeOverflowException should not have happened in this context. " + adoe.getMessage());
+                                        System.exit(-1);
+                                    } catch (NotDivisibleException nde) {
+                                        testDivImagPartMult += 2;
+                                        testDivisor = new ImaginaryQuadraticInteger(testDivRealPartMult, testDivImagPartMult, num.imagQuadRing, 2);
+                                        currTestDivNorm = testDivisor.norm();
+                                        withinRange = (currTestDivNorm < maxTestDivNorm);
+                                    }
+                                }
+                                testDivRealPartMult = 1;
+                                testDivImagPartMult += 2;
+                            }
+                        }
+                        return presumedIrreducible;
+                }
+            }
         }
     }
     

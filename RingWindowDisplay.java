@@ -8,11 +8,11 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package imaginaryquadraticinteger;
 
@@ -116,13 +116,51 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      */
     public static final int MAXIMUM_DOT_RADIUS = 128;
     
+    /**
+     * The usual step by which to increment or decrement pixels by unit 
+     * interval. This step can be increased or decreased, either through the 
+     * menu or with a keyboard shortcut.
+     */
     public static final int DEFAULT_ZOOM_INTERVAL = 5;
+    
+    /**
+     * The smallest step by which to increment or decrement pixels by unit 
+     * interval. Once this step is reached, the relevant menu item is disabled 
+     * and the corresponding keyboard shortcut is ignored.
+     */
     public static final int MINIMUM_ZOOM_INTERVAL = 1;
+    
+    /**
+     * The largest step by which to increment or decrement pixels by unit 
+     * interval. Once this step is reached, the relevant menu item is disabled 
+     * and the corresponding keyboard shortcut is ignored.
+     */
     public static final int MAXIMUM_ZOOM_INTERVAL = 48;
     
+    /**
+     * The default background color when the program starts. In a future 
+     * version, there will be a dialog accessed through a menu that will enable 
+     * the user to change this color. For now, the only way to change it is by 
+     * changing this constant.
+     */
     public static final Color DEFAULT_CANVAS_BACKGROUND_COLOR = new Color(2107440); // A dark blue
     
+    /**
+     * The default color for the "half-integer" grid. In a future version, there 
+     * will be a dialog accessed through a menu that will enable the user to 
+     * change this color. This setting is only relevant when the program is 
+     * displaying a diagram with "half-integers" at a zoom level sufficient to 
+     * cause the drawing of grid lines.
+     */
     public static final Color DEFAULT_HALF_INTEGER_GRID_COLOR = Color.DARK_GRAY;
+    
+    /**
+     * The default color for the "full" integer grid. In a future version, there 
+     * will be a dialog accessed through a menu that will enable the user to 
+     * change this color. This setting is only relevant when the program is 
+     * displaying a diagram with at a zoom level sufficient to cause the drawing 
+     * of grid lines.
+     */
     public static final Color DEFAULT_INTEGER_GRID_COLOR = Color.BLACK;
     
     /**
@@ -179,16 +217,22 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      * but less than or equal to MAXIMUM_PIXELS_PER_UNIT_INTERVAL.
      */
     protected int pixelsPerUnitInterval;
-    protected ImaginaryQuadraticRing imagQuadRing;
-    private ImaginaryQuadraticInteger mouseIQI;
+    
+    /**
+     * The actual pixels per basic imaginary interval setting. This setting 
+     * depends on pixelsPerUnitInterval.
+     */
     protected int pixelsPerBasicImaginaryInterval;
     
+    protected ImaginaryQuadraticRing imagQuadRing;
+    
+    private ImaginaryQuadraticInteger mouseIQI;
+        
     /**
      * When imagQuadRing.d1mod4 is true, some users may prefer to see 
      * "half-integers" notated with theta notation rather than fractions with 2s 
      * for denominators. With this preference turned on and d = -3, omega will 
-     * be used rather than theta.
-     * omega = -1/2 + sqrt(-3)/2.
+     * be used rather than theta. Remember that omega = -1/2 + sqrt(-3)/2 and 
      * theta = 1/2 + sqrt(d)/2.
      */
     private boolean preferenceForThetaNotation;
@@ -199,35 +243,20 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     private int dotRadius;
     private int zoomInterval;
     
-    private Color backgroundColor;
-    
-    private Color halfIntegerGridColor;
-    private Color integerGridColor;
-    
-    private Color zeroColor;
-    private Color unitColor;
-    private Color inertPrimeColor;
-    private Color splitPrimeColor;
-    private Color ramifiedPrimeColor;
+    private Color backgroundColor, halfIntegerGridColor, integerGridColor;
+    private Color zeroColor, unitColor, inertPrimeColor, splitPrimeColor, ramifiedPrimeColor;
     
     private int zeroCoordX, zeroCoordY;
     private boolean zeroCentered, zeroInView;
     
     private JFrame ringFrame;
     
-    private JMenuBar ringWindowMenuBar;
-    private JMenu ringWindowMenu;
-    private JMenuItem ringWindowMenuItem;
-    private JMenuItem chooseDMenuItem;
     private JMenuItem increaseDMenuItem, decreaseDMenuItem;
     private JMenuItem prevDMenuItem, nextDMenuItem;
-    private JMenuItem copyReadOutsToClipboardMenuItem;
     private JMenuItem zoomInMenuItem, zoomOutMenuItem;
     private JMenuItem decreaseZoomIntervalMenuItem, increaseZoomIntervalMenuItem;
     private JMenuItem decreaseDotRadiusMenuItem, increaseDotRadiusMenuItem;
-    private JMenuItem resetViewDefaultsMenuItem;
     private JCheckBoxMenuItem preferThetaNotationMenuItem, toggleReadOutsEnabledMenuItem;
-    private JMenuItem aboutMenuItem;
     
     private JTextField algIntReadOut, algIntTraceReadOut, algIntNormReadOut, algIntPolReadOut;
     
@@ -866,6 +895,14 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     /**
+     * Copies the currently displayed diagram to the clipboard.
+     * FEATURE NOT YET IMPLEMENTED*****************************
+     */
+    public void copyDiagramToClipboard() {
+        System.out.println("FEATURE NOT YET IMPLEMENTED");
+    }
+    
+    /**
      * Checks whether the Zoom in and Zoom out menu items are enabled or not, 
      * and whether they should be, enabling them or disabling them as needed.
      */
@@ -920,6 +957,10 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         }
     }
     
+    /**
+     * Just a little message dialog to let the user know what the zoom interval 
+     * is now.
+     */
     private void informZoomIntervalChange() {
         String notificationString = "Zoom interval is now " + this.zoomInterval + ".\nThere are " + this.pixelsPerUnitInterval + " pixels per unit interval.";
         JOptionPane.showMessageDialog(ringFrame, notificationString);
@@ -1005,7 +1046,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      * updated, nor the preference for theta notation.
      */
     public void resetViewDefaults() {
-        /* Since the program does not yet allow the user to change colors, the following three lines are for now unnecessary.
+        /* Since the program does not yet allow the user to change colors, the 
+           following three lines are for now unnecessary.
         changeBackgroundColor(DEFAULT_CANVAS_BACKGROUND_COLOR);
         changeGridColors(DEFAULT_HALF_INTEGER_GRID_COLOR, DEFAULT_INTEGER_GRID_COLOR);
         changePointColors(DEFAULT_ZERO_COLOR, DEFAULT_UNIT_COLOR, DEFAULT_INERT_PRIME_COLOR, DEFAULT_SPLIT_PRIME_COLOR, DEFAULT_RAMIFIED_PRIME_COLOR);
@@ -1055,17 +1097,18 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      * Function to show the About box, a simple MessageDialog from JOptionPage.
      */
     public void showAboutBox() {
-        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.831\n\u00A9 2018 Alonso del Arte");
+        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.84\n\u00A9 2018 Alonso del Arte");
     }
     
-    
     /**
-     * Function to handle menu events.
+     * Function to handle menu events. Unrecognized commands will be printed to 
+     * the console with a message to that effect.
      * @param ae Object giving information about the menu item selected.
      */
     @Override
     public void actionPerformed(ActionEvent ae) {
-        switch (ae.getActionCommand()) {
+        String cmd = ae.getActionCommand();
+        switch (cmd) {
             case "chooseD":
                 chooseDiscriminant();
                 break;
@@ -1083,6 +1126,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                 break;
             case "copyReadouts":
                 copyReadoutsToClipboard();
+                break;
+            case "copyDiagram":
+                copyDiagramToClipboard();
                 break;
             case "zoomIn":
                 zoomIn();
@@ -1120,7 +1166,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                 showAboutBox();
                 break;
             default:
-                System.out.println("Command not recognized.");
+                System.out.println("Command " + cmd + " not recognized.");
         }
     }
 
@@ -1138,12 +1184,18 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         this.pixelsPerBasicImaginaryInterval = (int) Math.floor(imagInterval);
     }
    
+    /**
+     * Sets up the JFrame in which the various ring diagrams will be drawn.
+     */
     private void setUpRingFrame() {
         
         ringFrame = new JFrame("Ring Diagram for " + this.imagQuadRing.toString());
-        
+        JMenuBar ringWindowMenuBar;
+        JMenu ringWindowMenu;
+        JMenuItem ringWindowMenuItem, chooseDMenuItem, copyReadOutsToClipboardMenuItem, copyDiagramToClipboardMenuItem, resetViewDefaultsMenuItem, aboutMenuItem;
+
         boolean macOSFlag;
-        int maskCtrlCommand, maskCtrlAltCommandOption;
+        int maskCtrlCommand;
         String operSysName = System.getProperty("os.name");
         macOSFlag = operSysName.equals("Mac OS X");
         if (macOSFlag) {
@@ -1199,6 +1251,12 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         copyReadOutsToClipboardMenuItem.setActionCommand("copyReadouts");
         copyReadOutsToClipboardMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, maskCtrlCommand + Event.SHIFT_MASK));
         copyReadOutsToClipboardMenuItem.addActionListener(this);
+        ringWindowMenuItem = new JMenuItem("Copy diagram to clipboard");
+        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Copy the currently displayed diagram to the clipboard so that it's accessible to other applications");
+        copyDiagramToClipboardMenuItem = ringWindowMenu.add(ringWindowMenuItem);
+        copyDiagramToClipboardMenuItem.setActionCommand("copyDiagram");
+        copyDiagramToClipboardMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, maskCtrlCommand + Event.ALT_MASK));
+        copyDiagramToClipboardMenuItem.addActionListener(this);
         
     /*    ringWindowMenu.addSeparator();
         THIS IS FOR WHEN I GET AROUND TO ADDING THE CAPABILITY TO CHANGE GRID, POINT COLORS
@@ -1363,6 +1421,14 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
 
     }
     
+    /**
+     * Constructor. Most of the work is setting the various instance fields to 
+     * their default values. paintComponent() is not explicitly called.
+     * @param ringChoice The negative squarefree number to determine which 
+     * diagram will be drawn first. If positive, it will quietly be changed to 
+     * its additive inverse (e.g., 163 gets turned to -163), but if it's not 
+     * squarefree,
+     */
     public RingWindowDisplay(int ringChoice) {
         
         ImaginaryQuadraticRing imR;

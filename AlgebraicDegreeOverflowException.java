@@ -17,9 +17,14 @@
 package imaginaryquadraticinteger;
 
 /**
- * An exception to indicate when the result of an arithmetical operation results in an algebraic integer of higher algebraic degree than the implementation of AlgebraicInteger was designed for.
- * For example, the square root of 2 times the fifth root of 3 is an algebraic integer with minimal polynomial x^10 - 288.
- * So an AlgebraicInteger implementation for quadratic integers would be ill-suited to hold the result of the operation, as would an implementaion that can handle algebraic integers up to algebraic degree 5.
+ * An exception to indicate when the result of an arithmetical operation results 
+ * in an algebraic integer of higher algebraic degree than the implementation of 
+ * AlgebraicInteger was designed for. For example, the square root of 2 times 
+ * the fifth root of 3 is an algebraic integer with minimal polynomial x^10 - 
+ * 288. So an AlgebraicInteger implementation for quadratic integers would be 
+ * ill-suited to hold the result of the operation, as would an implementation 
+ * that can handle algebraic integers up to algebraic degree 5. In such a case, 
+ * it is appropriate to throw this exception.
  * @author Alonso del Arte
  */
 public class AlgebraicDegreeOverflowException extends Exception {

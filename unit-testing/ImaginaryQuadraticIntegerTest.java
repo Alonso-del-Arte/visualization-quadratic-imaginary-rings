@@ -8,11 +8,11 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package imaginaryquadraticinteger;
 
@@ -38,6 +38,7 @@ public class ImaginaryQuadraticIntegerTest {
     private static ImaginaryQuadraticRing ringEisenstein;
     private static ImaginaryQuadraticRing ringOQi7;
     private static ImaginaryQuadraticRing ringRandom;
+    private static ImaginaryQuadraticRing ringRandomForAltTesting;
     
     private static List<ImaginaryQuadraticInteger> testIntegers, testAdditiveInverses, testConjugates, testNorms;
     private static List<Integer> testNormsRealParts;
@@ -70,7 +71,17 @@ public class ImaginaryQuadraticIntegerTest {
         ringEisenstein = new ImaginaryQuadraticRing(-3);
         ringOQi7 = new ImaginaryQuadraticRing(-7);
         ringRandom = new ImaginaryQuadraticRing(randomDiscr);
-        System.out.println(ringRandom.toFilenameString() + " has been randomly chosen for testing purposes.");
+        if (ringRandom.hasHalfIntegers()) {
+            ringRandomForAltTesting = ringRandom;
+        } else {
+            int nextD = ringRandom.getNegRad();
+            do {
+                nextD++;
+            } while (!(NumberTheoreticFunctionsCalculator.isSquareFree(nextD) && (nextD % 4 == -3)));
+            ringRandomForAltTesting = new ImaginaryQuadraticRing(nextD);
+            System.out.println(ringRandomForAltTesting.toASCIIString() + " has been chosen for testing toStringAlt() and toASCIIStringAlt.");
+        }
+        System.out.println(ringRandom.toASCIIString() + " has been randomly chosen for testing purposes.");
         maxAB = (int) Math.floor(Math.sqrt(Integer.MAX_VALUE/((-4) * (randomDiscr + 1))));
         System.out.println("Maximum for real and imaginary parts is " + maxAB);
         Random ranNumGen = new Random();
@@ -172,8 +183,6 @@ public class ImaginaryQuadraticIntegerTest {
     @Test
     public void testAlgebraicDegree() {
         System.out.println("algebraicDegree");
-        ImaginaryQuadraticRing instanceRing = new ImaginaryQuadraticRing(-2);
-        ImaginaryQuadraticInteger instance = new ImaginaryQuadraticInteger(1, 1, instanceRing, 1);
         int expResult = 2; // Quadratic integers with nonzero imaginary part should have algebraic degree 2
         int result;
         for (int i = 0; i < totalTestIntegers; i++) {
@@ -249,7 +258,8 @@ public class ImaginaryQuadraticIntegerTest {
             }
             result = testIntegers.get(i).minPolynomial();
             assertArrayEquals(expResult, result);
-            // Now to test the mimimal polymomial of the purely imaginary integer sqrt(d)
+            /* Now to test the mimimal polymomial of the purely imaginary 
+               integer sqrt(d) */
             expResult[1] = 0;
             expResult[0] = testIntegers.get(i).imagQuadRing.getAbsNegRad();
             baseImagDist = new ImaginaryQuadraticInteger(0, 1, testIntegers.get(i).imagQuadRing, 1);
@@ -274,7 +284,10 @@ public class ImaginaryQuadraticIntegerTest {
     /**
      * Test of minPolynomialString method, of class ImaginaryQuadraticInteger.
      * For methods that return Strings, spaces are desirable but not required.
-     * Therefore the tests should strip out spaces before asserting equality.
+     * Therefore the tests should strip out spaces before asserting equality. It
+     * is understood that "0x" is implied in the minimal polynomial of purely 
+     * imaginary integers and therefore "+0x" and "-0x" should both be excluded 
+     * from the output.
      */
     @Test
     public void testMinPolynomialString() {
@@ -297,6 +310,10 @@ public class ImaginaryQuadraticIntegerTest {
                 }
                 expResult = expResult + "x+" + (randomRealPart * randomRealPart + randomImagPart * randomImagPart * testIntegers.get(i).imagQuadRing.getAbsNegRad());
             }
+            expResult = expResult.replace("+1x", "+x");
+            expResult = expResult.replace("-1x", "-x");
+            expResult = expResult.replace("+0x", "");
+            expResult = expResult.replace("-0x", "");
             result = testIntegers.get(i).minPolynomialString().replace(" ", ""); // Strip out spaces
             assertEquals(expResult, result);
         }
@@ -312,8 +329,39 @@ public class ImaginaryQuadraticIntegerTest {
             result = degreeOneInt.minPolynomialString().replace(" ", "");
             assertEquals(expResult, result);
         }
-        // I'm not terribly concerned about this one, so it's here more for the sake of completeness than anything else
+        /* I'm not terribly concerned about this one, so it's here more for the 
+           sake of completeness than anything else. Feel free to delete if 
+           inconvenient. */
         assertEquals("x", zeroIQI.minPolynomialString());
+    }
+    
+    /**
+     * Test of conjugate method, of class ImaginaryQuadraticInteger. These are 
+     * the two main facts used to make sure conjugate() gives the right results: 
+     * first, the norm of a quadratic integer divided by that quadratic integer 
+     * is its conjugate; and second, the conjugate of a conjugate is the 
+     * original quadratic integer.
+     */
+    @Test
+    public void testConjugate() {
+        System.out.println("conjugate");
+        ImaginaryQuadraticInteger expResult, result;
+        for (int i = 0; i < totalTestIntegers; i++) {
+            try {
+                expResult = testNorms.get(i).divides(testIntegers.get(i));
+            } catch (AlgebraicDegreeOverflowException adoe) {
+                expResult = zeroIQI; // This is to avoid "expResult might not have been initialized" error
+                fail("AlgebraicDegreeOverflowException should not have occurred during test of conjugate().\n" + adoe.getMessage() + "\nThere may be a mistake in the setup of the test.");
+            } catch (NotDivisibleException nde) {
+                expResult = zeroIQI;
+                fail("NotDivisibleException should not have occurred during test of conjugate().\n" + nde.getMessage() + "\nThere may be a mistake in the setup of the test.");
+            }
+            result = testIntegers.get(i).conjugate();
+            assertEquals(expResult, result);
+            assertEquals(testConjugates.get(i), result);
+            result = result.conjugate();
+            assertEquals(result, testIntegers.get(i));
+        }
     }
 
     /**
@@ -396,7 +444,12 @@ public class ImaginaryQuadraticIntegerTest {
     @Test
     public void testToString() {
         System.out.println("toString");
-        String expResult = randomRealPart + "+" + randomImagPart + "i";
+        String expResult;
+        if (randomRealPart == 0) {
+            expResult = randomImagPart + "i";
+        } else {
+            expResult = randomRealPart + "+" + randomImagPart + "i";
+        }
         expResult = expResult.replace("+-", "-");
         expResult = expResult.replace("+1i", "+i");
         expResult = expResult.replace("-1i", "-i");
@@ -406,7 +459,11 @@ public class ImaginaryQuadraticIntegerTest {
             if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
                 expResult = randomRealForHalfInts + "/2+" + randomImagForHalfInts + "\u221A(" + testIntegers.get(i).imagQuadRing.getNegRad() + ")/2";
             } else {
-                expResult = randomRealPart + "+" + randomImagPart + "\u221A(" + testIntegers.get(i).imagQuadRing.getNegRad() + ")";
+                if (randomRealPart == 0) {
+                    expResult = randomImagPart + "\u221A(" + testIntegers.get(i).imagQuadRing.getNegRad() + ")";
+                } else {
+                    expResult = randomRealPart + "+" + randomImagPart + "\u221A(" + testIntegers.get(i).imagQuadRing.getNegRad() + ")";
+                }
             }
             expResult = expResult.replace("+-", "-");
             expResult = expResult.replace("+1\u221A", "+\u221A");
@@ -429,7 +486,6 @@ public class ImaginaryQuadraticIntegerTest {
         String expResult, result;
         ImaginaryQuadraticInteger currIQI;
         int nonThetaPart;
-        ImaginaryQuadraticRing ringRandomForAltTesting;
         // Treating the ring of Eisenstein integers as a special case
         for (int a = -32; a < 32; a++) {
             for (int b = -9; b < 9; b++) {
@@ -457,17 +513,8 @@ public class ImaginaryQuadraticIntegerTest {
                 }
             }
         }
-        // Now to test in O_Q(sqrt(-7)) and some random ring with "half-integers"
-        if (ringRandom.hasHalfIntegers()) {
-            ringRandomForAltTesting = ringRandom;
-        } else {
-            int nextD = ringRandom.getNegRad();
-            do {
-                nextD++;
-            } while (!(NumberTheoreticFunctionsCalculator.isSquareFree(nextD) && (nextD % 4 == -3)));
-            ringRandomForAltTesting = new ImaginaryQuadraticRing(nextD);
-            System.out.println(ringRandomForAltTesting.toFilenameString() + " has been chosen for testing toStringAlt().");
-        }
+        /* Now to test in O_Q(sqrt(-7)) and some random ring with 
+           "half-integers" */
         for (int m = -32; m < 32; m++) {
             for (int n = -9; n < 9; n++) {
                 if ((m % 2) == (n % 2)) {
@@ -514,24 +561,31 @@ public class ImaginaryQuadraticIntegerTest {
     @Test
     public void testToASCIIString() {
         System.out.println("toASCIIString");
-        String expResult = randomRealPart + "+" + randomImagPart + "i";
+        String expResult;
+        if (randomRealPart == 0) {
+            expResult = randomImagPart + "i";
+        } else {
+            expResult = randomRealPart + "+" + randomImagPart + "i";
+        }
         expResult = expResult.replace("+-", "-");
         expResult = expResult.replace("+1i", "+i");
         expResult = expResult.replace("-1i", "-i");
         String result = testIntegers.get(0).toASCIIString().replace(" ", "");
-        System.out.println(result);
         assertEquals(expResult, result);
         for (int i = 1; i < totalTestIntegers; i++) {
             if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
                 expResult = randomRealForHalfInts + "/2+" + randomImagForHalfInts + "sqrt(" + testIntegers.get(i).imagQuadRing.getNegRad() + ")/2";
             } else {
-                expResult = randomRealPart + "+" + randomImagPart + "sqrt(" + testIntegers.get(i).imagQuadRing.getNegRad() + ")";
+                if (randomRealPart == 0) {
+                    expResult = randomImagPart + "sqrt(" + testIntegers.get(i).imagQuadRing.getNegRad() + ")";
+                } else {
+                    expResult = randomRealPart + "+" + randomImagPart + "sqrt(" + testIntegers.get(i).imagQuadRing.getNegRad() + ")";
+                }
             }
             expResult = expResult.replace("+-", "-");
             expResult = expResult.replace("+1sqrt", "+sqrt");
             expResult = expResult.replace("-1sqrt", "-sqrt");
             result = testIntegers.get(i).toASCIIString().replace(" ", "");
-            System.out.println(result);
             assertEquals(expResult, result);
         }
     }
@@ -549,7 +603,6 @@ public class ImaginaryQuadraticIntegerTest {
         String expResult, result;
         ImaginaryQuadraticInteger currIQI;
         int nonThetaPart;
-        ImaginaryQuadraticRing ringRandomForAltTesting;
         // Treating the ring of Eisenstein integers as a special case
         for (int a = -32; a < 32; a++) {
             for (int b = -9; b < 9; b++) {
@@ -577,17 +630,8 @@ public class ImaginaryQuadraticIntegerTest {
                 }
             }
         }
-        // Now to test in O_Q(sqrt(-7)) and some random ring with "half-integers"
-        if (ringRandom.hasHalfIntegers()) {
-            ringRandomForAltTesting = ringRandom;
-        } else {
-            int nextD = ringRandom.getNegRad();
-            do {
-                nextD++;
-            } while (!(NumberTheoreticFunctionsCalculator.isSquareFree(nextD) && (nextD % 4 == -3)));
-            ringRandomForAltTesting = new ImaginaryQuadraticRing(nextD);
-            System.out.println(ringRandomForAltTesting.toFilenameString() + " has been chosen for testing toASCIIStringAlt().");
-        }
+        /* Now to test in O_Q(sqrt(-7)) and some random ring with 
+        "half-integers" */
         for (int m = -32; m < 32; m++) {
             for (int n = -9; n < 9; n++) {
                 if ((m % 2) == (n % 2)) {
@@ -618,7 +662,8 @@ public class ImaginaryQuadraticIntegerTest {
                 }
             }
         }
-        // For integers in rings without "half-integers," we expect toASCIIString() and toASCIIStringAlt() to give the same result.
+        /* For integers in rings without "half-integers," we expect 
+        toASCIIString() and toASCIIStringAlt() to give the same result. */
         for (int i = 0; i < totalTestIntegers; i++) {
             if (!testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
                 assertEquals(testIntegers.get(i).toASCIIString(), testIntegers.get(i).toASCIIStringAlt());
@@ -630,7 +675,7 @@ public class ImaginaryQuadraticIntegerTest {
      * Test of hashCode method, of class ImaginaryQuadraticInteger. It is 
      * expected that if two ImaginaryQuadraticInteger objects are equal, their 
      * hash codes are equal as well. It is also expected that a + b sqrt(c) and 
-     * a + b sqrt(d) will get different hash codes. But by no means is it 
+     * a + b sqrt(d) will get different hash codes. But it definitely not 
      * expected that hash codes will be unique among all possible 
      * ImaginaryQuadraticInteger objects.
      */
@@ -661,8 +706,8 @@ public class ImaginaryQuadraticIntegerTest {
             temporaryHold = new ImaginaryQuadraticInteger(testNormsRealParts.get(j), 0, testNorms.get(totalTestIntegers - 1).imagQuadRing, 1);
             tempHash = temporaryHold.hashCode();
             testHash = testNorms.get(j).hashCode();
-            System.out.println(temporaryHold.toString() + " from " + temporaryHold.imagQuadRing.toFilenameString() + " hashed as " + tempHash);
-            System.out.println(testNorms.get(j).toString() + " from " + testNorms.get(j).imagQuadRing.toFilenameString() + " hashed as " + testHash);
+            System.out.println(temporaryHold.toString() + " from " + temporaryHold.imagQuadRing.toASCIIString() + " hashed as " + tempHash);
+            System.out.println(testNorms.get(j).toString() + " from " + testNorms.get(j).imagQuadRing.toASCIIString() + " hashed as " + testHash);
             assertEquals(tempHash, testHash);
         }
     }
@@ -777,14 +822,14 @@ public class ImaginaryQuadraticIntegerTest {
             result = testIntegers.get(i).plus(0);
             assertEquals(testIntegers.get(i), result);
         }
-        // And now to test that adding algebraic integers from two different quadratic integer rings triggers AlgebraicDegreeOverflowException
+        /* And now to test that adding algebraic integers from two different 
+           quadratic integer rings triggers AlgebraicDegreeOverflowException */
         for (int j = 0; j < totalTestIntegers - 1; j++) {
             try {
                 result = testIntegers.get(j).plus(testIntegers.get(j + 1));
                 fail("Adding " + testIntegers.get(j).toASCIIString() + " to " + testIntegers.get(j + 1).toASCIIString() + " should not have resulted in " + result.toASCIIString() + " without triggering AlgebraicDegreeOverflowException.");
             } catch (AlgebraicDegreeOverflowException adoe) {
-                System.out.println("Adding " + testIntegers.get(j).toASCIIString() + " to " + testIntegers.get(j + 1).toASCIIString() + " correctly triggered AlgebraicDegreeOverflowException.");
-                System.out.println("That calculation requires an implementation of AlgebraicInteger capable of handling algebraic degree " + adoe.getNecessaryAlgebraicDegree() + " or higher.");
+                System.out.println("Adding " + testIntegers.get(j).toASCIIString() + " to " + testIntegers.get(j + 1).toASCIIString() + " correctly triggered AlgebraicDegreeOverflowException (algebraic degree " + adoe.getNecessaryAlgebraicDegree() + " needed).");
             }
         }
     }
@@ -854,8 +899,7 @@ public class ImaginaryQuadraticIntegerTest {
                 result = testIntegers.get(j).minus(testIntegers.get(j + 1));
                 fail("Subtracting " + testIntegers.get(j + 1).toASCIIString() + " to " + testIntegers.get(j).toASCIIString() + " should not have resulted in " + result.toASCIIString() + " without triggering AlgebraicDegreeOverflowException.");
             } catch (AlgebraicDegreeOverflowException adoe) {
-                System.out.println("Subtracting " + testIntegers.get(j + 1).toASCIIString() + " from " + testIntegers.get(j).toASCIIString() + " correctly triggered AlgebraicDegreeOverflowException.");
-                System.out.println("That calculation requires an implementation of AlgebraicInteger capable of handling algebraic degree " + adoe.getNecessaryAlgebraicDegree() + " or higher.");
+                System.out.println("Subtracting " + testIntegers.get(j + 1).toASCIIString() + " from " + testIntegers.get(j).toASCIIString() + " correctly triggered AlgebraicDegreeOverflowException (algebraic degree " + adoe.getNecessaryAlgebraicDegree() + " needed).");
             }
         }
     }
@@ -913,7 +957,6 @@ public class ImaginaryQuadraticIntegerTest {
                 result = zeroIQI; // This is just to avoid "variable result might not have been initialized" error
                 fail("Multiplying an integer by its conjugate should not have triggered AlgebraicDegreeOverflowException \"" + adoe.getMessage());
             }
-            System.out.println("Test norm is " + testNorms.get(i).toString() + " and recalculated norm is " + result.toString());
             assertEquals(testNorms.get(i), result);
         }
         // And now to test that multiplying algebraic integers from two different quadratic integer rings triggers AlgebraicDegreeOverflowException
@@ -922,15 +965,18 @@ public class ImaginaryQuadraticIntegerTest {
                 result = testIntegers.get(j).times(testIntegers.get(j + 1));
                 fail("Multiplying " + testIntegers.get(j).toASCIIString() + " by " + testIntegers.get(j + 1).toASCIIString() + " should not have resulted in " + result.toASCIIString() + " without triggering AlgebraicDegreeOverflowException.");
             } catch (AlgebraicDegreeOverflowException adoe) {
-                System.out.println("Multiplying " + testIntegers.get(j).toASCIIString() + " by " + testIntegers.get(j + 1).toASCIIString() + " correctly triggered AlgebraicDegreeOverflowException.");
-                System.out.println("That calculation requires an implementation of AlgebraicInteger capable of handling algebraic degree " + adoe.getNecessaryAlgebraicDegree() + " or higher.");
+                System.out.println("Multiplying " + testIntegers.get(j).toASCIIString() + " by " + testIntegers.get(j + 1).toASCIIString() + " correctly triggered AlgebraicDegreeOverflowException (algebraic degree " + adoe.getNecessaryAlgebraicDegree() + " needed).");
             }
         }
     }
 
     /**
-     * Test of divides method, of class ImaginaryQuadraticInteger.
-     * If the test of the times method fails, the result of this test is irrelevant.
+     * Test of divides method, of class ImaginaryQuadraticInteger. This test 
+     * multiplies several algebraic integers in the rings Z[i] to Z[sqrt(-199)], 
+     * then divides to get back the first number. So if the test of the times 
+     * method fails, the result of this test is meaningless. In regards to 
+     * division by zero, this test will pass if either IllegalArgumentException 
+     * or ArithmeticException is thrown. Any other exception will fail the test.
      */
     @Test
     public void testDivides() {
@@ -1009,6 +1055,8 @@ public class ImaginaryQuadraticIntegerTest {
             }
             System.out.println(testNorms.get(i).toASCIIString() + " divided by " + testIntegers.get(i).toASCIIString() + " is " + result.toASCIIString());
             assertEquals(testConjugates.get(i), result);
+            /* Last but not least, check to make sure division by zero causes a 
+               suitable exception. */
             try {
                 testIntegers.get(i).divides(zeroIQI);
             } catch (AlgebraicDegreeOverflowException adoe) {
@@ -1017,6 +1065,10 @@ public class ImaginaryQuadraticIntegerTest {
                 fail("NotDivisibleException is the wrong exception to throw for division by 0.");
             } catch (IllegalArgumentException iae) {
                 System.out.println("IllegalArgumentException correctly triggered upon attempt to divide by 0 + 0i.");
+            } catch (ArithmeticException ae) {
+                System.out.println("ArithmeticException correctly triggered upon attempt to divide by 0 + 0i.");
+            } catch (Exception e) {
+                System.out.println("Wrong exception thrown for attempt to divide by 0 + 0i. " + e.getMessage());
             }
             try {
                 testIntegers.get(i).divides(0);
@@ -1024,13 +1076,18 @@ public class ImaginaryQuadraticIntegerTest {
                 fail("NotDivisibleException is the wrong exception to throw for division by 0.");
             } catch (IllegalArgumentException iae) {
                 System.out.println("IllegalArgumentException correctly triggered upon attempt to divide by 0.");
+            } catch (ArithmeticException ae) {
+                System.out.println("ArithmeticException correctly triggered upon attempt to divide by 0.");
+            } catch (Exception e) {
+                System.out.println("Wrong exception thrown for attempt to divide by 0. " + e.getMessage());
             }
         }
     }
 
     /**
-     * Test of ImaginaryQuadraticInteger class constructor.
-     * The main thing we're testing here is that an invalid argument triggers an IllegalArgumentException.
+     * Test of ImaginaryQuadraticInteger class constructor. The main thing we're 
+     * testing here is that an invalid argument triggers an 
+     * IllegalArgumentException.
      */
     @Test
     public void testConstructor() {

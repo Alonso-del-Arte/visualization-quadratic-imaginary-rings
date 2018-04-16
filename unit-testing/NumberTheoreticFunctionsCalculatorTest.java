@@ -227,6 +227,7 @@ public class NumberTheoreticFunctionsCalculatorTest {
      * multiplied by -1, should all be identified as not prime. As for 0, I'm 
      * not sure; if you like you can uncomment the line for it and perhaps 
      * change assertFalse to assertTrue.
+     * TO DO: WRITE TESTS FOR isPrime(ImaginaryQuadraticInteger)
      */
     @Test
     public void testIsPrime() {
@@ -267,6 +268,49 @@ public class NumberTheoreticFunctionsCalculatorTest {
         for  (int m = 5; m < fibonacciList.size(); m++) {
             if (NumberTheoreticFunctionsCalculator.isPrime(fibonacciList.get(m))) {
                 assertTrue(NumberTheoreticFunctionsCalculator.isPrime(m));
+            }
+        }
+        // That does it for testing isPrime on purely real integers.
+        // TO DO: WRITE MORE TESTS FOR isPrime(IQI).
+        ImaginaryQuadraticRing Zi5 = new ImaginaryQuadraticRing(-5);
+        ImaginaryQuadraticInteger numberFromNonUFD = new ImaginaryQuadraticInteger(7, 0, Zi5);
+        try {
+            boolean primality = NumberTheoreticFunctionsCalculator.isPrime(numberFromNonUFD);
+            fail("Attempt to call isPrime(" + numberFromNonUFD.toASCIIString() + ") should have caused a NonUniqueFactorizationDomainException.");
+        } catch (NonUniqueFactorizationDomainException nufde) {
+            System.out.println("Calling isPrime(" + numberFromNonUFD.toASCIIString() + ") on number from non-UFD correctly triggered NonUniqueFactorizationDomainException \"" + nufde.getMessage() + "\"");
+        }
+    }
+    
+    /**
+     * Test of isIrreducible method, of class 
+     * NumberTheoreticFunctionsCalculator.
+     */
+    @Test
+    public void testIsIrreducible() {
+        System.out.println("isIrreducible");
+        ImaginaryQuadraticRing currRing;
+        ImaginaryQuadraticInteger currQuadrInt;
+        /* The number 1 + sqrt(d) should be irreducible but not prime in each
+           domain Z[sqrt(d)] for squarefree negative d = 3 mod 4. But the 
+           conjugate of (1 + sqrt(d))^2 should not be. */
+        for (int iterDiscr = -5; iterDiscr > -200; iterDiscr -= 4) {
+            if (NumberTheoreticFunctionsCalculator.isSquareFree(iterDiscr)) {
+                currRing = new ImaginaryQuadraticRing(iterDiscr);
+                currQuadrInt = new ImaginaryQuadraticInteger(1, 1, currRing);
+                try {
+                    assertFalse(NumberTheoreticFunctionsCalculator.isPrime(currQuadrInt));
+                } catch (NonUniqueFactorizationDomainException nufde) {
+                    fail("NonUniqueFactorizationDomainException should not have happened in this context: " + nufde.getMessage());
+                }
+                assertTrue(NumberTheoreticFunctionsCalculator.isIrreducible(currQuadrInt));
+                try {
+                    currQuadrInt = currQuadrInt.times(currQuadrInt); // Squaring currQuadrInt
+                } catch (AlgebraicDegreeOverflowException adoe) {
+                    fail("AlgebraicDegreeOverflowException should not have happened when multiplying an algebraic integer by itself.");
+                }
+                currQuadrInt = currQuadrInt.conjugate();
+                assertFalse(NumberTheoreticFunctionsCalculator.isIrreducible(currQuadrInt));
             }
         }
     }

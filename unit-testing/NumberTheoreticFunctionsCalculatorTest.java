@@ -316,6 +316,75 @@ public class NumberTheoreticFunctionsCalculatorTest {
     }
     
     /**
+     * Test of symbolLegendre method, of class 
+     * NumberTheoreticFunctionsCalculator. Per quadratic reciprocity, 
+     * Legendre(p, q) = Legendre(q, p) if p and q are both primes and either one 
+     * or both of them are congruent to 1 mod 4. But if both are congruent to 3 
+     * mod 4, then Legendre(p, q) = -Legendre(q, p). And of course Legendre(p, 
+     * p) = 0.
+     * TO DO: Write test for Legendre(a, p) where a is composite.
+     */
+    @Test
+    public void testLegendreSymbol() {
+        System.out.println("symbolLegendre");
+        byte expResult, result;
+        int p, q;
+        for (int pindex = 1; pindex < primesListLength; pindex++) {
+            p = primesList.get(pindex);
+            expResult = 0;
+            result = NumberTheoreticFunctionsCalculator.symbolLegendre(p, p);
+            assertEquals(expResult, result);
+            for (int qindex = pindex + 1; qindex < primesListLength; qindex++) {
+                q = primesList.get(qindex);
+                if (p % 4 == 1 || q % 4 == 1) {
+                    expResult = NumberTheoreticFunctionsCalculator.symbolLegendre(q, p);
+                    result = NumberTheoreticFunctionsCalculator.symbolLegendre(p, q);
+                } else {
+                    expResult = NumberTheoreticFunctionsCalculator.symbolLegendre(q, p);
+                    expResult *= -1; // Can't multiply by -1 on the previous line because of "possible lossy conversion"
+                    result = NumberTheoreticFunctionsCalculator.symbolLegendre(p, q);
+                }
+                assertEquals(expResult, result);
+            }
+        }
+    }
+
+    /**
+     * Test of symbolJacobi method, of class 
+     * NumberTheoreticFunctionsCalculator.
+     */
+    @Test
+    public void testJacobiSymbol() {
+        System.out.println("symbolJacobi");
+        byte expResult, result;
+        for (int i = 1; i < primesListLength; i++) {
+            for (int a = 2; a < 100; a++) {
+                expResult = NumberTheoreticFunctionsCalculator.symbolLegendre(a, primesList.get(i));
+                result = NumberTheoreticFunctionsCalculator.symbolJacobi(a, primesList.get(i));
+                assertEquals(expResult, result);
+            }
+        }
+        expResult = -1;
+        result = NumberTheoreticFunctionsCalculator.symbolJacobi(14, 15);
+        assertEquals(expResult, result);
+    }
+
+    // This is nowhere near a complete test, but it should be enought to give a 
+    // failing first test, per the test-driven development methodology.
+    /**
+     * Test of symbolKronecker method, of class 
+     * NumberTheoreticFunctionsCalculator.
+     */
+    @Test
+    public void testKroneckerSymbol() {
+        System.out.println("symbolKronecker");
+        byte expResult = -1;
+        byte result = NumberTheoreticFunctionsCalculator.symbolKronecker(5, 2);
+        assertEquals(expResult, result);
+    }
+   
+    
+    /**
      * Test of isSquareFree method, of class NumberTheoreticFunctionsCalculator.
      */
     @Test

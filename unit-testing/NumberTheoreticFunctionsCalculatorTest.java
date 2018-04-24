@@ -231,7 +231,7 @@ public class NumberTheoreticFunctionsCalculatorTest {
      */
     @Test
     public void testIsPrime() {
-        System.out.println("isPrime");
+        System.out.println("isPrime(int)");
         // assertFalse(NumberTheoreticFunctionsCalculator.isPrime(0));
         for (int i = 0; i < primesListLength; i++) {
             assertTrue(NumberTheoreticFunctionsCalculator.isPrime(primesList.get(i)));
@@ -270,6 +270,7 @@ public class NumberTheoreticFunctionsCalculatorTest {
                 assertTrue(NumberTheoreticFunctionsCalculator.isPrime(m));
             }
         }
+        System.out.println("isPrime(ImaginaryQuadraticInteger)");
         // That does it for testing isPrime on purely real integers.
         // TO DO: WRITE MORE TESTS FOR isPrime(IQI).
         ImaginaryQuadraticRing Zi5 = new ImaginaryQuadraticRing(-5);
@@ -280,6 +281,14 @@ public class NumberTheoreticFunctionsCalculatorTest {
         } catch (NonUniqueFactorizationDomainException nufde) {
             System.out.println("Calling isPrime(" + numberFromNonUFD.toASCIIString() + ") on number from non-UFD correctly triggered NonUniqueFactorizationDomainException \"" + nufde.getMessage() + "\"");
         }
+        ImaginaryQuadraticRing OQi43 = new ImaginaryQuadraticRing(-43);
+        ImaginaryQuadraticInteger a43 = new ImaginaryQuadraticInteger(43, 0, OQi43);
+        try {
+            assertFalse(NumberTheoreticFunctionsCalculator.isPrime(a43));
+        } catch (NonUniqueFactorizationDomainException nufde) {
+            fail("Calling isPrime(" + a43.toASCIIString() + ") on number from UFD not have triggered NonUniqueFactorizationDomainException \"" + nufde.getMessage() + "\"");
+        }
+        // April 24, 2018: That will have to do for now. Will write more later.
     }
     
     /**
@@ -321,14 +330,58 @@ public class NumberTheoreticFunctionsCalculatorTest {
      * Legendre(p, q) = Legendre(q, p) if p and q are both primes and either one 
      * or both of them are congruent to 1 mod 4. But if both are congruent to 3 
      * mod 4, then Legendre(p, q) = -Legendre(q, p). And of course Legendre(p, 
-     * p) = 0.
-     * TO DO: Write test for Legendre(a, p) where a is composite.
+     * p) = 0. Some of this assumes that both p and q are positive. In the case 
+     * of Legendre(p, q) with q being negative, reckon the congruence of -q mod 
+     * 4 rather than q.
+     * <p>Another property to test for is that Legendre(ab, p) = Legendre(a, p) 
+     * Legendre(b, p). That is to say that this is a multiplicative function. So 
+     * here this is tested with Legendre(2p, q) = Legendre(2, q) Legendre(p, q).
+     * </p>
+     * <p>Of course it's entirely possible that in implementing symbolLegendre 
+     * the programmer could get dyslexic and produce an implementation that 
+     * always gives the wrong result when gcd(a, p) = 1, meaning that it always 
+     * returns -1 when it should return 1, and vice-versa, and yet it passes the 
+     * tests.</p>
+     * <p>For that reason one should not rely only on the identities pertaining 
+     * to multiplicativity and quadratic reciprocity. Therefore these tests also 
+     * include some computations of actual squares modulo p to check some of the 
+     * answers.</p>
      */
     @Test
     public void testLegendreSymbol() {
         System.out.println("symbolLegendre");
         byte expResult, result;
         int p, q;
+        // First to test Legendre(Fibonacci(n), p)
+        for (int i = 3; i < fibonacciList.size(); i++) {
+            for (int j = 1; j < primesListLength; j++) {
+                p = primesList.get(j);
+                int fiboM = fibonacciList.get(i) % p;
+                if (fiboM == 0) {
+                    expResult = 0;
+                } else {
+                    int halfPmark = (p + 1)/2;
+                    int[] modSquares = new int[halfPmark];
+                    boolean noSolutionFound = true;
+                    int currModSqIndex = 0;
+                    for (int n = 0; n < halfPmark; n++) {
+                        modSquares[n] = (n * n) % p;
+                    }
+                    while (noSolutionFound && (currModSqIndex < halfPmark)) {
+                        noSolutionFound = !(fiboM == modSquares[currModSqIndex]);
+                        currModSqIndex++;
+                    }
+                    if (noSolutionFound) {
+                        expResult = -1;
+                    } else {
+                        expResult = 1;
+                    }
+                }
+                result = NumberTheoreticFunctionsCalculator.symbolLegendre(fibonacciList.get(i), p);
+                assertEquals(expResult, result);
+            }
+        }
+        // Now to test with both p and q being odd primes
         for (int pindex = 1; pindex < primesListLength; pindex++) {
             p = primesList.get(pindex);
             expResult = 0;
@@ -336,14 +389,19 @@ public class NumberTheoreticFunctionsCalculatorTest {
             assertEquals(expResult, result);
             for (int qindex = pindex + 1; qindex < primesListLength; qindex++) {
                 q = primesList.get(qindex);
-                if (p % 4 == 1 || q % 4 == 1) {
-                    expResult = NumberTheoreticFunctionsCalculator.symbolLegendre(q, p);
-                    result = NumberTheoreticFunctionsCalculator.symbolLegendre(p, q);
-                } else {
-                    expResult = NumberTheoreticFunctionsCalculator.symbolLegendre(q, p);
-                    expResult *= -1; // Can't multiply by -1 on the previous line because of "possible lossy conversion"
-                    result = NumberTheoreticFunctionsCalculator.symbolLegendre(p, q);
+                expResult = NumberTheoreticFunctionsCalculator.symbolLegendre(q, p);
+                if (p % 4 == 3 && q % 4 == 3) {
+                    expResult *= -1;
                 }
+                result = NumberTheoreticFunctionsCalculator.symbolLegendre(p, q);
+                assertEquals(expResult, result);
+                result = NumberTheoreticFunctionsCalculator.symbolLegendre(p, -q);
+                assertEquals(expResult, result);
+                /* And lastly, to test that Legendre(2p, q) = Legendre(2, q) 
+                   Legendre(p, q). */
+                expResult = NumberTheoreticFunctionsCalculator.symbolLegendre(2, q);
+                expResult *= NumberTheoreticFunctionsCalculator.symbolLegendre(p, q);
+                result = NumberTheoreticFunctionsCalculator.symbolLegendre(2 * p, q);
                 assertEquals(expResult, result);
             }
         }

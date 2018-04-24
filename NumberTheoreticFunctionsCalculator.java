@@ -106,6 +106,72 @@ public class NumberTheoreticFunctionsCalculator {
     }
     
     /**
+     * An implementation of the Legendre symbol, which tells if a given number 
+     * is a quadratic residue modulo an odd prime. There is no overflow 
+     * checking, but hopefully that's only a problem for numbers that are very 
+     * close to Integer.MIN_VALUE or Integer.MAX_VALUE.
+     * @param a The number to test for being a quadratic residue modulo an odd 
+     * prime. For example, 10.
+     * @param p The odd prime to test a for being a quadratic residue modulo of. 
+     * For example, 7. This parameter may be negative; the function will simply 
+     * change it to a positive number.
+     * @return -1 if a is quadratic residue modulo p, 0 if gcd(a, p) > 1, 1 if a 
+     * is a quadratic residue modulo p. An example of each: Legendre(10, 7) = -1 
+     * since there are no solutions to x^2 = 10 mod 7; Legendre(10, 5) = 0 since 
+     * 10 is a multiple of 5; and Legendre(10, 3) = 1 since x^2 = 10 mod 3 does 
+     * have solutions, such as x = 4.
+     * @throws IllegalArgumentException If p is not an odd prime. Note that this 
+     * is a runtime exception.
+     */
+    public static byte symbolLegendre(int a, int p) {
+        if (!isPrime(p)) {
+            throw new IllegalArgumentException(p + " is not a prime number. Consider using the Jacobi symbol instead.");
+        }
+        if (p == -2 || p == 2) {
+            throw new IllegalArgumentException(p + " is not an odd prime. Consider using the Kronecker symbol instead.");
+        }
+        if (euclideanGCD(a, p) > 1) {
+            return 0;
+        }
+        int oddPrime = Math.abs(p); // Making sure p is positive
+        int exponent = (oddPrime - 1)/2;
+        int modStop = oddPrime - 2;
+        int adjA = a;
+        if (adjA > (oddPrime - 1)) {
+            adjA %= oddPrime;
+        }
+        if (adjA == (oddPrime - 1)) {
+            adjA = -1;
+        }
+        while (adjA < -1) {
+            adjA += oddPrime;
+        }
+        int power = adjA;
+        for (int i = 1; i < exponent; i++) {
+            power *= adjA;
+            while (power > modStop) {
+                power -= oddPrime;
+            }
+            while (power < -1) {
+                power += oddPrime;
+            }
+        }
+        return (byte) power;
+    }
+    
+    // PLACEHOLDER FOR symbolJacobi
+    // Uncomment the next three lines to get failing first test.
+//    public static byte symbolJacobi(int a, int m) {
+//        return -3;
+//    }
+    
+    // PLACEHOLDER FOR symbolKronecker
+    // Uncomment the next three lines to get failing first test.
+//    public static byte symbolKronecker(int a, int m) {
+//        return -4;
+//    }
+    
+    /**
      * Determines whether a given number, not necessarily purely real, is prime 
      * or not.
      * @param num The number for which to make the determination.
@@ -139,15 +205,11 @@ public class NumberTheoreticFunctionsCalculator {
                         case -7:
                             return (absRealPartMult != 2 || absRealPartMult != 7);
                         case -11:
-                            return true; // TO DO: FILL IN MISSING LOGIC
                         case -19:
-                            return true; // TO DO: FILL IN MISSING LOGIC
                         case -43:
-                            return true; // TO DO: FILL IN MISSING LOGIC
                         case -67:
-                            return true; // TO DO: FILL IN MISSING LOGIC
                         case -163:
-                            return true; // TO DO: FILL IN MISSING LOGIC
+                            return symbolLegendre(absRealPartMult, num.imagQuadRing.negRad) == -1;
                         default:
                             String exceptionMessage = num.imagQuadRing.toASCIIString() + " is not a unique factorization domain.";
                             throw new NonUniqueFactorizationDomainException(exceptionMessage, num);

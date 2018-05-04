@@ -18,9 +18,6 @@ package imaginaryquadraticinteger;
 
 import java.util.List;
 import java.util.ArrayList;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -72,9 +69,6 @@ public class NumberTheoreticFunctionsCalculatorTest {
      * A List of Fibonacci numbers.
      */
     private static List<Integer> fibonacciList;
-    
-    public NumberTheoreticFunctionsCalculatorTest() {
-    }
     
     /**
      * Sets up a List of the first few consecutive primes, the first few 
@@ -146,18 +140,6 @@ public class NumberTheoreticFunctionsCalculatorTest {
         System.out.println("Fibonacci(" + currIndex + ") = " + fibonacciList.get(currIndex));
     }
     
-    @AfterClass
-    public static void tearDownClass() {
-    }
-    
-    @Before
-    public void setUp() {
-    }
-    
-    @After
-    public void tearDown() {
-    }
-
     /**
      * Test of primeFactors method, of class NumberTheoreticFunctionsCalculator.
      * This test uses squares of primorials (4, 36, 900, 44100, etc.) and 
@@ -331,8 +313,8 @@ public class NumberTheoreticFunctionsCalculatorTest {
      * or both of them are congruent to 1 mod 4. But if both are congruent to 3 
      * mod 4, then Legendre(p, q) = -Legendre(q, p). And of course Legendre(p, 
      * p) = 0. Some of this assumes that both p and q are positive. In the case 
-     * of Legendre(p, q) with q being negative, reckon the congruence of -q mod 
-     * 4 rather than q.
+     * of Legendre(p, -q) with q being positive, reckon the congruence of q mod 
+     * 4 rather than -q.
      * <p>Another property to test for is that Legendre(ab, p) = Legendre(a, p) 
      * Legendre(b, p). That is to say that this is a multiplicative function. So 
      * here this is tested with Legendre(2p, q) = Legendre(2, q) Legendre(p, q).
@@ -346,6 +328,9 @@ public class NumberTheoreticFunctionsCalculatorTest {
      * to multiplicativity and quadratic reciprocity. Therefore these tests also 
      * include some computations of actual squares modulo p to check some of the 
      * answers.</p>
+     * <p>I chose to use the Fibonacci numbers for this purpose, since they are 
+     * already being used in some of the other tests and they contain a good mix 
+     * of prime numbers (including the even prime 2) and composite numbers.</p>
      */
     @Test
     public void testLegendreSymbol() {
@@ -405,11 +390,21 @@ public class NumberTheoreticFunctionsCalculatorTest {
                 assertEquals(expResult, result);
             }
         }
+        // And lastly to check for exceptions for bad arguments.
+        try {
+            byte attempt = NumberTheoreticFunctionsCalculator.symbolLegendre(7, 2);
+            fail("Calling Legendre(7, 2) should have triggered an exception, not given result " + attempt + ".");
+        } catch (IllegalArgumentException iae) {
+            System.out.println("Calling Legendre(7, 2) correctly triggered IllegalArgumentException. " + iae.getMessage());
+        }
     }
 
     /**
-     * Test of symbolJacobi method, of class 
-     * NumberTheoreticFunctionsCalculator.
+     * Test of symbolJacobi method, of class NumberTheoreticFunctionsCalculator. 
+     * First, it checks that Legendre(a, p) = Jacobi(a, p), where p is an odd 
+     * prime. Next, it checks that Jacobi(n, pq) = Legendre(n, p) Legendre(n, 
+     * q). If the Legendre symbol test fails, then the result of this test is 
+     * meaningless.
      */
     @Test
     public void testJacobiSymbol() {
@@ -422,9 +417,20 @@ public class NumberTheoreticFunctionsCalculatorTest {
                 assertEquals(expResult, result);
             }
         }
-        expResult = -1;
-        result = NumberTheoreticFunctionsCalculator.symbolJacobi(14, 15);
-        assertEquals(expResult, result);
+        int p, q, m;
+        for (int pindex = 1; pindex < primesListLength; pindex++) {
+            p = primesList.get(pindex);
+            for (int qindex = pindex + 1; qindex < primesListLength; qindex++) {
+                q = primesList.get(qindex);
+                m = p * q;
+                for (int n = 2; n < 100; n++) {
+                    expResult = NumberTheoreticFunctionsCalculator.symbolLegendre(n, p);
+                    expResult *= NumberTheoreticFunctionsCalculator.symbolLegendre(n, q);
+                    result = NumberTheoreticFunctionsCalculator.symbolJacobi(n, m);
+                    assertEquals(expResult, result);
+                }
+            }
+        }
     }
 
     // This is nowhere near a complete test, but it should be enought to give a 
@@ -436,11 +442,45 @@ public class NumberTheoreticFunctionsCalculatorTest {
     @Test
     public void testKroneckerSymbol() {
         System.out.println("symbolKronecker");
-        byte expResult = -1;
-        byte result = NumberTheoreticFunctionsCalculator.symbolKronecker(5, 2);
-        assertEquals(expResult, result);
+        byte expResult, result;
+        for (int n = 1; n < 50; n++) {
+            expResult = -1;
+            result = NumberTheoreticFunctionsCalculator.symbolKronecker(-n, -1);
+            assertEquals(expResult, result);
+            expResult = 1;
+            result = NumberTheoreticFunctionsCalculator.symbolKronecker(n, -1);
+            assertEquals(expResult, result);
+        }
+        for (int m = 0; m < 50; m += 8) {
+            expResult = -1;
+            result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 3, 2);
+            assertEquals(expResult, result);
+            result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 5, 2);
+            assertEquals(expResult, result);
+            result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 1, -2);
+            assertEquals(expResult, result);
+            result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 7, -2);
+            assertEquals(expResult, result);
+            expResult = 0;
+            result = NumberTheoreticFunctionsCalculator.symbolKronecker(m, 2);
+            assertEquals(expResult, result);
+            result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 2, 2);
+            assertEquals(expResult, result);
+            result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 4, 2);
+            assertEquals(expResult, result);
+            result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 6, 2);
+            assertEquals(expResult, result);
+            expResult = 1;
+            result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 1, 2);
+            assertEquals(expResult, result);
+            result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 7, 2);
+            assertEquals(expResult, result);
+            result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 3, -2);
+            assertEquals(expResult, result);
+            result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 5, -2);
+            assertEquals(expResult, result);
+        }
     }
-   
     
     /**
      * Test of isSquareFree method, of class NumberTheoreticFunctionsCalculator.
@@ -494,7 +534,6 @@ public class NumberTheoreticFunctionsCalculatorTest {
 
     /**
      * Test of euclideanGCD method, of class NumberTheoreticFunctionsCalculator.
-     * TO DO: Write test for euclideanGCD(IQI, IQI).
      * At this time, I choose not to test the case gcd(0, 0). The value of such 
      * a test would be philosophical rather than practical.
      */
@@ -529,14 +568,54 @@ public class NumberTheoreticFunctionsCalculatorTest {
         // And now some of the same tests again but with the long data type
         long expResultLong = 1;
         long resultLong;
-        for (long j = Integer.MAX_VALUE; j < Integer.MAX_VALUE + 32; j++) {
+        for (long j = (long) Integer.MAX_VALUE; j < ((long) Integer.MAX_VALUE + 32); j++) {
             resultLong = NumberTheoreticFunctionsCalculator.euclideanGCD(j, j + 1);
             assertEquals(expResultLong, resultLong);
         }
         expResultLong = 2;
-        for (long k = Integer.MAX_VALUE; k < Integer.MAX_VALUE + 32; k += 2) {
+        for (long k = ((long) Integer.MAX_VALUE - 1); k < ((long) Integer.MAX_VALUE + 32); k += 2) {
             resultLong = NumberTheoreticFunctionsCalculator.euclideanGCD(k, k + 2);
             assertEquals(expResultLong, resultLong);
+        }
+        /* TO DO: Write more tests for euclideanGCD(IQI, IQI). */
+        /* Last but not least, euclideanGCD(ImaginaryQuadraticInteger, 
+           ImaginaryQuadraticInteger). */
+        ImaginaryQuadraticRing r = new ImaginaryQuadraticRing(-1);
+        ImaginaryQuadraticInteger iqia = new ImaginaryQuadraticInteger(-2, 2, r);
+        ImaginaryQuadraticInteger iqib = new ImaginaryQuadraticInteger(-2, 4, r);
+        ImaginaryQuadraticInteger expResultIQI = new ImaginaryQuadraticInteger(0, 2, r);
+        ImaginaryQuadraticInteger resultIQI;
+        try {
+            resultIQI = NumberTheoreticFunctionsCalculator.euclideanGCD(iqia, iqib);
+        } catch (AlgebraicDegreeOverflowException adoe) {
+            resultIQI = iqia; // Just to avoid "may not have been initialized" warning
+            fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") should not have triggered AlgebraicDegreeOverflowException" + adoe.getMessage());
+        } catch (NonEuclideanDomainException nde) {
+            resultIQI = iqib; // Same reason as previous
+            fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") should not have triggered NonEuclideanDomainException" + nde.getMessage());
+        }
+        assertEquals(expResultIQI, resultIQI);
+        // Now to check the appropriate exceptions are thrown
+        r = new ImaginaryQuadraticRing(-2);
+        iqib = new ImaginaryQuadraticInteger(-2, 4, r);
+        try {
+            resultIQI = NumberTheoreticFunctionsCalculator.euclideanGCD(iqia, iqib);
+            fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") should have triggered AlgebraicDegreeOverflowException, not given result " + resultIQI.toASCIIString());
+        } catch (AlgebraicDegreeOverflowException adoe) {
+            System.out.println("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") correctly triggered AlgebraicDegreeOverflowException" + adoe.getMessage());
+        } catch (NonEuclideanDomainException nde) {
+            fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") should not have triggered NonEuclideanDomainException" + nde.getMessage());
+        }
+        r = new ImaginaryQuadraticRing(-5);
+        iqia = new ImaginaryQuadraticInteger(-2, 2, r);
+        iqib = new ImaginaryQuadraticInteger(-2, 4, r);
+        try {
+            resultIQI = NumberTheoreticFunctionsCalculator.euclideanGCD(iqia, iqib);
+            fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") should have triggered NonEuclideanDomainException, not given result " + resultIQI.toASCIIString());
+        } catch (AlgebraicDegreeOverflowException adoe) {
+            fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") should not have triggered AlgebraicDegreeOverflowException" + adoe.getMessage());
+        } catch (NonEuclideanDomainException nde) {
+            System.out.println("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") correctly triggered NonEuclideanDomainException" + nde.getMessage());
         }
     }
     

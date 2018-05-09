@@ -1,18 +1,18 @@
 /*
  * Copyright (C) 2018 Alonso del Arte
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under 
+ * the terms of the GNU General Public License as published by the Free Software 
+ * Foundation, either version 3 of the License, or (at your option) any later 
+ * version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
+ * details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with 
+ * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package imaginaryquadraticinteger;
 
@@ -44,6 +44,7 @@ public class NotDivisibleExceptionTest {
             System.out.println(dividend.toASCIIString() + " divided by " + divisor.toASCIIString() + " is " + division.toASCIIString());
         } catch (AlgebraicDegreeOverflowException adoe) {
             System.err.println("AlgebraicDegreeOverflowException should not have occurred in this context.");
+            // This would merit a fail if occurred in a test.
         } catch (NotDivisibleException nde) {
             notDivGaussian = nde;
         }
@@ -54,11 +55,12 @@ public class NotDivisibleExceptionTest {
             System.out.println(dividend.toASCIIString() + " divided by " + divisor.toASCIIString() + " is " + division.toASCIIString());
         } catch (AlgebraicDegreeOverflowException adoe) {
             System.err.println("AlgebraicDegreeOverflowException should not have occurred in this context.");
+            // This would merit a fail if occurred in a test.
         } catch (NotDivisibleException nde) {
             notDivEisenstein = nde;
         }
-        System.out.println("NotDivisibleException for Gaussian integers example has this message: \"" + notDivGaussian.getMessage() + "\"");
-        System.out.println("NotDivisibleException for Eisenstein integers example has this message: \"" + notDivEisenstein.getMessage() + "\"");
+        System.out.println("NotDivisibleException for the Gaussian integers example has this message: \"" + notDivGaussian.getMessage() + "\"");
+        System.out.println("NotDivisibleException for the Eisenstein integers example has this message: \"" + notDivEisenstein.getMessage() + "\"");
     }
     
     /**
@@ -118,6 +120,33 @@ public class NotDivisibleExceptionTest {
         expResult = new ImaginaryQuadraticInteger(0, -2, RING_EISENSTEIN);
         result = notDivEisenstein.roundTowardsZero();
         assertEquals(expResult, result);
+        ImaginaryQuadraticRing currRing;
+        ImaginaryQuadraticInteger dividend, divisor, division;
+        /* For this next test, must skip over iterDiscr = -3, because 1/2 + 
+           sqrt(-3) is a unit, as is its conjugate. */
+        for (int iterDiscr = -5; iterDiscr > -200; iterDiscr--) {
+            if (NumberTheoreticFunctionsCalculator.isSquareFree(iterDiscr)) {
+                currRing = new ImaginaryQuadraticRing(iterDiscr);
+                if (currRing.hasHalfIntegers()) {
+                    dividend = new ImaginaryQuadraticInteger(1, 0, currRing);
+                    divisor = new ImaginaryQuadraticInteger(1, 1, currRing, 2);
+                } else {
+                    dividend = new ImaginaryQuadraticInteger(2, 1, currRing);
+                    divisor = new ImaginaryQuadraticInteger(1, 1, currRing);
+                }
+                try {
+                    division = dividend.divides(divisor);
+                    fail("Dividing " + dividend + " by " + divisor + " should not have given " + division);
+                } catch (AlgebraicDegreeOverflowException adoe) {
+                    fail("AlgebraicDegreeOverflowException should not have happened. " + adoe.getMessage());
+                } catch (NotDivisibleException nde) {
+                    expResult = divisor.conjugate();
+                    result = nde.roundTowardsZero();
+                    System.out.println(dividend.toASCIIString() + " divided by " + divisor.toASCIIString() + " rounds to " + result.toASCIIString());
+                    assertEquals(expResult, result);
+                }
+            }
+        }
     }
     
 }

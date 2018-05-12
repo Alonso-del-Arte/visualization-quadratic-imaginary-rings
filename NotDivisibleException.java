@@ -79,24 +79,31 @@ public class NotDivisibleException extends Exception {
         return resultingFractionNegRad;
     }
     
-    // TODO: FINE-TUNE FUNCTION FOR -3, -7, -11, -15, -19, ETC.
-    // I thought this would pass tests that don't involve domains with "half-integers", but that's not the case
+    // Uncomment next five lines for failing first test
+//    public ImaginaryQuadraticInteger[] getBoundingIntegers() {
+//        ImaginaryQuadraticInteger zeroIQI = new ImaginaryQuadraticInteger(0, 0, workingRing);
+//        ImaginaryQuadraticInteger[] algIntArray = {zeroIQI, zeroIQI, zeroIQI, zeroIQI};
+//        return algIntArray;
+//    }
+    
+    // TODO: FINE-TUNE FUNCTION FOR DOMAINS WITH "HALF-INTEGERS"
+    // I think this will pass tests that don't involve domains with "half-integers", but more thorough tests may be necessary...
     // TODO: WRITE JAVADOC, making sure to mention ArithmeticException
     public ImaginaryQuadraticInteger roundTowardsZero() {
-        double intermediateRealPart = resultingFractionRealPartNumerator / resultingFractionDenominator;
-        double intermediateImagPart = resultingFractionImagPartNumerator / resultingFractionDenominator;
-//        if (intermediateRealPart < 0) {
-//            intermediateRealPart = Math.ceil(intermediateRealPart);
-//        } else {
+        double intermediateRealPart = (double) resultingFractionRealPartNumerator / (double) resultingFractionDenominator;
+        double intermediateImagPart = (double) resultingFractionImagPartNumerator / (double) resultingFractionDenominator;
+        if (intermediateRealPart < 0) {
+            intermediateRealPart = Math.ceil(intermediateRealPart);
+        } else {
             intermediateRealPart = Math.floor(intermediateRealPart);
-//        }
-//        if (intermediateImagPart < 0) {
-//            intermediateImagPart = Math.ceil(intermediateImagPart);
-//        } else {
+        }
+        if (intermediateImagPart < 0) {
+            intermediateImagPart = Math.ceil(intermediateImagPart);
+        } else {
             intermediateImagPart = Math.floor(intermediateImagPart);
-//        }
+        }
         boolean overflowFlag = (intermediateRealPart < Integer.MIN_VALUE) || (intermediateRealPart > Integer.MAX_VALUE);
-        overflowFlag = overflowFlag || (intermediateImagPart < Integer.MIN_VALUE) || (intermediateImagPart > Integer.MAX_VALUE);
+        overflowFlag = overflowFlag || ((intermediateImagPart < Integer.MIN_VALUE) || (intermediateImagPart > Integer.MAX_VALUE));
         if (overflowFlag) {
             throw new ArithmeticException("Real part " + intermediateRealPart + ", imaginary part " + intermediateImagPart + " times sqrt" + resultingFractionNegRad + " is outside the range of this implmentation of ImaginaryQuadraticInteger, which uses 32-bit signed ints.");
         }
@@ -104,7 +111,12 @@ public class NotDivisibleException extends Exception {
         return result;
     }
     
-    // I'M THINKING OF INCLUDING FOUR OR SIX ROUNDING FUNCTIONS.
+    // Uncomment next three lines for failing first test
+//    public ImaginaryQuadraticInteger roundAwayFromZero() {
+//        return new ImaginaryQuadraticInteger(2, 1, workingRing);
+//    }
+    
+    // I'M THINKING OF INCLUDING ANOTHER TWO OR THREE ROUNDING FUNCTIONS.
     // Part of what is holding me back is figuring out what to call these functions.
     // Also, how to order the results?
 

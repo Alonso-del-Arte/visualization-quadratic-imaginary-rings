@@ -104,20 +104,30 @@ public class NotDivisibleExceptionTest {
         assertEquals(-1, notDivGaussian.getResFractNegRad());
         assertEquals(-3, notDivEisenstein.getResFractNegRad());
     }
+    
+    /**
+     * Test of getBoundingIntegers method, of class NotDivisibleException.
+     */
+    @Test
+    public void testGetBoundingIntegers() {
+        System.out.println("getBoundingIntegers");
+        fail("Test not written yet");
+    }
 
     /**
      * Test of roundTowardsZero method, of class NotDivisibleException. Here we 
      * get down to the nitty-gritty, what is perhaps the most important function 
      * of this exception, the one that makes the Euclidean GCD algorithm 
-     * possible.
+     * possible. First, this tests the two exception instances notDivGaussian 
+     * and notDivEisenstein.
      */
     @Test
     public void testRoundTowardsZero() {
         System.out.println("roundTowardsZero");
-        ImaginaryQuadraticInteger expResult = new ImaginaryQuadraticInteger(1, -1, RING_GAUSSIAN);
+        ImaginaryQuadraticInteger expResult = new ImaginaryQuadraticInteger(1, 0, RING_GAUSSIAN);
         ImaginaryQuadraticInteger result = notDivGaussian.roundTowardsZero();
         assertEquals(expResult, result);
-        expResult = new ImaginaryQuadraticInteger(0, -2, RING_EISENSTEIN);
+        expResult = new ImaginaryQuadraticInteger(1, 3, RING_EISENSTEIN, 2);
         result = notDivEisenstein.roundTowardsZero();
         assertEquals(expResult, result);
         ImaginaryQuadraticRing currRing;
@@ -128,11 +138,13 @@ public class NotDivisibleExceptionTest {
             if (NumberTheoreticFunctionsCalculator.isSquareFree(iterDiscr)) {
                 currRing = new ImaginaryQuadraticRing(iterDiscr);
                 if (currRing.hasHalfIntegers()) {
-                    dividend = new ImaginaryQuadraticInteger(1, 0, currRing);
-                    divisor = new ImaginaryQuadraticInteger(1, 1, currRing, 2);
+                    dividend = new ImaginaryQuadraticInteger(-7, 15, currRing, 2);
+                    divisor = new ImaginaryQuadraticInteger(-3, 7, currRing, 2);
+                    expResult = new ImaginaryQuadraticInteger(2, 0, currRing);
                 } else {
                     dividend = new ImaginaryQuadraticInteger(2, 1, currRing);
                     divisor = new ImaginaryQuadraticInteger(1, 1, currRing);
+                    expResult = new ImaginaryQuadraticInteger(1, 0, currRing);
                 }
                 try {
                     division = dividend.divides(divisor);
@@ -140,13 +152,40 @@ public class NotDivisibleExceptionTest {
                 } catch (AlgebraicDegreeOverflowException adoe) {
                     fail("AlgebraicDegreeOverflowException should not have happened. " + adoe.getMessage());
                 } catch (NotDivisibleException nde) {
-                    expResult = divisor.conjugate();
                     result = nde.roundTowardsZero();
                     System.out.println(dividend.toASCIIString() + " divided by " + divisor.toASCIIString() + " rounds to " + result.toASCIIString());
                     assertEquals(expResult, result);
                 }
+                /* Now to try it with conjugates, results should be the same as 
+                   before */
+                try {
+                    division = dividend.conjugate().divides(divisor.conjugate());
+                    fail("Dividing " + dividend + " by " + divisor + " should not have given " + division);
+                } catch (AlgebraicDegreeOverflowException adoe) {
+                    fail("AlgebraicDegreeOverflowException should not have happened. " + adoe.getMessage());
+                } catch (NotDivisibleException nde) {
+                    result = nde.roundTowardsZero();
+                    System.out.println(dividend.conjugate().toASCIIString() + " divided by " + divisor.conjugate().toASCIIString() + " rounds to " + result.toASCIIString());
+                    assertEquals(expResult, result);
+                }
             }
         }
+    }
+
+    /**
+     * Test of roundAwayFromZero method, of class NotDivisibleException. Not 
+     * planning to test this one anywhere near as thoroughly as 
+     * roundTowardsZero.
+     */
+    @Test
+    public void testRoundAwayFromZero() {
+        System.out.println("roundAwayFromZero");
+        ImaginaryQuadraticInteger expResult = new ImaginaryQuadraticInteger(2, -1, RING_GAUSSIAN);
+        ImaginaryQuadraticInteger result = notDivGaussian.roundTowardsZero();
+        assertEquals(expResult, result);
+        expResult = new ImaginaryQuadraticInteger(2, 0, RING_EISENSTEIN);
+        result = notDivEisenstein.roundTowardsZero();
+        assertEquals(expResult, result);
     }
     
 }

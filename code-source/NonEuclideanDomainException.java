@@ -25,7 +25,7 @@ package imaginaryquadraticinteger;
  */
 public class NonEuclideanDomainException extends Exception {
     
-    private static final long serialVersionUID = 1;
+    private static final long serialVersionUID = 1058198177;
     
     /**
      * The only five values d such that new ImaginaryQuadraticRing(d) represents 
@@ -37,10 +37,19 @@ public class NonEuclideanDomainException extends Exception {
     
     private final ImaginaryQuadraticInteger attemptedA, attemptedB;
     
-/*
-    public List<ImaginaryQuadraticInteger> tryEuclideanGCDAnyway() {
-        (* This is going to be a function that tries to take the Euclidean GCD algorithm as far as possible.
-           Sometimes there will be a result, other times not. *)
+    public ImaginaryQuadraticInteger[] getEuclideanGCDAttemptedNumbers() {
+        ImaginaryQuadraticInteger[] attemptedNumbers = {attemptedA, attemptedB};
+        return attemptedNumbers;
+    }
+    /*
+    public ImaginaryQuadraticInteger tryEuclideanGCDAnyway() {
+        //   (* This is going to be a function that tries to take the Euclidean GCD algorithm as far as possible.
+        //      Sometimes there will be a result, other times not. *)
+        int negRad = this.attemptedA.getRing().getNegRad();
+        if (negRad != this.attemptedB.getRing().getNegRad()) {
+            throw new RuntimeException("euclideanGCD should have thrown AlgebraicDegreeOverflowException, not NonEuclideanDomainException.");
+        }
+        ImaginaryQuadraticInteger attemptedEuclideanGCD;
     } */
 
     /**
@@ -48,7 +57,7 @@ public class NonEuclideanDomainException extends Exception {
      * upon a and b in a ring of Q(sqrt(d)) for d other than the ones listed in 
      * NORM_EUCLIDEAN_IMAGINARY_RINGS_D.
      * @param message Should probably just be something like 
-     * a.imagQuadRing.toString() + " is not an Euclidean domain." This message 
+     * a.getRing().toString() + " is not an Euclidean domain." This message 
      * is just passed on to the superclass.
      * @param a One of the two algebraic integers for which the request to 
      * compute the Euclidean GCD was declined. If desired, the calling function 
@@ -63,8 +72,8 @@ public class NonEuclideanDomainException extends Exception {
      */
     public NonEuclideanDomainException(String message, ImaginaryQuadraticInteger a, ImaginaryQuadraticInteger b) {
         super(message);
-        attemptedA = a;
-        attemptedB = b;
+        this.attemptedA = a;
+        this.attemptedB = b;
     }
     
 }

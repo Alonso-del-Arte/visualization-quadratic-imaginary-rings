@@ -298,6 +298,42 @@ public class ImaginaryQuadraticRing {
     }
     
     /**
+     * Returns a hash code value for the imaginary quadratic ring. Overriding 
+     * {@link Object#hashCode} on account of needing to override 
+     * {@link Object#equals}. The hash code is based solely on negRad. The 
+     * NetBeans IDE created this function for me and I tweaked it slightly.
+     * @return The parameter d that was passed to the constructor, plus 219. 
+     * Thus the hash code ranges from -2147483428 to +218.
+     */
+    @Override
+    public int hashCode() {
+        return (219 + this.negRad);
+    }
+
+    /**
+     * Compares whether an object is equal to this imaginary quadratic ring. 
+     * This is another function which the NetBeans IDE wrote for me.
+     * @param obj The object to compare this to.
+     * @return True if the object is an imaginary quadratic ring with the same 
+     * parameter d passed to its constructor as this imaginary quadratic ring, 
+     * false otherwise.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ImaginaryQuadraticRing other = (ImaginaryQuadraticRing) obj;
+        return (this.negRad == other.negRad);
+    }
+    
+    /**
      * Class constructor. Its task is, after validating the parameter, simply to 
      * set the appropriate protected final properties.
      * @param d A negative, squarefree integer.

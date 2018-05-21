@@ -262,6 +262,17 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
+     * Gets the imaginary quadratic ring which this imaginary quadratic integer 
+     * belongs to.
+     * @return An ImaginaryQuadraticRing object, which can then be queried for 
+     * its negRad, absNegRad and absNegRadSqrt values, and a couple other 
+     * properties.
+     */
+    public ImaginaryQuadraticRing getRing() {
+        return this.imagQuadRing;
+    }
+    
+    /**
      * A text representation of the imaginary quadratic integer, with the real 
      * part first and the imaginary part second.
      * @return A String representing the imaginary quadratic integer which can 
@@ -436,11 +447,15 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     /**
      * Compares whether an object is arithmetically equal to this imaginary 
      * quadratic integer.
-     * @param obj The object to compare, preferably an object that implements 
-     * the AlgebraicInteger interface.
+     * @param obj The object to compare this to, preferably but not necessarily 
+     * an object that implements the AlgebraicInteger interface.
      * @return True if the object is an imaginary quadratic integer 
-     * arithmetically equal to this imaginary quadratic integer, false otherwise. Definitely false if obj is null.
-     * For example, if this is
+     * arithmetically equal to this imaginary quadratic integer, false 
+     * otherwise. If obj is an ImaginaryQuadraticInteger representing a purely 
+     * real integer and this ImaginaryQuadraticInteger represents the same 
+     * purely integer, then this function will return true even if they're from 
+     * different rings. For example, 3 + 0 * sqrt(-2) is the same as 3 + 0 * 
+     * sqrt(-5).
      */
     @Override
     public boolean equals(Object obj) {
@@ -470,9 +485,11 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * Checks whether this imaginary quadratic integer is equal to a purely real integer.
+     * Checks whether this imaginary quadratic integer is equal to a purely real 
+     * integer.
      * @param i The purely real integer to check against.
-     * @return True if the imaginary quadratic integer is indeed equal to the purely real integer, false otherwise.
+     * @return True if the imaginary quadratic integer is indeed equal to the 
+     * purely real integer, false otherwise.
      */
     public boolean equalsInt(int i) {
         if (this.imagPartMult == 0) {
@@ -483,12 +500,19 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
   
     /**
-     * Addition operation, since operator+ (plus) can't be overloaded.
-     * Computations are done with 64-bit variables. Overflow checking is rudimentary.
-     * @param summand The imaginary quadratic integer to be added to this quadratic integer.
-     * @return A new ImaginaryQuadraticInteger object with the result of the operation.
-     * @throws AlgebraicDegreeOverflowException If the algebraic integers come from different quadratic rings, the result of the sum will be an algebraic integer of degree 4 and this exception will be thrown.
-     * @throws ArithmeticException A runtime exception thrown if either the real part or the imaginary part of the sum exceeds the range of the int data type. You may need long or even BigInteger for the calculation.
+     * Addition operation, since operator+ (plus) can't be overloaded. 
+     * Computations are done with 64-bit variables. Overflow checking is 
+     * rudimentary.
+     * @param summand The imaginary quadratic integer to be added to this 
+     * quadratic integer.
+     * @return A new ImaginaryQuadraticInteger object with the result of the 
+     * operation.
+     * @throws AlgebraicDegreeOverflowException If the algebraic integers come 
+     * from different quadratic rings, the result of the sum will be an 
+     * algebraic integer of degree 4 and this exception will be thrown.
+     * @throws ArithmeticException A runtime exception thrown if either the real 
+     * part or the imaginary part of the sum exceeds the range of the int data 
+     * type. You may need long or even BigInteger for the calculation.
      */
     public ImaginaryQuadraticInteger plus(ImaginaryQuadraticInteger summand) throws AlgebraicDegreeOverflowException {
         if (((this.imagPartMult != 0) && (summand.imagPartMult != 0)) && (this.imagQuadRing.negRad != summand.imagQuadRing.negRad)) {
@@ -528,13 +552,21 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * Addition operation, since operator+ (plus) can't be overloaded.
-     * Computations are done with 64-bit variables. Overflow checking is rudimentary.
-     * Although the previous plus function can be passed an ImaginaryQuadraticInteger with imagPartMult equal to 0, this function is to be preferred if you know for sure the summand is purely real.
-     * With this plus, there is no need to catch an AlgebraicDegreeOverflowException.
-     * @param summand The purely real integer to be added to the real part of the ImaginaryQuadraticInteger.
-     * @return A new ImaginaryQuadraticInteger object with the result of the operation.
-     * @throws ArithmeticException A runtime exception thrown if the real part of the sum exceeds the range of the int data type. The imaginary part of the sum should be fine, since the summand has a tacit imaginary part of 0.
+     * Addition operation, since operator+ (plus) can't be overloaded. This does 
+     * computations with 64-bit variables. Overflow checking is rudimentary. 
+     * Although the previous plus function can be passed an 
+     * ImaginaryQuadraticInteger with imagPartMult equal to 0, this function is 
+     * to be preferred if you know for sure the summand is purely real. With 
+     * this plus, there is no need to catch an 
+     * {@link AlgebraicDegreeOverflowException}.
+     * @param summand The purely real integer to be added to the real part of 
+     * the ImaginaryQuadraticInteger.
+     * @return A new ImaginaryQuadraticInteger object with the result of the 
+     * operation.
+     * @throws ArithmeticException A runtime exception thrown if the real part 
+     * of the sum exceeds the range of the int data type. The imaginary part of 
+     * the sum should be fine, since the summand has a tacit imaginary part of 
+     * 0.
      */
     public ImaginaryQuadraticInteger plus(int summand) {
         long sumRealPart = this.realPartMult;
@@ -550,12 +582,18 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
 
     /**
-     * Subtraction operation, since operator- can't be overloaded.
-     * Computations are done with 64-bit variables. Overflow checking is rudimentary.
-     * @param subtrahend The imaginary quadratic integer to be subtracted from this quadratic integer.
-     * @return A new ImaginaryQuadraticInteger object with the result of the operation.
-     * @throws AlgebraicDegreeOverflowException If the algebraic integers come from different quadratic rings, the result of the subtraction will be an algebraic integer of degree 4 and this exception will be thrown.
-     * @throws ArithmeticException A runtime exception thrown if either the real part or the imaginary part of the subtraction exceeds the range of the int data type. You may need long or even BigInteger for the calculation.
+     * Subtraction operation, since operator- can't be overloaded. This does 
+     * computations with 64-bit variables. Overflow checking is rudimentary.
+     * @param subtrahend The imaginary quadratic integer to be subtracted from 
+     * this quadratic integer.
+     * @return A new ImaginaryQuadraticInteger object with the result of the 
+     * operation.
+     * @throws AlgebraicDegreeOverflowException If the algebraic integers come 
+     * from different quadratic rings, the result of the subtraction will be an 
+     * algebraic integer of degree 4 and this exception will be thrown.
+     * @throws ArithmeticException A runtime exception thrown if either the real 
+     * part or the imaginary part of the subtraction exceeds the range of the 
+     * int data type. You may need long or even BigInteger for the calculation.
      */
     public ImaginaryQuadraticInteger minus(ImaginaryQuadraticInteger subtrahend) throws AlgebraicDegreeOverflowException {
         if (((this.imagPartMult != 0) && (subtrahend.imagPartMult != 0)) && (this.imagQuadRing.negRad != subtrahend.imagQuadRing.negRad)) {
@@ -595,13 +633,20 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * Subtraction operation, since operator- can't be overloaded.
-     * Although the previous minus function can be passed an ImaginaryQuadraticInteger with imagPartMult equal to 0, this function is to be preferred if you know for sure the subtrahend is purely real.
-     * With this minus, there is no need to catch an AlgebraicDegreeOverflowException.
-     * Computations are done with 64-bit variables. Overflow checking is rudimentary.
-     * @param subtrahend The purely real integer to be subtracted from this quadratic integer.
-     * @return A new ImaginaryQuadraticInteger object with the result of the operation.
-     * @throws ArithmeticException A runtime exception thrown if the real part of the subtraction exceeds the range of the int data type. The imaginary part of the sum should be fine, since the subtrahend has a tacit imaginary part of 0.
+     * Subtraction operation, since operator- can't be overloaded. Although the 
+     * previous minus function can be passed an ImaginaryQuadraticInteger with 
+     * imagPartMult equal to 0, this function is to be preferred if you know for 
+     * sure the subtrahend is purely real. With this minus, there is no need to 
+     * catch an {@link AlgebraicDegreeOverflowException}. Computations are done 
+     * with 64-bit variables. Overflow checking is rudimentary.
+     * @param subtrahend The purely real integer to be subtracted from this 
+     * quadratic integer.
+     * @return A new ImaginaryQuadraticInteger object with the result of the 
+     * operation.
+     * @throws ArithmeticException A runtime exception thrown if the real part 
+     * of the subtraction exceeds the range of the int data type. The imaginary 
+     * part of the sum should be fine, since the subtrahend has a tacit 
+     * imaginary part of 0.
      */
     public ImaginaryQuadraticInteger minus(int subtrahend) {
         long subtractionRealPart = this.realPartMult;
@@ -618,12 +663,19 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * Multiplication operation, since operator* can't be overloaded.
-     * Computations are done with 64-bit variables. Overflow checking is rudimentary.
-     * @param multiplicand The imaginary quadratic integer to be multiplied by this quadratic integer.
-     * @return A new ImaginaryQuadraticInteger object with the result of the operation.
-     * @throws AlgebraicDegreeOverflowException If the algebraic integers come from different quadratic rings, the product will be an algebraic integer of degree 4 and this exception will be thrown.
-     * @throws ArithmeticException A runtime exception thrown if either the real part or the imaginary part of the product exceeds the range of the int data type. You may need long or even BigInteger for the calculation.
+     * Multiplication operation, since operator* can't be overloaded. 
+     * Computations are done with 64-bit variables. Overflow checking is 
+     * rudimentary.
+     * @param multiplicand The imaginary quadratic integer to be multiplied by 
+     * this quadratic integer.
+     * @return A new ImaginaryQuadraticInteger object with the result of the 
+     * operation.
+     * @throws AlgebraicDegreeOverflowException If the algebraic integers come 
+     * from different quadratic rings, the product will be an algebraic integer 
+     * of degree 4 and this exception will be thrown.
+     * @throws ArithmeticException A runtime exception thrown if either the real 
+     * part or the imaginary part of the product exceeds the range of the int 
+     * data type. You may need long or even BigInteger for the calculation.
      */
     public ImaginaryQuadraticInteger times(ImaginaryQuadraticInteger multiplicand) throws AlgebraicDegreeOverflowException {
         if (((this.imagPartMult != 0) && (multiplicand.imagPartMult != 0)) && (this.imagQuadRing.negRad != multiplicand.imagQuadRing.negRad)) {
@@ -637,7 +689,10 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
             intermediateImagPart /= 2;
             intermediateDenom = 2;
         }
-        // There is no need to check if intermediateDenom is equal to 2 and both intermediateRealPart and intermediateImagPart are even because the ImaginaryQuadraticInteger constructor will take care of halving the parts and changing the denominator to 1.
+        /* There is no need to check if intermediateDenom is equal to 2 and both 
+           intermediateRealPart and intermediateImagPart are even because the 
+           ImaginaryQuadraticInteger constructor will take care of halving the 
+           parts and changing the denominator to 1. */
         if (intermediateRealPart < Integer.MIN_VALUE || intermediateRealPart > Integer.MAX_VALUE) {
             throw new ArithmeticException("Real part of product exceeds int data type:" + intermediateRealPart + " + " + intermediateImagPart + "sqrt(" + this.imagQuadRing.negRad + ")");
         }
@@ -648,13 +703,20 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * Multiplication operation, since operator* can't be overloaded.
-     * Although the previous times function can be passed an ImaginaryQuadraticInteger with imagPartMult equal to 0, this function is to be preferred if you know for sure the multiplicand is purely real.
-     * With this times, there is no need to catch an AlgebraicDegreeOverflowException.
-     * Computations are done with 64-bit variables. Overflow checking is rudimentary.
-     * @param multiplicand The purely real integer to be multiplied by this quadratic integer.
-     * @return A new ImaginaryQuadraticInteger object with the result of the operation.
-     * @throws ArithmeticException A runtime exception thrown if either the real part or the imaginary part of the product exceeds the range of the int data type.
+     * Multiplication operation, since operator* can't be overloaded. Although 
+     * the previous times function can be passed an ImaginaryQuadraticInteger 
+     * with imagPartMult equal to 0, this function is to be preferred if you 
+     * know for sure the multiplicand is purely real. With this times, there is 
+     * no need to catch an {@link AlgebraicDegreeOverflowException}. 
+     * Computations are done with 64-bit variables. Overflow checking is 
+     * rudimentary.
+     * @param multiplicand The purely real integer to be multiplied by this 
+     * quadratic integer.
+     * @return A new ImaginaryQuadraticInteger object with the result of the 
+     * operation.
+     * @throws ArithmeticException A runtime exception thrown if either the real 
+     * part or the imaginary part of the product exceeds the range of the int 
+     * data type.
      */
     public ImaginaryQuadraticInteger times(int multiplicand) {
         long multiplicationRealPart = this.realPartMult * multiplicand;
@@ -670,14 +732,22 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
    
     /**
-     * Division operation, since operator/ can't be overloaded.
-     * Computations are done with 64-bit variables. Overflow checking is rudimentary.
-     * @param divisor The imaginary quadratic integer by which to divide this quadratic integer.
-     * @return A new ImaginaryQuadraticInteger object with the result of the operation.
-     * @throws AlgebraicDegreeOverflowException If the algebraic integers come from different quadratic rings, the result of the division will be an algebraic integer of degree 4 and this checked exception will be thrown.
-     * @throws NotDivisibleException If the imaginary quadratic integer is not divisible by the divisor, this checked exception will be thrown.
-     * @throws IllegalArgumentException Division by 0 is not allowed, and will trigger this runtime exception.
-     * @throws ArithmeticException A runtime exception thrown if either the real part or the imaginary part of the division exceeds the range of the int data type.
+     * Division operation, since operator/ can't be overloaded. Computations are 
+     * done with 64-bit variables. Overflow checking is rudimentary.
+     * @param divisor The imaginary quadratic integer by which to divide this 
+     * quadratic integer.
+     * @return A new ImaginaryQuadraticInteger object with the result of the 
+     * operation.
+     * @throws AlgebraicDegreeOverflowException If the algebraic integers come 
+     * from different quadratic rings, the result of the division will be an 
+     * algebraic integer of degree 4 and this checked exception will be thrown.
+     * @throws NotDivisibleException If the imaginary quadratic integer is not 
+     * divisible by the divisor, this checked exception will be thrown.
+     * @throws IllegalArgumentException Division by 0 is not allowed, and will 
+     * trigger this runtime exception.
+     * @throws ArithmeticException A runtime exception thrown if either the real 
+     * part or the imaginary part of the division exceeds the range of the int 
+     * data type.
      */
     public ImaginaryQuadraticInteger divides(ImaginaryQuadraticInteger divisor) throws AlgebraicDegreeOverflowException, NotDivisibleException {
         if (((this.imagPartMult != 0) && (divisor.imagPartMult != 0)) && (this.imagQuadRing.negRad != divisor.imagQuadRing.negRad)) {
@@ -707,7 +777,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
             divisibleFlag = (intermediateDenom == 1);
         }
         if (!divisibleFlag) {
-            String exceptionMessage = this.toString() + " is not divisible by " + divisor.toString() + ".";
+            String exceptionMessage = this.toASCIIString() + " is not divisible by " + divisor.toASCIIString() + ".";
             throw new NotDivisibleException(exceptionMessage, intermediateRealPart, intermediateImagPart, intermediateDenom, this.imagQuadRing.negRad);
         }
         if (intermediateRealPart < Integer.MIN_VALUE || intermediateRealPart > Integer.MAX_VALUE) {
@@ -720,15 +790,25 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * Division operation, since operator/ can't be overloaded.
-     * Although the previous divides function can be passed an ImaginaryQuadraticInteger with imagPartMult equal to 0, this function is to be preferred if you know for sure the divisor is purely real.
-     * With this divides, there is no need to catch an AlgebraicDegreeOverflowException, but there is one checked exception and two possible runtime exceptions to be concerned about.
-     * Computations are done with 64-bit variables. Overflow checking is rudimentary.
-     * @param divisor The purely real integer by which to divide this quadratic integer.
-     * @return A new ImaginaryQuadraticInteger object with the result of the operation.
-     * @throws NotDivisibleException If the imaginary quadratic integer is not divisible by the divisor, this exception will be thrown.
-     * @throws IllegalArgumentException Division by 0 is not allowed, and will trigger this runtime exception.
-     * @throws ArithmeticException A runtime exception thrown if either the real part or the imaginary part of the division exceeds the range of the int data type.
+     * Division operation, since operator/ can't be overloaded. Although the 
+     * previous divides function can be passed an ImaginaryQuadraticInteger with 
+     * imagPartMult equal to 0, this function is to be preferred if you know for 
+     * sure the divisor is purely real. With this divides, there is no need to 
+     * catch an {@link AlgebraicDegreeOverflowException}, but there is one 
+     * checked exception and two possible runtime exceptions to be concerned 
+     * about. Computations are done with 64-bit variables. Overflow checking is 
+     * rudimentary.
+     * @param divisor The purely real integer by which to divide this quadratic 
+     * integer.
+     * @return A new ImaginaryQuadraticInteger object with the result of the 
+     * operation.
+     * @throws NotDivisibleException If the imaginary quadratic integer is not 
+     * divisible by the divisor, this exception will be thrown.
+     * @throws IllegalArgumentException Division by 0 is not allowed, and will 
+     * trigger this runtime exception.
+     * @throws ArithmeticException A runtime exception thrown if either the real 
+     * part or the imaginary part of the division exceeds the range of the int 
+     * data type.
      */
     public ImaginaryQuadraticInteger divides(int divisor) throws NotDivisibleException {
         if (divisor == 0) {
@@ -760,7 +840,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
             divisibleFlag = (intermediateDenom == 1);
         }
         if (!divisibleFlag) {
-            String exceptionMessage = this.toString() + " is not divisible by " + divisor + ".";
+            String exceptionMessage = this.toASCIIString() + " is not divisible by " + divisor + ".";
             throw new NotDivisibleException(exceptionMessage, intermediateRealPart, intermediateImagPart, intermediateDenom, this.imagQuadRing.negRad);
         }
         if (intermediateRealPart < Integer.MIN_VALUE || intermediateRealPart > Integer.MAX_VALUE) {
@@ -773,7 +853,8 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * Alternative object constructor, may be used when the denominator is known to be 1.
+     * Alternative object constructor, may be used when the denominator is known 
+     * to be 1.
      * @param a The real part of the imaginary quadratic integer.
      * @param b The part to be multiplied by sqrt(d).
      * @param R The ring to which this algebraic integer belongs to.
@@ -787,16 +868,20 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     
     /**
      * Primary object constructor.
-     * @param a The real part of the imaginary quadratic integer, multiplied by 2 when applicable.
-     * @param b The part to be multiplied by sqrt(d), multiplied by 2 when applicable.
+     * @param a The real part of the imaginary quadratic integer, multiplied by 
+     * 2 when applicable.
+     * @param b The part to be multiplied by sqrt(d), multiplied by 2 when 
+     * applicable.
      * @param R The ring to which this algebraic integer belongs to.
-     * @param denom In most cases 1, but may be 2 if a and b have the same parity and d = 1 mod 4.
-     * @throws IllegalArgumentException If denom is anything other than 1 or 2, or if denom is 2 but a and b don't match parity. However, if passed denom of -1 or -2, the constructor will quietly change it to 1 or 2, and multiply a and b by -1.
+     * @param denom In most cases 1, but may be 2 if a and b have the same 
+     * parity and d = 1 mod 4.
+     * @throws IllegalArgumentException If denom is anything other than 1 or 2, 
+     * or if denom is 2 but a and b don't match parity. However, if passed denom 
+     * of -1 or -2, the constructor will quietly change it to 1 or 2, and 
+     * multiply a and b by -1.
      */
     public ImaginaryQuadraticInteger(int a, int b, ImaginaryQuadraticRing R, int denom) {
-        
         boolean abParityMatch;
-        
         if (denom == -1 || denom == -2) {
             a *= -1;
             b *= -1;
@@ -829,18 +914,16 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
             this.denominator = 1;
         }
         this.imagQuadRing = R;
-        
     }
     
     private static int getIntFromConsole(Scanner input) {
         int enteredInteger = 0;
         boolean invalidInput = true;
-        
         while (invalidInput) {
             try {
                 enteredInteger = input.nextInt();
                 invalidInput = false;
-            } catch (InputMismatchException inputMismatch) {
+            } catch (InputMismatchException ime) {
                 System.out.println("Please enter an integer.");
                 input.nextLine();
             }

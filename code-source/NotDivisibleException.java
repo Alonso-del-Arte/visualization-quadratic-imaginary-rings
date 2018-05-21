@@ -30,7 +30,7 @@ package imaginaryquadraticinteger;
  */
 public class NotDivisibleException extends Exception {
     
-    private static final long serialVersionUID = 1;
+    private static final long serialVersionUID = 1058198179;
     private final long resultingFractionRealPartNumerator;
     private final long resultingFractionImagPartNumerator;
     private final long resultingFractionDenominator;
@@ -80,11 +80,11 @@ public class NotDivisibleException extends Exception {
     }
     
     // Uncomment next five lines for failing first test
-//    public ImaginaryQuadraticInteger[] getBoundingIntegers() {
-//        ImaginaryQuadraticInteger zeroIQI = new ImaginaryQuadraticInteger(0, 0, workingRing);
-//        ImaginaryQuadraticInteger[] algIntArray = {zeroIQI, zeroIQI, zeroIQI, zeroIQI};
-//        return algIntArray;
-//    }
+    public ImaginaryQuadraticInteger[] getBoundingIntegers() {
+        ImaginaryQuadraticInteger zeroIQI = new ImaginaryQuadraticInteger(0, 0, workingRing);
+        ImaginaryQuadraticInteger[] algIntArray = {zeroIQI, zeroIQI, zeroIQI, zeroIQI};
+        return algIntArray;
+    }
     
     // TODO: FINE-TUNE FUNCTION FOR DOMAINS WITH "HALF-INTEGERS"
     // I think this will pass tests that don't involve domains with "half-integers", but more thorough tests may be necessary...

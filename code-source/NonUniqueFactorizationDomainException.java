@@ -23,11 +23,15 @@ package imaginaryquadraticinteger;
  */
 public class NonUniqueFactorizationDomainException extends Exception {
     
-    private static final long serialVersionUID = 1;
+    private static final long serialVersionUID = 1058198178;
     
     public static final int[] UNIQUE_FACTORIZATON_QUADRATIC_IMAGINARY_RINGS_D = {-163, -67, -43, -19, -11, -7, -3, -2, -1};
     
     private final ImaginaryQuadraticInteger unfactorizedNumber;
+    
+    public ImaginaryQuadraticInteger getUnfactorizedNumber() {
+        return this.unfactorizedNumber;
+    }
     
     // PLACEHOLDER for tryToFactorizeAnyway()
     
@@ -36,14 +40,14 @@ public class NonUniqueFactorizationDomainException extends Exception {
      * function if called upon to operate on a number from a domain other than 
      * those listed in UNIQUE_FACTORIZATON_QUADRATIC_IMAGINARY_RINGS_D.
      * @param message Should probably just be something like 
-     * number.imagQuadRing.toString() + " is not a unique factorizaton domain." 
+     * number.getRing().toString() + " is not a unique factorizaton domain." 
      * This message is just passed on to the superclass.
      * @param number The number sent to the prime factorization function, like, 
      * for example, 1 + sqrt(-30).
      */
     public NonUniqueFactorizationDomainException(String message, ImaginaryQuadraticInteger number) {
         super(message);
-        unfactorizedNumber = number;
+        this.unfactorizedNumber = number;
     }
     
 }

@@ -1,18 +1,18 @@
 /*
  * Copyright (C) 2018 Alonso del Arte
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under 
+ * the terms of the GNU General Public License as published by the Free Software 
+ * Foundation, either version 3 of the License, or (at your option) any later 
+ * version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
+ * details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with 
+ * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package imaginaryquadraticinteger;
 
@@ -24,7 +24,7 @@ package imaginaryquadraticinteger;
  * functions (addition, subtraction, multiplication and division) would be nice 
  * but are not explicitly required by this interface. It is then up to the 
  * implementer to define basic arithmetic methods as static or instance methods, 
- * or both, or not at all.
+ * or both, or not at all. Other specifics are also left to the implementer.
  * @author Alonso del Arte
  */
 public interface AlgebraicInteger {
@@ -47,7 +47,8 @@ public interface AlgebraicInteger {
     /**
      * Gives the norm of the algebraic integer, useful for comparing integers in 
      * the Euclidean GCD algorithm.
-     * @return The norm. For example, given 5/2 + sqrt(-7)/2, the norm would be 8.
+     * @return The norm. For example, given 5/2 + sqrt(-7)/2, the norm would be 
+     * 8.
      */
     int norm();
     

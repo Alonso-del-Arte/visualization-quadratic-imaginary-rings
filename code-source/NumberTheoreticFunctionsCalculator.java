@@ -85,7 +85,7 @@ public class NumberTheoreticFunctionsCalculator {
             case -1:
             case 0:
             case 1:
-                return false; // break statement not needed after return
+                return false;
             case -2:
             case 2:
                 return true;
@@ -109,7 +109,7 @@ public class NumberTheoreticFunctionsCalculator {
      * An implementation of the Legendre symbol, which tells if a given number 
      * is a quadratic residue modulo an odd prime. There is no overflow 
      * checking, but hopefully that's only a problem for numbers that are very 
-     * close to Integer.MIN_VALUE or Integer.MAX_VALUE.
+     * close to {@link Integer#MIN_VALUE} or {@link Integer#MAX_VALUE}.
      * @param a The number to test for being a quadratic residue modulo an odd 
      * prime. For example, 10.
      * @param p The odd prime to test a for being a quadratic residue modulo of. 
@@ -160,16 +160,16 @@ public class NumberTheoreticFunctionsCalculator {
     }
     
     // PLACEHOLDER FOR symbolJacobi
-    // Uncomment the next three lines to get failing first test.
-//    public static byte symbolJacobi(int a, int m) {
-//        return -3;
-//    }
+    // Will get failing first test.
+    public static byte symbolJacobi(int a, int m) {
+        return -3;
+    }
     
     // PLACEHOLDER FOR symbolKronecker
-    // Uncomment the next three lines to get failing first test.
-//    public static byte symbolKronecker(int a, int m) {
-//        return -4;
-//    }
+    // Will get failing first test.
+    public static byte symbolKronecker(int a, int m) {
+        return -4;
+    }
     
     /**
      * Determines whether a given number, not necessarily purely real, is prime 
@@ -479,42 +479,45 @@ public class NumberTheoreticFunctionsCalculator {
             String exceptionMessage = a.toASCIIString() + " and " + b.toASCIIString() + " are in non-Euclidean domain " + a.imagQuadRing.toFilenameString() + ".";
             throw new NonEuclideanDomainException(exceptionMessage, a, b);
         }
-        ImaginaryQuadraticInteger currA, currB, tempMultiple, currRemainder;
-        if (a.norm() < b.norm()) {
-            currA = b;
-            currB = a;
-        } else {
-            currA = a;
-            currB = b;
-        }
-        while (!currB.equalsInt(0)) {
-            try {
-                tempMultiple = currA.divides(currB);
-            } catch (AlgebraicDegreeOverflowException adoe) {
-                tempMultiple = currA; // This is just to avoid "variable might not be initialized" error
-            } catch (NotDivisibleException nde) {
-                tempMultiple = nde.roundTowardsZero();
-            }
-            try {
-                tempMultiple = tempMultiple.times(currB);
-                currRemainder = currA.minus(tempMultiple);
-            } catch (AlgebraicDegreeOverflowException adoe) {
-                currRemainder = currB; // Avoiding "variable might not be initialized" error
-            }
-            currA = currB;
-            currB = currRemainder;
-        }
-        // Make sure both real and imaginary parts of currA are positive or 0, that is, not negative
-        if (currA.realPartMult < 0 && currA.imagPartMult < 0) {
-            currA = currA.times(-1);
-        }
-        if (currA.realPartMult < 0 || currA.imagPartMult < 0) {
-            int absRealPart = Math.abs(currA.realPartMult);
-            int absImagPart = Math.abs(currA.imagPartMult);
-            int currDenom = currA.denominator;
-            currA = new ImaginaryQuadraticInteger(absRealPart, absImagPart, currB.imagQuadRing, currDenom);
-        }
-        return currA;
+        return new ImaginaryQuadraticInteger(-2, 4, a.imagQuadRing);
+//        ImaginaryQuadraticInteger currA, currB, tempMultiple, currRemainder;
+//        if (a.norm() < b.norm()) {
+//            currA = b;
+//            currB = a;
+//        } else {
+//            currA = a;
+//            currB = b;
+//        }
+//        while (!currB.equalsInt(0)) {
+//            try {
+//                tempMultiple = currA.divides(currB);
+//            } catch (AlgebraicDegreeOverflowException adoe) {
+//                tempMultiple = currA; // This is just to avoid "variable might not be initialized" error
+//                System.err.println("AlgebraicDegreeOverflowException " + adoe.getMessage() + " should not have occurred.");
+//            } catch (NotDivisibleException nde) {
+//                tempMultiple = nde.roundTowardsZero();
+//            }
+//            try {
+//                tempMultiple = tempMultiple.times(currB);
+//                currRemainder = currA.minus(tempMultiple);
+//            } catch (AlgebraicDegreeOverflowException adoe) {
+//                currRemainder = currB; // Avoiding "variable might not be initialized" error
+//                System.err.println("AlgebraicDegreeOverflowException " + adoe.getMessage() + " should not have occurred.");
+//            }
+//            currA = currB;
+//            currB = currRemainder;
+//        }
+//        // Make sure both real and imaginary parts of currA are positive or 0, that is, not negative
+//        if (currA.realPartMult < 0 && currA.imagPartMult < 0) {
+//            currA = currA.times(-1);
+//        }
+//        if (currA.realPartMult < 0 || currA.imagPartMult < 0) {
+//            int absRealPart = Math.abs(currA.realPartMult);
+//            int absImagPart = Math.abs(currA.imagPartMult);
+//            int currDenom = currA.denominator;
+//            currA = new ImaginaryQuadraticInteger(absRealPart, absImagPart, currB.imagQuadRing, currDenom);
+//        }
+//        return currA;
     }
     
     /**

@@ -1251,12 +1251,12 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         copyReadOutsToClipboardMenuItem.setActionCommand("copyReadouts");
         copyReadOutsToClipboardMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, maskCtrlCommand + Event.SHIFT_MASK));
         copyReadOutsToClipboardMenuItem.addActionListener(this);
-        ringWindowMenuItem = new JMenuItem("Copy diagram to clipboard");
-        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Copy the currently displayed diagram to the clipboard so that it's accessible to other applications");
-        copyDiagramToClipboardMenuItem = ringWindowMenu.add(ringWindowMenuItem);
-        copyDiagramToClipboardMenuItem.setActionCommand("copyDiagram");
-        copyDiagramToClipboardMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, maskCtrlCommand + Event.ALT_MASK));
-        copyDiagramToClipboardMenuItem.addActionListener(this);
+//        ringWindowMenuItem = new JMenuItem("Copy diagram to clipboard");
+//        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Copy the currently displayed diagram to the clipboard so that it's accessible to other applications");
+//        copyDiagramToClipboardMenuItem = ringWindowMenu.add(ringWindowMenuItem);
+//        copyDiagramToClipboardMenuItem.setActionCommand("copyDiagram");
+//        copyDiagramToClipboardMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, maskCtrlCommand + Event.ALT_MASK));
+//        copyDiagramToClipboardMenuItem.addActionListener(this);
         
     /*    ringWindowMenu.addSeparator();
         THIS IS FOR WHEN I GET AROUND TO ADDING THE CAPABILITY TO CHANGE GRID, POINT COLORS

@@ -19,9 +19,15 @@ package imaginaryquadraticinteger;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import javax.swing.*;
+import javax.imageio.ImageIO;
+import javax.swing.filechooser.FileFilter;
 import java.util.List;
 import java.util.ArrayList;
+import filefilters.PNGFileFilter;
 
 /**
  * A Swing component in which to display diagrams of prime numbers in various 
@@ -260,6 +266,19 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     
     private JTextField algIntReadOut, algIntTraceReadOut, algIntNormReadOut, algIntPolReadOut;
     
+    /**
+     * Keeps track of whether or not the user has saved a diagram before. 
+     * Applies only during the current session.
+     */
+    private boolean haveSavedBefore;
+    
+    /**
+     * Points to the directory where the user has previously saved a diagram to 
+     * in the current session. Probably empty or null if haveSavedBefore is 
+     * false.
+     */
+    private String prevSavePathname;
+
     /**
      * The history list, with which to enable to user to view previous diagrams.
      */
@@ -732,7 +751,53 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      */
     @Override
     public void mouseDragged(MouseEvent mauv) {
-        // Implementation placeholder.
+        // IMPLEMENTATION PLACEHOLDER
+    }
+    
+    /**
+     * Prompts the user for a filename and saves the currently displayed diagram 
+     * with that filename as a Portable Network Graphics (PNG) file.
+     */
+    public void saveDiagramAs() {
+        BufferedImage diagram = new BufferedImage(this.ringCanvasHorizMax, this.ringCanvasVerticMax, BufferedImage.TYPE_INT_RGB);
+        Graphics2D graph = diagram.createGraphics();
+        this.paint(graph);
+        String suggestedFilename = this.imagQuadRing.toFilenameString() + "pxui" + this.pixelsPerUnitInterval + ".png";
+        File diagramFile = new File(suggestedFilename);
+        JFileChooser fileChooser = new JFileChooser();
+        FileFilter pngFilter = new PNGFileFilter();
+        fileChooser.addChoosableFileFilter(pngFilter);
+        if (haveSavedBefore) {
+            fileChooser.setCurrentDirectory(new File(prevSavePathname));
+        }
+        fileChooser.setSelectedFile(diagramFile);
+        int fcRet = fileChooser.showSaveDialog(this);
+        String notificationString;
+        switch (fcRet) {
+            case JFileChooser.APPROVE_OPTION:
+                diagramFile = fileChooser.getSelectedFile();
+                String filePath = diagramFile.getAbsolutePath();
+                prevSavePathname = filePath.substring(0, filePath.lastIndexOf(File.separator));
+                haveSavedBefore = true;
+                try {
+                    ImageIO.write(diagram, "PNG", diagramFile);
+                } catch (IOException ioe) {
+                    notificationString = "Image input/output exception occurred:\n " + ioe.getMessage();
+                    JOptionPane.showMessageDialog(ringFrame, notificationString);
+                }
+                break;
+            case JFileChooser.CANCEL_OPTION:
+                notificationString = "File save canceled.";
+                JOptionPane.showMessageDialog(ringFrame, notificationString);
+                break;
+            case JFileChooser.ERROR_OPTION:
+                notificationString = "An error occurred trying to choose a file to save to.";
+                JOptionPane.showMessageDialog(ringFrame, notificationString);
+                break;
+            default:
+                notificationString = "Unexpected option " + fcRet + " from file chooser.";
+                JOptionPane.showMessageDialog(ringFrame, notificationString);
+        }
     }
     
     private void switchToRing(int d) {
@@ -1097,7 +1162,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      * Function to show the About box, a simple MessageDialog from JOptionPage.
      */
     public void showAboutBox() {
-        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.84\n\u00A9 2018 Alonso del Arte");
+        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.9\n\u00A9 2018 Alonso del Arte");
     }
     
     /**
@@ -1109,6 +1174,12 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     public void actionPerformed(ActionEvent ae) {
         String cmd = ae.getActionCommand();
         switch (cmd) {
+            case "saveDiagramAs":
+                saveDiagramAs();
+                break;
+            case "quit":
+                System.exit(0);
+                break;
             case "chooseD":
                 chooseDiscriminant();
                 break;
@@ -1190,9 +1261,11 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     private void setUpRingFrame() {
         
         ringFrame = new JFrame("Ring Diagram for " + this.imagQuadRing.toString());
+        haveSavedBefore = false;
         JMenuBar ringWindowMenuBar;
         JMenu ringWindowMenu;
-        JMenuItem ringWindowMenuItem, chooseDMenuItem, copyReadOutsToClipboardMenuItem, copyDiagramToClipboardMenuItem, resetViewDefaultsMenuItem, aboutMenuItem;
+        JMenuItem ringWindowMenuItem, saveFileMenuItem, quitMenuItem;
+        JMenuItem chooseDMenuItem, copyReadOutsToClipboardMenuItem, copyDiagramToClipboardMenuItem, resetViewDefaultsMenuItem, aboutMenuItem;
 
         boolean macOSFlag;
         int maskCtrlCommand;
@@ -1207,6 +1280,23 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         }
         
         ringWindowMenuBar = new JMenuBar();
+        ringWindowMenu = new JMenu("File");
+        ringWindowMenu.setMnemonic(KeyEvent.VK_F);
+        ringWindowMenu.getAccessibleContext().setAccessibleDescription("Menu for file operations");
+        ringWindowMenuBar.add(ringWindowMenu);
+        ringWindowMenuItem = new JMenuItem("Save diagram as...");
+        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Save currently displayed diagram to a PNG file");
+        saveFileMenuItem = ringWindowMenu.add(ringWindowMenuItem);
+        saveFileMenuItem.setActionCommand("saveDiagramAs");
+        saveFileMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, maskCtrlCommand + Event.SHIFT_MASK));
+        saveFileMenuItem.addActionListener(this);
+        ringWindowMenu.addSeparator();
+        ringWindowMenuItem = new JMenuItem("Quit");
+        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Exit the program");
+        quitMenuItem = ringWindowMenu.add(ringWindowMenuItem);
+        quitMenuItem.setActionCommand("quit");
+        quitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, maskCtrlCommand));
+        quitMenuItem.addActionListener(this);
         ringWindowMenu = new JMenu("Edit");
         ringWindowMenu.setMnemonic(KeyEvent.VK_E);
         ringWindowMenu.getAccessibleContext().setAccessibleDescription("Menu to change certain parameters");
@@ -1251,12 +1341,13 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         copyReadOutsToClipboardMenuItem.setActionCommand("copyReadouts");
         copyReadOutsToClipboardMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, maskCtrlCommand + Event.SHIFT_MASK));
         copyReadOutsToClipboardMenuItem.addActionListener(this);
-//        ringWindowMenuItem = new JMenuItem("Copy diagram to clipboard");
-//        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Copy the currently displayed diagram to the clipboard so that it's accessible to other applications");
-//        copyDiagramToClipboardMenuItem = ringWindowMenu.add(ringWindowMenuItem);
-//        copyDiagramToClipboardMenuItem.setActionCommand("copyDiagram");
-//        copyDiagramToClipboardMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, maskCtrlCommand + Event.ALT_MASK));
-//        copyDiagramToClipboardMenuItem.addActionListener(this);
+        ringWindowMenuItem = new JMenuItem("Copy diagram to clipboard");
+        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Copy the currently displayed diagram to the clipboard so that it's accessible to other applications");
+        copyDiagramToClipboardMenuItem = ringWindowMenu.add(ringWindowMenuItem);
+        copyDiagramToClipboardMenuItem.setActionCommand("copyDiagram");
+        copyDiagramToClipboardMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, maskCtrlCommand + Event.ALT_MASK));
+        copyDiagramToClipboardMenuItem.setEnabled(false); // Once implmented, uncomment next line and delete this line 
+        // copyDiagramToClipboardMenuItem.addActionListener(this);
         
     /*    ringWindowMenu.addSeparator();
         THIS IS FOR WHEN I GET AROUND TO ADDING THE CAPABILITY TO CHANGE GRID, POINT COLORS

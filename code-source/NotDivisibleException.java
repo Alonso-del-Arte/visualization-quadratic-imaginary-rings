@@ -111,10 +111,30 @@ public class NotDivisibleException extends Exception {
         return result;
     }
     
-    // Uncomment next three lines for failing first test
-//    public ImaginaryQuadraticInteger roundAwayFromZero() {
-//        return new ImaginaryQuadraticInteger(2, 1, workingRing);
-//    }
+    // TODO: FINE-TUNE FUNCTION FOR DOMAINS WITH "HALF-INTEGERS"
+    // I think this will pass tests that don't involve domains with "half-integers", but more thorough tests may be necessary...
+    // TODO: WRITE JAVADOC, making sure to mention ArithmeticException
+    public ImaginaryQuadraticInteger roundAwayFromZero() {
+        double intermediateRealPart = (double) resultingFractionRealPartNumerator / (double) resultingFractionDenominator;
+        double intermediateImagPart = (double) resultingFractionImagPartNumerator / (double) resultingFractionDenominator;
+        if (intermediateRealPart < 0) {
+            intermediateRealPart = Math.floor(intermediateRealPart);
+        } else {
+            intermediateRealPart = Math.ceil(intermediateRealPart);
+        }
+        if (intermediateImagPart < 0) {
+            intermediateImagPart = Math.floor(intermediateImagPart);
+        } else {
+            intermediateImagPart = Math.ceil(intermediateImagPart);
+        }
+        boolean overflowFlag = (intermediateRealPart < Integer.MIN_VALUE) || (intermediateRealPart > Integer.MAX_VALUE);
+        overflowFlag = overflowFlag || ((intermediateImagPart < Integer.MIN_VALUE) || (intermediateImagPart > Integer.MAX_VALUE));
+        if (overflowFlag) {
+            throw new ArithmeticException("Real part " + intermediateRealPart + ", imaginary part " + intermediateImagPart + " times sqrt" + resultingFractionNegRad + " is outside the range of this implmentation of ImaginaryQuadraticInteger, which uses 32-bit signed ints.");
+        }
+        ImaginaryQuadraticInteger result = new ImaginaryQuadraticInteger((int) intermediateRealPart, (int) intermediateImagPart, workingRing);
+        return result;
+    }
     
     // I'M THINKING OF INCLUDING ANOTHER TWO OR THREE ROUNDING FUNCTIONS.
     // Part of what is holding me back is figuring out what to call these functions.

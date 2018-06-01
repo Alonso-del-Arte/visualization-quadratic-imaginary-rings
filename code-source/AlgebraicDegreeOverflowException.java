@@ -17,19 +17,21 @@
 package imaginaryquadraticinteger;
 
 /**
- * An exception to indicate when the result of an arithmetical operation results 
- * in an algebraic integer of higher algebraic degree than the implementation of 
- * AlgebraicInteger was designed for. For example, the square root of 2 times 
- * the fifth root of 3 is an algebraic integer with minimal polynomial x^10 - 
- * 288. So an AlgebraicInteger implementation for quadratic integers would be 
- * ill-suited to hold the result of the operation, as would an implementation 
- * that can handle algebraic integers up to algebraic degree 5. In such a case, 
- * it is appropriate to throw this exception.
+ * A runtime exception to indicate when the result of an arithmetical operation 
+ * results in an algebraic integer of higher algebraic degree than the 
+ * implementation of AlgebraicInteger was designed for. For example, the square 
+ * root of 2 times the fifth root of 3 is an algebraic integer with minimal 
+ * polynomial x^10 - 288. So an AlgebraicInteger implementation for quadratic 
+ * integers would be ill-suited to hold the result of the operation, as would an 
+ * implementation that can handle algebraic integers up to algebraic degree 5. 
+ * In such a case, it is appropriate to throw this exception. Note that this was 
+ * originally a checked exception; later on I decided it made more sense as a 
+ * runtime exception.
  * @author Alonso del Arte
  */
-public class AlgebraicDegreeOverflowException extends Exception {
+public class AlgebraicDegreeOverflowException extends RuntimeException {
     
-    private static final long serialVersionUID = 1058198176;
+    private static final long serialVersionUID = 1058208768;
     private final int maxExpectedAlgebraicDegree;
     private final int necessaryAlgebraicDegree;
     
@@ -37,7 +39,7 @@ public class AlgebraicDegreeOverflowException extends Exception {
      * Tells what is the maximum algebraic degree the function that threw the 
      * exception was expecting.
      * @return An integer greater than 1 but less than the necessary algebraic 
-     * degree. For example, this would be 2 if thrown by 
+     * degree. For example, this would probably be 2 if thrown by 
      * {@link ImaginaryQuadraticInteger#plus}.
      */
     public int getMaxExpectedAlgebraicDegree() {

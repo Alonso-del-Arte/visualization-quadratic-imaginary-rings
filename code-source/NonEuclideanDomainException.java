@@ -63,12 +63,12 @@ public class NonEuclideanDomainException extends Exception {
      * compute the Euclidean GCD was declined. If desired, the calling function 
      * may choose the number with larger norm to be a, but this is not required. 
      * However, a and b ought to be in the same ring, otherwise 
-     * AlgebraicDegreeOverflowDegreeException should have been used instead.
+     * {@link AlgebraicDegreeOverflowException} should have been used instead.
      * @param b One of the two algebraic integers for which the request to 
      * compute the Euclidean GCD was declined. If desired, the calling function 
      * may choose the number with smaller norm to be b, but this is not 
      * required. However, b and a ought to be in the same ring, otherwise 
-     * AlgebraicDegreeOverflowDegreeException should have been used instead.
+     * {@link AlgebraicDegreeOverflowException} should have been used instead.
      */
     public NonEuclideanDomainException(String message, ImaginaryQuadraticInteger a, ImaginaryQuadraticInteger b) {
         super(message);

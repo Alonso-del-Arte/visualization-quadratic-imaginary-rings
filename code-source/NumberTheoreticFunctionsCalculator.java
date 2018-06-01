@@ -41,10 +41,8 @@ public class NumberTheoreticFunctionsCalculator {
      * -44100, the resulting list should be -1, 2, 2, 3, 3, 5, 5, 7, 7.
      */
     public static List<Integer> primeFactors(int num) {
-        
         int n = num;
         List<Integer> factors = new ArrayList<>();
-        
         if (n == 0) {
             factors.add(0);
         } else {
@@ -64,7 +62,6 @@ public class NumberTheoreticFunctionsCalculator {
             }
         }
         return factors;
-        
     }
     
     /**
@@ -80,7 +77,6 @@ public class NumberTheoreticFunctionsCalculator {
      * return false.
      */
     public static boolean isPrime(int num) {
-        
         switch (num) {
             case -1:
             case 0:
@@ -209,7 +205,7 @@ public class NumberTheoreticFunctionsCalculator {
                         case -43:
                         case -67:
                         case -163:
-                            return symbolLegendre(absRealPartMult, num.imagQuadRing.negRad) == -1;
+                            return symbolLegendre(absRealPartMult, num.imagQuadRing.absNegRad) == -1;
                         default:
                             String exceptionMessage = num.imagQuadRing.toASCIIString() + " is not a unique factorization domain.";
                             throw new NonUniqueFactorizationDomainException(exceptionMessage, num);
@@ -274,9 +270,6 @@ public class NumberTheoreticFunctionsCalculator {
                                 try {
                                     currDivision = num.divides(testDivisor);
                                     presumedIrreducible = false;
-                                } catch (AlgebraicDegreeOverflowException adoe) {
-                                    System.err.println("AlgebraicDegreeOverflowException should not have happened in this context. " + adoe.getMessage());
-                                    System.exit(-1);
                                 } catch (NotDivisibleException nde) {
                                     testDivRealPartMult++;
                                     testDivisor = new ImaginaryQuadraticInteger(testDivRealPartMult, testDivImagPartMult, num.imagQuadRing);
@@ -301,9 +294,6 @@ public class NumberTheoreticFunctionsCalculator {
                                     try {
                                         currDivision = num.divides(testDivisor);
                                         presumedIrreducible = false;
-                                    } catch (AlgebraicDegreeOverflowException adoe) {
-                                        System.err.println("AlgebraicDegreeOverflowException should not have happened in this context. " + adoe.getMessage());
-                                        System.exit(-1);
                                     } catch (NotDivisibleException nde) {
                                         testDivImagPartMult += 2;
                                         testDivisor = new ImaginaryQuadraticInteger(testDivRealPartMult, testDivImagPartMult, num.imagQuadRing, 2);
@@ -331,7 +321,6 @@ public class NumberTheoreticFunctionsCalculator {
      * function should return true.
      */
     public static boolean isSquareFree(int num) {
-        
         switch (num) {
             case -1:
             case 1:
@@ -360,7 +349,6 @@ public class NumberTheoreticFunctionsCalculator {
      * example, \u03BC(31) = -1, \u03BC(32) = 0 and \u03BC(33) = 1.
      */
     public static byte moebiusMu(int num) {
-        
         switch (num) {
             case -1:
             case 1:
@@ -462,16 +450,16 @@ public class NumberTheoreticFunctionsCalculator {
      * degree 4 or higher. This may or may not be the case (quite likely the two 
      * algebraic integers will be coprime and so the answer is just good old 1); 
      * the function assumes that the GCD can't be calculated using the Euclidean 
-     * algorithm and throws this checked exception.
+     * algorithm and throws this runtime exception.
      * @throws NonEuclideanDomainException If the algebraic integers come from 
-     * any imaginary quadratic ring other than Z[i], Z[sqrt(-2)], Z[omega], 
-     * O_Q(sqrt(-7)) or O_Q(sqrt(-11)), the function assumes the Euclidean GCD 
+     * any imaginary quadratic ring other than Z[i], Z[&radic;-2], Z[\u03C9], 
+     * O_Q(&radic;-7) or O_Q(&radic;-11), the function assumes the Euclidean GCD 
      * algorithm will fail without even trying, and throws this checked 
      * exception. However, for some pairs drawn from a non-Euclidean domain, the 
      * Euclidean GCD algorithm might nevertheless work. For this reason, the 
      * exception has (will have) the method tryEuclideanGCDAnyway().
      */
-    public static ImaginaryQuadraticInteger euclideanGCD(ImaginaryQuadraticInteger a, ImaginaryQuadraticInteger b) throws AlgebraicDegreeOverflowException, NonEuclideanDomainException {
+    public static ImaginaryQuadraticInteger euclideanGCD(ImaginaryQuadraticInteger a, ImaginaryQuadraticInteger b) throws NonEuclideanDomainException {
         if (((a.imagPartMult != 0) && (b.imagPartMult != 0)) && (a.imagQuadRing.negRad != b.imagQuadRing.negRad)) {
             throw new AlgebraicDegreeOverflowException("This operation would result in an algebraic integer of degree 4.", 2, 4);
         }
@@ -479,45 +467,29 @@ public class NumberTheoreticFunctionsCalculator {
             String exceptionMessage = a.toASCIIString() + " and " + b.toASCIIString() + " are in non-Euclidean domain " + a.imagQuadRing.toFilenameString() + ".";
             throw new NonEuclideanDomainException(exceptionMessage, a, b);
         }
-        return new ImaginaryQuadraticInteger(-2, 4, a.imagQuadRing);
-//        ImaginaryQuadraticInteger currA, currB, tempMultiple, currRemainder;
-//        if (a.norm() < b.norm()) {
-//            currA = b;
-//            currB = a;
-//        } else {
-//            currA = a;
-//            currB = b;
-//        }
-//        while (!currB.equalsInt(0)) {
-//            try {
-//                tempMultiple = currA.divides(currB);
-//            } catch (AlgebraicDegreeOverflowException adoe) {
-//                tempMultiple = currA; // This is just to avoid "variable might not be initialized" error
-//                System.err.println("AlgebraicDegreeOverflowException " + adoe.getMessage() + " should not have occurred.");
-//            } catch (NotDivisibleException nde) {
-//                tempMultiple = nde.roundTowardsZero();
-//            }
-//            try {
-//                tempMultiple = tempMultiple.times(currB);
-//                currRemainder = currA.minus(tempMultiple);
-//            } catch (AlgebraicDegreeOverflowException adoe) {
-//                currRemainder = currB; // Avoiding "variable might not be initialized" error
-//                System.err.println("AlgebraicDegreeOverflowException " + adoe.getMessage() + " should not have occurred.");
-//            }
-//            currA = currB;
-//            currB = currRemainder;
-//        }
-//        // Make sure both real and imaginary parts of currA are positive or 0, that is, not negative
-//        if (currA.realPartMult < 0 && currA.imagPartMult < 0) {
-//            currA = currA.times(-1);
-//        }
-//        if (currA.realPartMult < 0 || currA.imagPartMult < 0) {
-//            int absRealPart = Math.abs(currA.realPartMult);
-//            int absImagPart = Math.abs(currA.imagPartMult);
-//            int currDenom = currA.denominator;
-//            currA = new ImaginaryQuadraticInteger(absRealPart, absImagPart, currB.imagQuadRing, currDenom);
-//        }
-//        return currA;
+        ImaginaryQuadraticInteger currA, currB, tempMultiple, currRemainder;
+        if (a.norm() < b.norm()) {
+            currA = b;
+            currB = a;
+        } else {
+            currA = a;
+            currB = b;
+        }
+        while (!currB.equalsInt(0)) {
+            try {
+                tempMultiple = currA.divides(currB);
+            } catch (NotDivisibleException nde) {
+                tempMultiple = nde.roundTowardsZero();
+            }
+            tempMultiple = tempMultiple.times(currB);
+            currRemainder = currA.minus(tempMultiple);
+            currA = currB;
+            currB = currRemainder;
+        }
+        if (currA.realPartMult < 0) {
+            currA = currA.times(-1);
+        }
+        return currA;
     }
     
     /**
@@ -604,6 +576,7 @@ public class NumberTheoreticFunctionsCalculator {
             invalidInput = true;
             prevInteger = enteredInteger;
         }
+        
     }
     
 }

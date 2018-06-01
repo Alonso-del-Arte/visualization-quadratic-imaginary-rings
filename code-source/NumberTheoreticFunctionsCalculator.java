@@ -199,13 +199,12 @@ public class NumberTheoreticFunctionsCalculator {
                         case -3:
                             return (absRealPartMult % 3 == 2);
                         case -7:
-                            return (absRealPartMult != 2 || absRealPartMult != 7);
                         case -11:
                         case -19:
                         case -43:
                         case -67:
                         case -163:
-                            return symbolLegendre(absRealPartMult, num.imagQuadRing.absNegRad) == -1;
+                            return (symbolLegendre(absRealPartMult, num.imagQuadRing.negRad) == -1);
                         default:
                             String exceptionMessage = num.imagQuadRing.toASCIIString() + " is not a unique factorization domain.";
                             throw new NonUniqueFactorizationDomainException(exceptionMessage, num);

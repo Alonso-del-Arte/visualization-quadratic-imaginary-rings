@@ -71,6 +71,15 @@ public class NumberTheoreticFunctionsCalculatorTest {
     private static List<Integer> fibonacciList;
     
     /**
+     * There are the only nine negative numbers d such that the ring of 
+     * algebraic integers of Q(sqrt(d)) is a unique factorization domain (though 
+     * not necessarily Euclidean).
+     */
+    public static final int[] HEEGNER_NUMBERS = {-163, -67, -43, -19, -11, -7, -3, -2, -1};
+    
+    private static final int[] HEEGNER_COMPANION_PRIMES = new int[9];
+    
+    /**
      * Sets up a List of the first few consecutive primes, the first few 
      * composite numbers and the first few Fibonacci numbers. This provides most 
      * of what is needed for the tests.
@@ -123,7 +132,7 @@ public class NumberTheoreticFunctionsCalculatorTest {
         System.out.println("setUpClass() has generated a list of the first " + primesListLength + " consecutive primes.");
         System.out.println("prime(" + primesListLength + ") = " + primesList.get(primesListLength - 1));
         System.out.println("There are " + (PRIME_LIST_THRESHOLD - (primesListLength + 1)) + " composite numbers up to " + PRIME_LIST_THRESHOLD + ".");
-        // Last but not least, a list of Fibonacci numbers
+        // And now to make a list of Fibonacci numbers
         fibonacciList = new ArrayList<>();
         fibonacciList.add(0);
         fibonacciList.add(1);
@@ -138,6 +147,44 @@ public class NumberTheoreticFunctionsCalculatorTest {
         currIndex--; // Step one back to index last added Fibonacci number
         System.out.println("setUpClass() has generated a list of the first " + fibonacciList.size() + " Fibonacci numbers.");
         System.out.println("Fibonacci(" + currIndex + ") = " + fibonacciList.get(currIndex));
+        /* And last but not least, to make what I'm calling, for lack of a 
+           better term, "the Heegner companion primes." */
+        int absD, currDiff, currCompCand, currSqrIndex, currSqrDMult;
+        boolean numNotFoundYet;
+        for (int d = 0; d < HEEGNER_NUMBERS.length; d++) {
+            absD = (-1) * HEEGNER_NUMBERS[d];
+            currIndex = 0;
+            do {
+                currPrime = primesList.get(currIndex);
+                currIndex++;
+            } while (currPrime <= absD);
+            numNotFoundYet = true;
+            while (numNotFoundYet) {
+                currCompCand = 4 * currPrime;
+                currSqrIndex = 1;
+                currDiff = absD;
+                while (currDiff > 0) {
+                    currSqrDMult = absD * currSqrIndex * currSqrIndex;
+                    currDiff = currCompCand - currSqrDMult;
+                    if (Math.sqrt(currDiff) == Math.floor(Math.sqrt(currDiff))) {
+                        currDiff = 0;
+                    }
+                    currSqrIndex++;
+                }
+                if (currDiff < 0) {
+                    numNotFoundYet = false;
+                } else {
+                    currIndex++;
+                    currPrime = primesList.get(currIndex);
+                }
+            }
+            HEEGNER_COMPANION_PRIMES[d] = currPrime;
+        }
+        System.out.println("setUpClass() has generated a list of \"Heegner companion primes\": ");
+        for (int dReport = 0; dReport < HEEGNER_NUMBERS.length; dReport++) {
+            System.out.print(HEEGNER_COMPANION_PRIMES[dReport] + " for " + HEEGNER_NUMBERS[dReport] + ", ");
+        }
+        System.out.println();
     }
     
     /**
@@ -254,12 +301,37 @@ public class NumberTheoreticFunctionsCalculatorTest {
         }
         System.out.println("isPrime(ImaginaryQuadraticInteger)");
         // That does it for testing isPrime on purely real integers.
-        // TO DO: WRITE MORE TESTS FOR isPrime(IQI).
+        ImaginaryQuadraticRing ufdRing;
+        ImaginaryQuadraticInteger numberFromUFD;
+        for (int d = 0; d < HEEGNER_NUMBERS.length; d++) {
+            ufdRing = new ImaginaryQuadraticRing(HEEGNER_NUMBERS[d]);
+            // d should not be prime in the ring of Q(sqrt(d))
+            numberFromUFD = new ImaginaryQuadraticInteger(HEEGNER_NUMBERS[d], 0, ufdRing);
+            try {
+                assertFalse(NumberTheoreticFunctionsCalculator.isPrime(numberFromUFD));
+            } catch (NonUniqueFactorizationDomainException nufde) {
+                fail("Attempt to call isPrime(" + numberFromUFD.toASCIIString() + ") should not have caused a NonUniqueFactorizationDomainException. " + nufde.getMessage());
+            }
+            // Nor should d + 4 be prime even if it is prime in Z
+            numberFromUFD = new ImaginaryQuadraticInteger(-HEEGNER_NUMBERS[d] + 4, 0, ufdRing);
+            try {
+                assertFalse(NumberTheoreticFunctionsCalculator.isPrime(numberFromUFD));
+            } catch (NonUniqueFactorizationDomainException nufde) {
+                fail("Attempt to call isPrime(" + numberFromUFD.toASCIIString() + ") should not have caused a NonUniqueFactorizationDomainException. " + nufde.getMessage());
+            }
+            // The "Heegner companion primes" should indeed be prime
+            numberFromUFD = new ImaginaryQuadraticInteger(HEEGNER_COMPANION_PRIMES[d], 0, ufdRing);
+            try {
+                assertTrue(NumberTheoreticFunctionsCalculator.isPrime(numberFromUFD));
+            } catch (NonUniqueFactorizationDomainException nufde) {
+                fail("Attempt to call isPrime(" + numberFromUFD.toASCIIString() + ") should not have caused a NonUniqueFactorizationDomainException. " + nufde.getMessage());
+            }
+        }
         ImaginaryQuadraticRing Zi5 = new ImaginaryQuadraticRing(-5);
         ImaginaryQuadraticInteger numberFromNonUFD = new ImaginaryQuadraticInteger(7, 0, Zi5);
         try {
             boolean primality = NumberTheoreticFunctionsCalculator.isPrime(numberFromNonUFD);
-            fail("Attempt to call isPrime(" + numberFromNonUFD.toASCIIString() + ") should have caused a NonUniqueFactorizationDomainException.");
+            fail("Attempt to call isPrime(" + numberFromNonUFD.toASCIIString() + ") should have caused a NonUniqueFactorizationDomainException, not given the result that primality is " + primality + ".");
         } catch (NonUniqueFactorizationDomainException nufde) {
             System.out.println("Calling isPrime(" + numberFromNonUFD.toASCIIString() + ") on number from non-UFD correctly triggered NonUniqueFactorizationDomainException \"" + nufde.getMessage() + "\"");
         }
@@ -270,7 +342,7 @@ public class NumberTheoreticFunctionsCalculatorTest {
         } catch (NonUniqueFactorizationDomainException nufde) {
             fail("Calling isPrime(" + a43.toASCIIString() + ") on number from UFD not have triggered NonUniqueFactorizationDomainException \"" + nufde.getMessage() + "\"");
         }
-        // April 24, 2018: That will have to do for now. Will write more later.
+        // May 31, 2018: These will have to do for now. Will write more later.
     }
     
     /**
@@ -540,7 +612,7 @@ public class NumberTheoreticFunctionsCalculatorTest {
     @Test
     public void testEuclideanGCD() {
         System.out.println("euclideanGCD");
-        int a, b, result;
+        int result;
         int expResult = 1; /* Going to test with consecutive integers, expect 
                               the result to be 1 each time */
         for (int i = -30; i < 31; i++) {
@@ -602,9 +674,9 @@ public class NumberTheoreticFunctionsCalculatorTest {
             resultIQI = NumberTheoreticFunctionsCalculator.euclideanGCD(iqia, iqib);
             fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") should have triggered AlgebraicDegreeOverflowException, not given result " + resultIQI.toASCIIString());
         } catch (AlgebraicDegreeOverflowException adoe) {
-            System.out.println("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") correctly triggered AlgebraicDegreeOverflowException" + adoe.getMessage());
+            System.out.println("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") correctly triggered AlgebraicDegreeOverflowException " + adoe.getMessage());
         } catch (NonEuclideanDomainException nde) {
-            fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") should not have triggered NonEuclideanDomainException" + nde.getMessage());
+            fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") should not have triggered NonEuclideanDomainException " + nde.getMessage());
         }
         r = new ImaginaryQuadraticRing(-5);
         iqia = new ImaginaryQuadraticInteger(-2, 2, r);
@@ -613,9 +685,9 @@ public class NumberTheoreticFunctionsCalculatorTest {
             resultIQI = NumberTheoreticFunctionsCalculator.euclideanGCD(iqia, iqib);
             fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") should have triggered NonEuclideanDomainException, not given result " + resultIQI.toASCIIString());
         } catch (AlgebraicDegreeOverflowException adoe) {
-            fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") should not have triggered AlgebraicDegreeOverflowException" + adoe.getMessage());
+            fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") should not have triggered AlgebraicDegreeOverflowException " + adoe.getMessage());
         } catch (NonEuclideanDomainException nde) {
-            System.out.println("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") correctly triggered NonEuclideanDomainException" + nde.getMessage());
+            System.out.println("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") correctly triggered NonEuclideanDomainException " + nde.getMessage());
         }
     }
     
@@ -636,7 +708,6 @@ public class NumberTheoreticFunctionsCalculatorTest {
             squaredPrime = primesList.get(i) * primesList.get(i);
             ranNumDiv = potentialNegRanSqFreeNum/squaredPrime;
             flooredRanNumDiv = (int) Math.floor(ranNumDiv);
-            // System.out.print(squaredPrime + ", " + ranNumDiv + ", " + flooredRanNumDiv + "; ");
             assertFalse(ranNumDiv == flooredRanNumDiv);
         }
         /* And lastly, check that it is at least the negated test bound but not 

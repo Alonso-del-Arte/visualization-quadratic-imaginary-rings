@@ -16,9 +16,6 @@
  */
 package imaginaryquadraticinteger;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -65,19 +62,7 @@ public class ImaginaryQuadraticRingTest {
         ringEisenstein = new ImaginaryQuadraticRing(-3);
         ringOQi7 = new ImaginaryQuadraticRing(-7);
         ringRandom = new ImaginaryQuadraticRing(randomDiscr);
-        System.out.println(ringRandom.toFilenameString() + " has been randomly chosen for testing purposes.");
-    }
-    
-    @AfterClass
-    public static void tearDownClass() {
-    }
-    
-    @Before
-    public void setUp() {
-    }
-    
-    @After
-    public void tearDown() {
+        System.out.println(ringRandom.toASCIIString() + " has been randomly chosen for testing purposes.");
     }
     
     /**
@@ -135,8 +120,8 @@ public class ImaginaryQuadraticRingTest {
     /**
      * Test of preferBlackboardBold method, of class ImaginaryQuadraticRing.
      * Without arguments, preferBlackboardBold is the getter method. With 
-     * arguments, preferBlackboardBold is the setter method.
-     * This is perhaps an unnecessary test.
+     * arguments, preferBlackboardBold is the setter method. This is perhaps an 
+     * unnecessary test.
      */
     @Test
     public void testPreferBlackboardBold() {
@@ -150,6 +135,46 @@ public class ImaginaryQuadraticRingTest {
         assertTrue(ImaginaryQuadraticRing.preferBlackboardBold());
         ImaginaryQuadraticRing.preferBlackboardBold(false);
         assertFalse(ImaginaryQuadraticRing.preferBlackboardBold());
+    }
+    
+    /**
+     * Test of hashCode method, of class ImaginaryQuadraticRing. The purpose 
+     * here isn't to test that any specific ring maps to any specific hash code,  
+     * but rather that two rings that are equal get the same hash code, and two 
+     * rings that are not equal get different hash codes.
+     */
+    @Test
+    public void testHashCode() {
+        System.out.println("hashCode");
+        ImaginaryQuadraticRing someRing = new ImaginaryQuadraticRing(-1);
+        assertEquals(ringGaussian.hashCode(), someRing.hashCode());
+        assertNotEquals(someRing.hashCode(), ringZi2.hashCode());
+        someRing = new ImaginaryQuadraticRing(-2);
+        assertEquals(ringZi2.hashCode(), someRing.hashCode());
+        assertNotEquals(someRing.hashCode(), ringGaussian.hashCode());
+    }
+    
+    /**
+     * Test of equals method, of class ImaginaryQuadraticRing. The reflexive, 
+     * symmetric and transitive properties are tested for rings that should 
+     * register as equal. Then five different rings are tested to check that 
+     * they're not registering as equal.
+     */
+    @Test
+    public void testEquals() {
+        System.out.println("equals");
+        ImaginaryQuadraticRing someRing = new ImaginaryQuadraticRing(-1);
+        ImaginaryQuadraticRing transitiveHold = new ImaginaryQuadraticRing(-1);
+        assertTrue(ringGaussian.equals(ringGaussian)); // Reflexive test
+        assertEquals(ringGaussian, someRing);
+        assertEquals(someRing, ringGaussian); // Symmetric test
+        assertEquals(someRing, transitiveHold);
+        assertEquals(transitiveHold, ringGaussian); // Transitive test
+        // Now to test that rings that are not equal are reported as not equal
+        assertNotEquals(ringGaussian, ringZi2);
+        assertNotEquals(ringZi2, ringEisenstein);
+        assertNotEquals(ringEisenstein, ringOQi7);
+        assertNotEquals(ringOQi7, ringRandom);
     }
 
     /**
@@ -340,19 +365,19 @@ public class ImaginaryQuadraticRingTest {
     public void testConstructor() {
         System.out.println("ImaginaryQuadraticRing (constructor)");
         ImaginaryQuadraticRing ringZi10 = new ImaginaryQuadraticRing(-10); // This should work fine
-        System.out.println("Created " + ringZi10.toFilenameString() + " without problem.");
+        System.out.println("Created " + ringZi10.toASCIIString() + " without problem.");
         ImaginaryQuadraticRing ringOQi11 = new ImaginaryQuadraticRing(-11); // This should also work fine
-        System.out.println("Created " + ringOQi11.toFilenameString() + " without problem.");
+        System.out.println("Created " + ringOQi11.toASCIIString() + " without problem.");
         try {
             ImaginaryQuadraticRing ringZi12 = new ImaginaryQuadraticRing(-12);
-            System.out.println("Somehow created " + ringZi12.toFilenameString() + " without problem.");
+            System.out.println("Somehow created " + ringZi12.toASCIIString() + " without problem.");
             fail("Attempt to use -12 should have caused an IllegalArgumentException.");
         } catch (IllegalArgumentException iae) {
             System.out.println("Attempt to use -12 correctly triggered IllegalArgumentException \"" + iae.getMessage() + "\"");
         }
         try {
             ImaginaryQuadraticRing ringZ7 = new ImaginaryQuadraticRing(7);
-            System.out.println("Somehow created " + ringZ7.toFilenameString() + " without problem.");
+            System.out.println("Somehow created " + ringZ7.toASCIIString() + " without problem.");
             fail("Attempt to use 7 should have caused an IllegalArgumentException.");
         } catch (IllegalArgumentException iae) {
             System.out.println("Attempt to use 7 correctly triggered IllegalArgumentException \"" + iae.getMessage() + "\"");

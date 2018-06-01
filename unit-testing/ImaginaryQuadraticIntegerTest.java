@@ -19,9 +19,6 @@ package imaginaryquadraticinteger;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Random;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -49,7 +46,6 @@ public class ImaginaryQuadraticIntegerTest {
     private static ImaginaryQuadraticInteger zeroIQI;
     
     private static int randomDiscr, randomRealPart, randomImagPart, randomRealForHalfInts, randomImagForHalfInts, totalTestIntegers;
-    private static boolean ringRandomd1mod4;
     
     public ImaginaryQuadraticIntegerTest() {
     }
@@ -60,12 +56,12 @@ public class ImaginaryQuadraticIntegerTest {
      */
     @BeforeClass
     public static void setUpClass() {
-        int testMinD, maxAB;
+        int maxAB;
         randomDiscr = NumberTheoreticFunctionsCalculator.randomNegativeSquarefreeNumber(RingWindowDisplay.MINIMUM_RING_D);
         if (randomDiscr > -5) {
             randomDiscr = -5; // This is just in case we get -3 or -1, which we are already testing for and which require special treatment in some of the tests.
         }
-        ringRandomd1mod4 = (randomDiscr % 4 == -3);
+        boolean ringRandomd1mod4 = (randomDiscr % 4 == -3);
         ringGaussian = new ImaginaryQuadraticRing(-1);
         ringZi2 = new ImaginaryQuadraticRing(-2);
         ringEisenstein = new ImaginaryQuadraticRing(-3);
@@ -165,18 +161,6 @@ public class ImaginaryQuadraticIntegerTest {
         totalTestIntegers = testIntegers.size();
     }
     
-    @AfterClass
-    public static void tearDownClass() {
-    }
-    
-    @Before
-    public void setUp() {
-    }
-    
-    @After
-    public void tearDown() {
-    }
-
     /**
      * Test of algebraicDegree method, of class ImaginaryQuadraticInteger.
      */
@@ -357,6 +341,7 @@ public class ImaginaryQuadraticIntegerTest {
                 fail("NotDivisibleException should not have occurred during test of conjugate().\n" + nde.getMessage() + "\nThere may be a mistake in the setup of the test.");
             }
             result = testIntegers.get(i).conjugate();
+            System.out.println("Conjugate of " + testIntegers.get(i).toASCIIString() + " is " + result.toASCIIString());
             assertEquals(expResult, result);
             assertEquals(testConjugates.get(i), result);
             result = result.conjugate();
@@ -434,6 +419,16 @@ public class ImaginaryQuadraticIntegerTest {
             }
             assertEquals(expResult, result);
         }
+    }
+    
+    @Test
+    public void testGetRing() {
+        System.out.println("getRing");
+        assertEquals(ringGaussian, testIntegers.get(0).getRing());
+        assertEquals(ringZi2, testIntegers.get(1).getRing());
+        assertEquals(ringEisenstein, testIntegers.get(2).getRing());
+        assertEquals(ringOQi7, testIntegers.get(3).getRing());
+        assertEquals(ringRandom, testIntegers.get(4).getRing());
     }
     
     /**
@@ -675,7 +670,7 @@ public class ImaginaryQuadraticIntegerTest {
      * Test of hashCode method, of class ImaginaryQuadraticInteger. It is 
      * expected that if two ImaginaryQuadraticInteger objects are equal, their 
      * hash codes are equal as well. It is also expected that a + b sqrt(c) and 
-     * a + b sqrt(d) will get different hash codes. But it definitely not 
+     * a + b sqrt(d) will get different hash codes. But it is definitely not 
      * expected that hash codes will be unique among all possible 
      * ImaginaryQuadraticInteger objects.
      */

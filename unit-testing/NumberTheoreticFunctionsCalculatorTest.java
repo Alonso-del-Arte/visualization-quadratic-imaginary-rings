@@ -174,8 +174,8 @@ public class NumberTheoreticFunctionsCalculatorTest {
                 if (currDiff < 0) {
                     numNotFoundYet = false;
                 } else {
-                    currIndex++;
                     currPrime = primesList.get(currIndex);
+                    currIndex++;
                 }
             }
             HEEGNER_COMPANION_PRIMES[d] = currPrime;

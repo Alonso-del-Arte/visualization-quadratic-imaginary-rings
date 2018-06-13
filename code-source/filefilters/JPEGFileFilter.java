@@ -20,28 +20,28 @@ import java.io.File;
 import javax.swing.filechooser.FileFilter;
 
 /**
- * File filter for selecting Portable Network Graphics (PNG) files in a 
+ * File filter for selecting Joint Photographic Experts Group (JPEG) files in a 
  * JFileChooser dialog box.
  * @author Alonso del Arte, based on the tutorial at 
  * <a href="http://www.codejava.net/java-se/swing/add-file-filter-for-jfilechooser-dialog">CodeJava</a>.
  */
-public class PNGFileFilter extends FileFilter {
+public class JPEGFileFilter extends FileFilter {
     
     @Override
     public boolean accept(File file) {
         if (file.isDirectory()) {
             return true;
         }
-        return file.getName().toLowerCase().endsWith(".png");
+        return (file.getName().toLowerCase().endsWith(".jpg") || file.getName().toLowerCase().endsWith(".jpeg"));
     }
     
     /**
      * The description of this filter.
-     * @return The String "Portable Network Graphics files (*.png)"
+     * @return The String "Joint Photographic Experts Group image files (*.jpg or *.jpeg)"
      */
     @Override
     public String getDescription() {
-        return "Portable Network Graphics files (*.png)";
+        return "Joint Photographic Experts Group image files (*.jpg or *.jpeg)";
     }
-    
+        
 }

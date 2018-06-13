@@ -94,11 +94,7 @@ public class NumberTheoreticFunctionsCalculatorTest {
         } else {
             threshold = PRIME_LIST_THRESHOLD;
         }
-        if (threshold % 2 == 1) {
-            halfThreshold = (threshold + 1)/2;
-        } else {
-            halfThreshold = threshold/2;
-        }
+        halfThreshold = threshold/2;
         primesList = new ArrayList<>();
         primesList.add(2); // Add 2 as a special case
         boolean[] primeFlags = new boolean[halfThreshold];
@@ -174,8 +170,8 @@ public class NumberTheoreticFunctionsCalculatorTest {
                 if (currDiff < 0) {
                     numNotFoundYet = false;
                 } else {
-                    currPrime = primesList.get(currIndex);
                     currIndex++;
+                    currPrime = primesList.get(currIndex);
                 }
             }
             HEEGNER_COMPANION_PRIMES[d] = currPrime;
@@ -268,9 +264,9 @@ public class NumberTheoreticFunctionsCalculatorTest {
         }
         assertFalse(NumberTheoreticFunctionsCalculator.isPrime(1));
         assertFalse(NumberTheoreticFunctionsCalculator.isPrime(-1));
-        for (int j = 0; j < compositesList.size(); j++) {
-            assertFalse(NumberTheoreticFunctionsCalculator.isPrime(compositesList.get(j)));
-            assertFalse(NumberTheoreticFunctionsCalculator.isPrime(-compositesList.get(j)));
+        for (Integer compositeNum : compositesList) {
+            assertFalse(NumberTheoreticFunctionsCalculator.isPrime(compositeNum));
+            assertFalse(NumberTheoreticFunctionsCalculator.isPrime(-compositeNum));
         }
         /* Now we're going to test odd integers greater than the last prime 
         in our List but smaller than the square of that prime. */
@@ -708,7 +704,7 @@ public class NumberTheoreticFunctionsCalculatorTest {
             squaredPrime = primesList.get(i) * primesList.get(i);
             ranNumDiv = potentialNegRanSqFreeNum/squaredPrime;
             flooredRanNumDiv = (int) Math.floor(ranNumDiv);
-            assertFalse(ranNumDiv == flooredRanNumDiv);
+            assertNotEquals(ranNumDiv, flooredRanNumDiv, ImaginaryQuadraticRingTest.TEST_DELTA);
         }
         /* And lastly, check that it is at least the negated test bound but not 
         more than or equal to 0. */

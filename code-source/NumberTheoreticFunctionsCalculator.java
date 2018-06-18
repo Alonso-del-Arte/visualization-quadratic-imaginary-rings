@@ -1,18 +1,18 @@
 /*
  * Copyright (C) 2018 Alonso del Arte
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under 
+ * the terms of the GNU General Public License as published by the Free Software 
+ * Foundation, either version 3 of the License, or (at your option) any later 
+ * version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
+ * details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with 
+ * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package imaginaryquadraticinteger;
 
@@ -102,15 +102,16 @@ public class NumberTheoreticFunctionsCalculator {
     }
     
     /**
-     * An implementation of the Legendre symbol, which tells if a given number 
-     * is a quadratic residue modulo an odd prime. There is no overflow 
+     * The Legendre symbol, a number theoretic function which tells if a given 
+     * number is a quadratic residue modulo an odd prime. There is no overflow 
      * checking, but hopefully that's only a problem for numbers that are very 
      * close to {@link Integer#MIN_VALUE} or {@link Integer#MAX_VALUE}.
      * @param a The number to test for being a quadratic residue modulo an odd 
      * prime. For example, 10.
      * @param p The odd prime to test a for being a quadratic residue modulo of. 
-     * For example, 7. This parameter may be negative; the function will simply 
-     * change it to a positive number.
+     * For example, 7. This parameter may be negative; the function will quietly 
+     * change it to a positive number; this behavior is not guaranteed for 
+     * future versions of this program.
      * @return -1 if a is quadratic residue modulo p, 0 if gcd(a, p) > 1, 1 if a 
      * is a quadratic residue modulo p. An example of each: Legendre(10, 7) = -1 
      * since there are no solutions to x^2 = 10 mod 7; Legendre(10, 5) = 0 since 
@@ -155,16 +156,107 @@ public class NumberTheoreticFunctionsCalculator {
         return (byte) power;
     }
     
-    // PLACEHOLDER FOR symbolJacobi
-    // Will get failing first test.
-    public static byte symbolJacobi(int a, int m) {
-        return -3;
+    /**
+     * The Jacobi symbol, a number theoretic function. This implementation is 
+     * almost entirely dependent on the Legendre symbol.
+     * @param n Parameter n, for example, 8.
+     * @param m Parameter m, for example, 15.
+     * @return The result, for example, 1.
+     * @throws IllegalArgumentException If m is even or negative (or both). Note 
+     * that this is a runtime exception.
+     */
+    public static byte symbolJacobi(int n, int m) {
+        if (m % 2 == 0) {
+            throw new IllegalArgumentException(m + " is not an odd number. Consider using the Kronecker symbol instead.");        }
+        if (m < 0) {
+            throw new IllegalArgumentException(m + " is not a positive number. Consider using the Kronecker symbol instead.");
+        }
+        if (m == 1) {
+            return 1;
+        }
+        if (euclideanGCD(n, m) > 1) {
+            return 0;
+        }
+        List<Integer> mFactors = primeFactors(m);
+        byte symbol = 1;
+        for (Integer mFactor : mFactors) {
+            symbol *= symbolLegendre(n, mFactor);
+        }
+        return symbol;
     }
     
-    // PLACEHOLDER FOR symbolKronecker
-    // Will get failing first test.
-    public static byte symbolKronecker(int a, int m) {
-        return -4;
+    private static byte symbolKroneckerNegOne(int n) {
+        if (n < 0) {
+            return -1;
+        } else {
+            return 1;
+        }
+    }
+    
+    private static byte symbolKroneckerTwo(int n) {
+        int nMod8 = n % 8;
+        switch (nMod8) {
+            case -7:
+            case -1:
+            case 1:
+            case 7:
+                return 1;
+            case -5:
+            case -3:
+            case 3:
+            case 5:
+                return -1;
+            default:
+                return 0;
+        }
+    }
+    
+    /**
+     * The Kronecker symbol, a number theoretic function. This implementation 
+     * relies in great part on the Legendre symbol, but not at all on the Jacobi 
+     * symbol.
+     * @param n Parameter n, for example, 3.
+     * @param m Parameter m, for example, 2.
+     * @return The result, for example, -1.
+     */
+    public static byte symbolKronecker(int n, int m) {
+        if (euclideanGCD(n, m) > 1) {
+            return 0;
+        }
+        if (m == 1) {
+            return 1;
+        }
+        if (m == 0) {
+            if (n == -1 || n == 1) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+        List<Integer> mFactors = primeFactors(m);
+        int currMFactorIndex = 0;
+        int kindaOmega = mFactors.size();
+        byte symbol = 1;
+        if (mFactors.get(currMFactorIndex) == -1) {
+            symbol *= symbolKroneckerNegOne(n);
+            currMFactorIndex++;
+        }
+        int currFactor;
+        boolean keepGoing = true; // Keep going with Kronecker(n, 2)?
+        while (currMFactorIndex < kindaOmega && keepGoing) {
+            currFactor = mFactors.get(currMFactorIndex);
+            keepGoing = (currFactor == 2);
+            if (keepGoing) {
+                symbol *= symbolKroneckerTwo(n);
+                currMFactorIndex++;
+            }
+        }
+        while (currMFactorIndex < kindaOmega) {
+            currFactor = mFactors.get(currMFactorIndex);
+            symbol *= symbolLegendre(n, currFactor);
+            currMFactorIndex++;
+        }
+        return symbol;
     }
     
     /**

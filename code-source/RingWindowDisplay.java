@@ -1,18 +1,18 @@
 /*
  * Copyright (C) 2018 Alonso del Arte
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under 
+ * the terms of the GNU General Public License as published by the Free Software 
+ * Foundation, either version 3 of the License, or (at your option) any later 
+ * version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
+ * details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with 
+ * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package imaginaryquadraticinteger;
 
@@ -374,7 +374,6 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         int verticalGridDistance = this.pixelsPerBasicImaginaryInterval;
         
         ImaginaryQuadraticInteger currIQI;
-        Color currColor;
         
         int currSplitPrime, currSplitPrimePointX, currNegSplitPrimePointX;
         
@@ -398,19 +397,68 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         graphicsForPoints.fillOval(currPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
         graphicsForPoints.fillOval(currNegPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
         
-        // The other purely real integer points
-        for (int x = 2; x <= maxX; x++) {
-            currPointX += this.pixelsPerUnitInterval;
-            currNegPointX -= this.pixelsPerUnitInterval;
-            if (NumberTheoreticFunctionsCalculator.isPrime(x)) {
-                if (NumberTheoreticFunctionsCalculator.euclideanGCD(x, this.imagQuadRing.negRad) > 1) {
-                    currColor = this.ramifiedPrimeColor;
-                } else {
-                    currColor = this.inertPrimeColor; // Assume the prime to be inert for now
-                }
-                graphicsForPoints.setColor(currColor);
+        // The even primes, -2 and 2
+        currNegPointX -= this.pixelsPerUnitInterval;
+        currPointX += this.pixelsPerUnitInterval;
+        byte symbol = NumberTheoreticFunctionsCalculator.symbolKronecker(this.imagQuadRing.negRad, 2);
+        if (this.imagQuadRing.negRad % 4 == -1) {
+            symbol = 0;
+        }
+        if (this.imagQuadRing.negRad == -3) {
+            symbol = -1;
+        }
+        if (this.imagQuadRing.negRad == -1) {
+            symbol = 1;
+        }
+        switch (symbol) {
+            case -1:
+                graphicsForPoints.setColor(this.inertPrimeColor);
                 graphicsForPoints.fillOval(currPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
                 graphicsForPoints.fillOval(currNegPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
+                break;
+            case 0:
+                graphicsForPoints.setColor(this.ramifiedPrimeColor);
+                graphicsForPoints.drawOval(currPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
+                graphicsForPoints.drawOval(currNegPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
+                break;
+            case 1:
+                graphicsForPoints.setColor(this.splitPrimeColor);
+                graphicsForPoints.drawOval(currPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
+                graphicsForPoints.drawOval(currNegPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
+                break;
+            default:
+                throw new RuntimeException("Unexpected problem computing symbolKronecker(" + imagQuadRing.negRad + ", " + 2 + ") = " + symbol);
+        }
+        
+        // Place "nibs" back at -1 and 1
+        currNegPointX += this.pixelsPerUnitInterval;
+        currPointX -= this.pixelsPerUnitInterval;
+
+        // The other purely real integer points
+        for (int x = 3; x <= maxX; x += 2) {
+            currPointX += (2 * this.pixelsPerUnitInterval);
+            currNegPointX -= (2 * this.pixelsPerUnitInterval);
+            if (NumberTheoreticFunctionsCalculator.isPrime(x)) {
+                symbol = NumberTheoreticFunctionsCalculator.symbolLegendre(imagQuadRing.negRad, x);
+                switch (symbol) {
+                    case -1:
+                        graphicsForPoints.setColor(this.inertPrimeColor);
+                        graphicsForPoints.fillOval(currPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
+                        graphicsForPoints.fillOval(currNegPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
+                        break;
+                    case 0:
+                        graphicsForPoints.setColor(this.ramifiedPrimeColor);
+                        graphicsForPoints.drawOval(currPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
+                        graphicsForPoints.drawOval(currNegPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
+                        break;
+                    case 1:
+                        graphicsForPoints.setColor(this.splitPrimeColor);
+                        graphicsForPoints.drawOval(currPointX - this.dotRadius + 1, currPointY - this.dotRadius + 1, dotDiameter, dotDiameter);
+                        graphicsForPoints.drawOval(currNegPointX - this.dotRadius + 1, currPointY - this.dotRadius + 1, dotDiameter, dotDiameter);
+                        break;
+                    default:
+                        throw new RuntimeException("Unexpected problem computing symbolLegendre(" + imagQuadRing.negRad + ", " + x + ") = " + symbol);
+                }
             }
         }
         
@@ -440,14 +488,17 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             for (int y = 1; y <= maxY; y++) {
                 currPointY += verticalGridDistance;
                 currNegPointY -= verticalGridDistance;
-                currIQI = new ImaginaryQuadraticInteger(0, y, this.imagQuadRing, 1);
+                currIQI = new ImaginaryQuadraticInteger(0, y, this.imagQuadRing);
                 if (NumberTheoreticFunctionsCalculator.isPrime(currIQI.norm())) {
                     if (NumberTheoreticFunctionsCalculator.euclideanGCD(currIQI.norm(), this.imagQuadRing.negRad) > 1) {
-                        currColor = this.ramifiedPrimeColor;
+                        int ramifyPoint = this.zeroCoordX + currIQI.norm() * this.pixelsPerUnitInterval;
+                        int negRamifyPoint = this.zeroCoordX - currIQI.norm() * this.pixelsPerUnitInterval;
+                        graphicsForPoints.setColor(this.ramifiedPrimeColor);
+                        graphicsForPoints.fillOval(ramifyPoint - this.dotRadius, this.zeroCoordY - this.dotRadius, dotDiameter, dotDiameter);
+                        graphicsForPoints.fillOval(negRamifyPoint - this.dotRadius, this.zeroCoordY - this.dotRadius, dotDiameter, dotDiameter);
                     } else {
-                        currColor = this.inertPrimeColor;
+                        graphicsForPoints.setColor(this.inertPrimeColor);
                     }
-                    graphicsForPoints.setColor(currColor);
                     graphicsForPoints.fillOval(currPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
                     graphicsForPoints.fillOval(currPointX - this.dotRadius, currNegPointY - this.dotRadius, dotDiameter, dotDiameter);
                 }
@@ -1162,7 +1213,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      * Function to show the About box, a simple MessageDialog from JOptionPage.
      */
     public void showAboutBox() {
-        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.9\n\u00A9 2018 Alonso del Arte");
+        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.94\n\u00A9 2018 Alonso del Arte");
     }
     
     /**

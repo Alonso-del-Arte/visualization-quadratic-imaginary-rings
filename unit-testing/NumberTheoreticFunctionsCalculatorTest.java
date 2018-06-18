@@ -1,18 +1,18 @@
 /*
  * Copyright (C) 2018 Alonso del Arte
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under 
+ * the terms of the GNU General Public License as published by the Free Software 
+ * Foundation, either version 3 of the License, or (at your option) any later 
+ * version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
+ * details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with 
+ * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package imaginaryquadraticinteger;
 
@@ -299,6 +299,7 @@ public class NumberTheoreticFunctionsCalculatorTest {
         // That does it for testing isPrime on purely real integers.
         ImaginaryQuadraticRing ufdRing;
         ImaginaryQuadraticInteger numberFromUFD;
+        String assertionMessage;
         for (int d = 0; d < HEEGNER_NUMBERS.length; d++) {
             ufdRing = new ImaginaryQuadraticRing(HEEGNER_NUMBERS[d]);
             // d should not be prime in the ring of Q(sqrt(d))
@@ -317,8 +318,9 @@ public class NumberTheoreticFunctionsCalculatorTest {
             }
             // The "Heegner companion primes" should indeed be prime
             numberFromUFD = new ImaginaryQuadraticInteger(HEEGNER_COMPANION_PRIMES[d], 0, ufdRing);
+            assertionMessage = numberFromUFD.toString() + " should have been identified as prime in " + ufdRing.toString();
             try {
-                assertTrue(NumberTheoreticFunctionsCalculator.isPrime(numberFromUFD));
+                assertTrue(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(numberFromUFD));
             } catch (NonUniqueFactorizationDomainException nufde) {
                 fail("Attempt to call isPrime(" + numberFromUFD.toASCIIString() + ") should not have caused a NonUniqueFactorizationDomainException. " + nufde.getMessage());
             }
@@ -470,28 +472,30 @@ public class NumberTheoreticFunctionsCalculatorTest {
     /**
      * Test of symbolJacobi method, of class NumberTheoreticFunctionsCalculator. 
      * First, it checks that Legendre(a, p) = Jacobi(a, p), where p is an odd 
-     * prime. Next, it checks that Jacobi(n, pq) = Legendre(n, p) Legendre(n, 
-     * q). If the Legendre symbol test fails, then the result of this test is 
-     * meaningless.
+     * prime. Next, it checks that Jacobi(n, pq) = Legendre(n, p) Legendre(n,  
+     * q). If the Legendre symbol test fails, the result of this test is 
+     * meaningless. Then follows the actual business of checking Jacobi(n, m).
      */
     @Test
     public void testJacobiSymbol() {
         System.out.println("symbolJacobi");
+        System.out.println("Checking overlap with Legendre symbol...");
         byte expResult, result;
         for (int i = 1; i < primesListLength; i++) {
-            for (int a = 2; a < 100; a++) {
+            for (int a = 5; a < 13; a++) {
                 expResult = NumberTheoreticFunctionsCalculator.symbolLegendre(a, primesList.get(i));
                 result = NumberTheoreticFunctionsCalculator.symbolJacobi(a, primesList.get(i));
                 assertEquals(expResult, result);
             }
         }
+        System.out.println("Now checking Jacobi symbol per se...");
         int p, q, m;
         for (int pindex = 1; pindex < primesListLength; pindex++) {
             p = primesList.get(pindex);
             for (int qindex = pindex + 1; qindex < primesListLength; qindex++) {
                 q = primesList.get(qindex);
                 m = p * q;
-                for (int n = 2; n < 100; n++) {
+                for (int n = 15; n < 20; n++) {
                     expResult = NumberTheoreticFunctionsCalculator.symbolLegendre(n, p);
                     expResult *= NumberTheoreticFunctionsCalculator.symbolLegendre(n, q);
                     result = NumberTheoreticFunctionsCalculator.symbolJacobi(n, m);
@@ -501,16 +505,37 @@ public class NumberTheoreticFunctionsCalculatorTest {
         }
     }
 
-    // This is nowhere near a complete test, but it should be enought to give a 
-    // failing first test, per the test-driven development methodology.
     /**
      * Test of symbolKronecker method, of class 
-     * NumberTheoreticFunctionsCalculator.
+     * NumberTheoreticFunctionsCalculator. First, it checks that Legendre(a, p) 
+     * = Kronecker(a, p), where p is an odd prime. Next, it checks that 
+     * Jacobi(n, m) = Kronecker(n, m). If either the Legendre symbol test or the 
+     * Jacobi symbol test fails, the result of this test is meaningless. Then 
+     * follows the actual business of checking Kronecker(n, -2), Kronecker(n, 
+     * -1) and Kronecker(n, 2). On another occasion I might add a few 
+     * multiplicative tests.
      */
     @Test
     public void testKroneckerSymbol() {
         System.out.println("symbolKronecker");
         byte expResult, result;
+        System.out.println("Checking overlap with Legendre symbol...");
+        for (int i = 1; i < primesListLength; i++) {
+            for (int a = 7; a < 11; a++) {
+                expResult = NumberTheoreticFunctionsCalculator.symbolLegendre(a, primesList.get(i));
+                result = NumberTheoreticFunctionsCalculator.symbolKronecker(a, primesList.get(i));
+                assertEquals(expResult, result);
+            }
+        }
+        System.out.println("Checking overlap with Jacobi symbol...");
+        for (int j = -10; j < 10; j++) {
+            for (int b = 5; b < 15; b += 2) {
+                expResult = NumberTheoreticFunctionsCalculator.symbolJacobi(j, b);
+                result = NumberTheoreticFunctionsCalculator.symbolKronecker(j, b);
+                assertEquals(expResult, result);
+            }
+        }
+        System.out.println("Now checking Kronecker symbol per se...");
         for (int n = 1; n < 50; n++) {
             expResult = -1;
             result = NumberTheoreticFunctionsCalculator.symbolKronecker(-n, -1);
@@ -519,16 +544,23 @@ public class NumberTheoreticFunctionsCalculatorTest {
             result = NumberTheoreticFunctionsCalculator.symbolKronecker(n, -1);
             assertEquals(expResult, result);
         }
-        for (int m = 0; m < 50; m += 8) {
+        for (int m = -24; m < 25; m += 8) {
             expResult = -1;
             result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 3, 2);
             assertEquals(expResult, result);
             result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 5, 2);
             assertEquals(expResult, result);
-            result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 1, -2);
-            assertEquals(expResult, result);
-            result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 7, -2);
-            assertEquals(expResult, result);
+            if (m < 0) {
+                result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 1, -2);
+                assertEquals(expResult, result);
+                result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 7, -2);
+                assertEquals(expResult, result);
+            } else {
+                result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 3, -2);
+                assertEquals(expResult, result);
+                result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 5, -2);
+                assertEquals(expResult, result);
+            }
             expResult = 0;
             result = NumberTheoreticFunctionsCalculator.symbolKronecker(m, 2);
             assertEquals(expResult, result);
@@ -543,10 +575,17 @@ public class NumberTheoreticFunctionsCalculatorTest {
             assertEquals(expResult, result);
             result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 7, 2);
             assertEquals(expResult, result);
-            result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 3, -2);
-            assertEquals(expResult, result);
-            result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 5, -2);
-            assertEquals(expResult, result);
+            if (m < 0) {
+                result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 3, -2);
+                assertEquals(expResult, result);
+                result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 5, -2);
+                assertEquals(expResult, result);
+            } else {
+                result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 1, -2);
+                assertEquals(expResult, result);
+                result = NumberTheoreticFunctionsCalculator.symbolKronecker(m + 7, -2);
+                assertEquals(expResult, result);
+            }
         }
     }
     

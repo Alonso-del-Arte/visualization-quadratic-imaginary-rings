@@ -43,7 +43,7 @@ public class NotDivisibleExceptionTest {
             division = dividend.divides(divisor);
             System.out.println(dividend.toASCIIString() + " divided by " + divisor.toASCIIString() + " is " + division.toASCIIString());
         } catch (AlgebraicDegreeOverflowException adoe) {
-            System.err.println("AlgebraicDegreeOverflowException should not have occurred in this context.");
+            System.err.println("AlgebraicDegreeOverflowException should not have occurred in this context: " + adoe.getMessage());
             // This would merit a fail if occurred in a test.
         } catch (NotDivisibleException nde) {
             notDivGaussian = nde;
@@ -54,7 +54,7 @@ public class NotDivisibleExceptionTest {
             division = dividend.divides(divisor);
             System.out.println(dividend.toASCIIString() + " divided by " + divisor.toASCIIString() + " is " + division.toASCIIString());
         } catch (AlgebraicDegreeOverflowException adoe) {
-            System.err.println("AlgebraicDegreeOverflowException should not have occurred in this context.");
+            System.err.println("AlgebraicDegreeOverflowException should not have occurred in this context: " + adoe.getMessage());
             // This would merit a fail if occurred in a test.
         } catch (NotDivisibleException nde) {
             notDivEisenstein = nde;
@@ -103,6 +103,51 @@ public class NotDivisibleExceptionTest {
         System.out.println("getResFractNegRad");
         assertEquals(-1, notDivGaussian.getResFractNegRad());
         assertEquals(-3, notDivEisenstein.getResFractNegRad());
+    }
+    
+    /**
+     * Test of getNumericRealPart method, of class NotDivisibleException.
+     */
+    @Test
+    public void testGetNumericRealPart() {
+        System.out.println("getNumericRealPart");
+        double expResult, result;
+        expResult = 1.0 / 4.0;
+        result = notDivEisenstein.getNumericRealPart();
+        assertEquals(expResult, result, ImaginaryQuadraticRingTest.TEST_DELTA);
+        expResult = 8.0 / 5.0;
+        result = notDivGaussian.getNumericRealPart();
+        assertEquals(expResult, result, ImaginaryQuadraticRingTest.TEST_DELTA);
+    }
+
+    /**
+     * Test of getNumericImagPartMult method, of class NotDivisibleException.
+     */
+    @Test
+    public void testGetNumericImagPartMult() {
+        System.out.println("getNumericImagPartMult");
+        double expResult, result;
+        expResult = -9.0 / 4.0;
+        result = notDivEisenstein.getNumericImagPartMult();
+        assertEquals(expResult, result, ImaginaryQuadraticRingTest.TEST_DELTA);
+        expResult = -1.0 / 5.0;
+        result = notDivGaussian.getNumericImagPartMult();
+        assertEquals(expResult, result, ImaginaryQuadraticRingTest.TEST_DELTA);
+    }
+
+    /**
+     * Test of getNumericImagPart method, of class NotDivisibleException.
+     */
+    @Test
+    public void testGetNumericImagPart() {
+        System.out.println("getNumericImagPart");
+        double expResult, result;
+        expResult = -9.0 * Math.sqrt(3) / 4.0;
+        result = notDivEisenstein.getNumericImagPart();
+        assertEquals(expResult, result, ImaginaryQuadraticRingTest.TEST_DELTA);
+        expResult = -1.0 / 5.0;
+        result = notDivGaussian.getNumericImagPart();
+        assertEquals(expResult, result, ImaginaryQuadraticRingTest.TEST_DELTA);
     }
     
     /**
@@ -181,10 +226,10 @@ public class NotDivisibleExceptionTest {
     public void testRoundAwayFromZero() {
         System.out.println("roundAwayFromZero");
         ImaginaryQuadraticInteger expResult = new ImaginaryQuadraticInteger(2, -1, RING_GAUSSIAN);
-        ImaginaryQuadraticInteger result = notDivGaussian.roundTowardsZero();
+        ImaginaryQuadraticInteger result = notDivGaussian.roundAwayFromZero();
         assertEquals(expResult, result);
         expResult = new ImaginaryQuadraticInteger(2, 0, RING_EISENSTEIN);
-        result = notDivEisenstein.roundTowardsZero();
+        result = notDivEisenstein.roundAwayFromZero();
         assertEquals(expResult, result);
     }
     

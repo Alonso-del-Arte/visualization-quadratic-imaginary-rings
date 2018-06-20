@@ -31,11 +31,16 @@ package imaginaryquadraticinteger;
 public class NotDivisibleException extends Exception {
     
     private static final long serialVersionUID = 1058198179;
+    
     private final long resultingFractionRealPartNumerator;
     private final long resultingFractionImagPartNumerator;
     private final long resultingFractionDenominator;
     private final int resultingFractionNegRad;
     private final ImaginaryQuadraticRing workingRing;
+    
+    private final double numericRealPart;
+    private final double numericImagPartMult;
+    private final double numericImagPart;
     
     /**
      * Gives the numerator of the real part of the resulting fraction.
@@ -79,12 +84,47 @@ public class NotDivisibleException extends Exception {
         return resultingFractionNegRad;
     }
     
-    // Uncomment next five lines for failing first test
-    public ImaginaryQuadraticInteger[] getBoundingIntegers() {
-        ImaginaryQuadraticInteger zeroIQI = new ImaginaryQuadraticInteger(0, 0, workingRing);
-        ImaginaryQuadraticInteger[] algIntArray = {zeroIQI, zeroIQI, zeroIQI, zeroIQI};
-        return algIntArray;
+    /**
+     * Gives a numeric approximation of the real part of the resulting fraction.
+     * @return A double with a numeric approximation of the real part of the 
+     * resulting fraction. For example, for 3/4 + 7sqrt(-2)/4, this would be 
+     * 0.75.
+     */
+    public double getNumericRealPart() {
+        return numericRealPart;
     }
+    
+    /**
+     * Gives a numeric approximation of the imaginary part of the resulting 
+     * fraction divided by the square root of the parameter d of the relevant 
+     * ring.
+     * @return A double with a numeric approximation of the imaginary part of 
+     * the resulting fraction divided by the square root of the parameter d of 
+     * the relevant ring. For example, for 3/4 + 7sqrt(-2)/4, this would be 
+     * 1.75.
+     */
+    public double getNumericImagPartMult() {
+        return numericImagPartMult;
+    }
+    
+    /**
+     * Gives a numeric approximation of the imaginary part of the resulting 
+     * fraction divided by the imaginary unit.
+     * @return A double with a numeric approximation of the imaginary part of 
+     * the resulting fraction divided by the imaginary unit. For example, for 
+     * 3/4 + 7sqrt(-2)/4, this would be about 2.4748737341, which is 
+     * approximately 7sqrt(2)/4.
+     */
+    public double getNumericImagPart() {
+        return numericImagPart;
+    }
+    
+    // Uncomment next five lines for failing first test
+//    public ImaginaryQuadraticInteger[] getBoundingIntegers() {
+//        ImaginaryQuadraticInteger zeroIQI = new ImaginaryQuadraticInteger(0, 0, workingRing);
+//        ImaginaryQuadraticInteger[] algIntArray = {zeroIQI, zeroIQI, zeroIQI, zeroIQI};
+//        return algIntArray;
+//    }
     
     // TODO: FINE-TUNE FUNCTION FOR DOMAINS WITH "HALF-INTEGERS"
     // I think this will pass tests that don't involve domains with "half-integers", but more thorough tests may be necessary...
@@ -166,5 +206,8 @@ public class NotDivisibleException extends Exception {
         resultingFractionDenominator = resFractDenom;
         resultingFractionNegRad = resFractNegRad;
         workingRing = new ImaginaryQuadraticRing(resFractNegRad);
+        numericRealPart = (double) resultingFractionRealPartNumerator / (double) resultingFractionDenominator;
+        numericImagPartMult = (double) resultingFractionImagPartNumerator / (double) resultingFractionDenominator;
+        numericImagPart = numericImagPartMult * workingRing.getAbsNegRadSqrt();
     }
 }

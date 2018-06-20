@@ -30,7 +30,7 @@ package imaginaryquadraticinteger;
  */
 public class NotDivisibleException extends Exception {
     
-    private static final long serialVersionUID = 1058198179;
+    private static final long serialVersionUID = 1058231799;
     
     private final long resultingFractionRealPartNumerator;
     private final long resultingFractionImagPartNumerator;

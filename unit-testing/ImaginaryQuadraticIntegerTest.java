@@ -1,18 +1,18 @@
 /*
  * Copyright (C) 2018 Alonso del Arte
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under 
+ * the terms of the GNU General Public License as published by the Free Software 
+ * Foundation, either version 3 of the License, or (at your option) any later 
+ * version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
+ * details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with 
+ * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package imaginaryquadraticinteger;
 
@@ -75,7 +75,7 @@ public class ImaginaryQuadraticIntegerTest {
                 nextD++;
             } while (!(NumberTheoreticFunctionsCalculator.isSquareFree(nextD) && (nextD % 4 == -3)));
             ringRandomForAltTesting = new ImaginaryQuadraticRing(nextD);
-            System.out.println(ringRandomForAltTesting.toASCIIString() + " has been chosen for testing toStringAlt() and toASCIIStringAlt.");
+            System.out.println(ringRandomForAltTesting.toASCIIString() + " has been chosen for testing toStringAlt(), toASCIIStringAlt, toTeXStringAlt and toHTMLStringAlt.");
         }
         System.out.println(ringRandom.toASCIIString() + " has been randomly chosen for testing purposes.");
         maxAB = (int) Math.floor(Math.sqrt(Integer.MAX_VALUE/((-4) * (randomDiscr + 1))));
@@ -667,6 +667,254 @@ public class ImaginaryQuadraticIntegerTest {
     }
     
     /**
+     * Test of toTeXString method, of class ImaginaryQuadraticInteger. For 
+     * methods that return Strings, spaces are desirable but not required.
+     * Therefore the tests should strip out spaces before asserting equality.
+     */
+    @Test
+    public void testToTeXString() {
+        System.out.println("toTeXString");
+        String expResult;
+        if (randomRealPart == 0) {
+            expResult = randomImagPart + "i";
+        } else {
+            expResult = randomRealPart + "+" + randomImagPart + "i";
+        }
+        expResult = expResult.replace("+-", "-");
+        expResult = expResult.replace("+1i", "+i");
+        expResult = expResult.replace("-1i", "-i");
+        String result = testIntegers.get(0).toTeXString().replace(" ", "");
+        assertEquals(expResult, result);
+        for (int i = 1; i < totalTestIntegers; i++) {
+            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+                expResult = "\\frac{" + randomRealForHalfInts + "}{2}+\\frac{" + randomImagForHalfInts + "\\sqrt{" + testIntegers.get(i).imagQuadRing.getNegRad() + "}{2}";
+            } else {
+                if (randomRealPart == 0) {
+                    expResult = randomImagPart + "\\sqrt{" + testIntegers.get(i).imagQuadRing.getNegRad() + "}";
+                } else {
+                    expResult = randomRealPart + "+" + randomImagPart + "\\sqrt{" + testIntegers.get(i).imagQuadRing.getNegRad() + "}";
+                }
+            }
+            expResult = expResult.replace("\\frac{-", "-\\frac{");
+            expResult = expResult.replace("+-", "-");
+            expResult = expResult.replace("+1\\sqrt", "+\\sqrt");
+            expResult = expResult.replace("-1\\sqrt", "-\\sqrt");
+            result = testIntegers.get(i).toTeXString().replace(" ", "");
+            assertEquals(expResult, result);
+        }
+    }
+    
+    /**
+     * Test of toTeXStringSingleDenom method, of class ImaginaryQuadraticInteger. For 
+     * methods that return Strings, spaces are desirable but not required.
+     * Therefore the tests should strip out spaces before asserting equality.
+     */
+    @Test
+    public void testToTeXStringSingleDenom() {
+        System.out.println("toTeXStringSingleDenom");
+    }
+
+    /**
+     * Test of toTeXStringAlt method, of class ImaginaryQuadraticInteger. For 
+     * methods that return Strings, spaces are desirable but not required.
+     * Therefore the tests should strip out spaces before asserting equality.
+     * If the test of the toTeXString method fails, the result of this test is 
+     * irrelevant.
+     */
+    @Test
+    public void testToTeXStringAlt() {
+        System.out.println("toTeXStringAlt");
+        String expResult, result;
+        ImaginaryQuadraticInteger currIQI;
+        int nonThetaPart;
+        // Treating the ring of Eisenstein integers as a special case
+        for (int a = -32; a < 32; a++) {
+            for (int b = -9; b < 9; b++) {
+                if ((a % 2) == (b % 2)) {
+                    nonThetaPart = (a + b)/2;
+                    if (nonThetaPart == 0) {
+                        expResult = b + "\\omega";
+                    } else {
+                        expResult = nonThetaPart + "+" + b + "\\omega";
+                    }
+                    expResult = expResult.replace("+-", "-");
+                    expResult = expResult.replace("+1\\omega", "+\\omega");
+                    expResult = expResult.replace("-1\\omega", "-\\omega");
+                    if (expResult.equals("0\\omega")) {
+                        expResult = "0";
+                    }
+                    if (expResult.equals("1\\omega")) {
+                        expResult = "\\omega";
+                    }
+                    expResult = expResult.replace("+0\\omega", "");
+                    currIQI = new ImaginaryQuadraticInteger(a, b, ringEisenstein, 2);
+                    result = currIQI.toTeXStringAlt().replace(" ", "");
+                    assertEquals(expResult, result);
+                }
+            }
+        }
+        /* Now to test in O_Q(sqrt(-7)) and some random ring with 
+        "half-integers" */
+        for (int m = -32; m < 32; m++) {
+            for (int n = -9; n < 9; n++) {
+                if ((m % 2) == (n % 2)) {
+                    nonThetaPart = (m - n)/2;
+                    if (nonThetaPart == 0) {
+                        expResult = n + "\\theta";
+                    } else {
+                        expResult = nonThetaPart + "+" + n + "\\theta";
+                    }
+                    expResult = expResult.replace("+-", "-");
+                    expResult = expResult.replace("+1\\theta", "+\\theta");
+                    expResult = expResult.replace("-1\\theta", "-\\theta");
+                    if (expResult.equals("0\\theta")) {
+                        expResult = "0";
+                    }
+                    if (expResult.equals("1\\theta")) {
+                        expResult = "\\theta";
+                    }
+                    expResult = expResult.replace("+0\\theta", "");
+                    // expResult = expResult.replace("-0omega", ""); This one's unnecessary, right?
+                    currIQI = new ImaginaryQuadraticInteger(m, n, ringOQi7, 2);
+                    result = currIQI.toTeXStringAlt().replace(" ", "");
+                    assertEquals(expResult, result);
+                    // No need to change expResult to test in ringRandomForAltTesting
+                    currIQI = new ImaginaryQuadraticInteger(m, n, ringRandomForAltTesting, 2);
+                    result = currIQI.toTeXStringAlt().replace(" ", "");
+                    assertEquals(expResult, result);
+                }
+            }
+        }
+        /* For integers in rings without "half-integers," we expect 
+        toTeXString() and toTeXStringAlt() to give the same result. */
+        for (int i = 0; i < totalTestIntegers; i++) {
+            if (!testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+                assertEquals(testIntegers.get(i).toTeXString(), testIntegers.get(i).toTeXStringAlt());
+            }
+        }
+    }
+    
+    /**
+     * Test of toHTMLString method, of class ImaginaryQuadraticInteger. For 
+     * methods that return Strings, spaces are desirable but not required.
+     * Therefore the tests should strip out spaces before asserting equality.
+     */
+    @Test
+    public void testToHTMLString() {
+        System.out.println("toHTMLString");
+        String expResult;
+        if (randomRealPart == 0) {
+            expResult = randomImagPart + "<i>i</i>";
+        } else {
+            expResult = randomRealPart + "+" + randomImagPart + "<i>i</i>";
+        }
+        expResult = expResult.replace("+-", "-");
+        expResult = expResult.replace("+1<i>i</i>", "+<i>i</i>");
+        expResult = expResult.replace("-1<i>i</i>", "-<i>i</i>");
+        expResult = expResult.replace("-", "&minus;");
+        String result = testIntegers.get(0).toHTMLString().replace(" ", "");
+        assertEquals(expResult, result);
+        for (int i = 1; i < totalTestIntegers; i++) {
+            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+                expResult = randomRealForHalfInts + "/2+" + randomImagForHalfInts + "&radic;(" + testIntegers.get(i).imagQuadRing.getNegRad() + ")/2";
+            } else {
+                if (randomRealPart == 0) {
+                    expResult = randomImagPart + "&radic;(" + testIntegers.get(i).imagQuadRing.getNegRad() + ")";
+                } else {
+                    expResult = randomRealPart + "+" + randomImagPart + "&radic;(" + testIntegers.get(i).imagQuadRing.getNegRad() + ")";
+                }
+            }
+            expResult = expResult.replace("+-", "-");
+            expResult = expResult.replace("+1&radic;", "+&radic;");
+            expResult = expResult.replace("-1&radic;", "-&radic;");
+            expResult = expResult.replace("-", "&minus;");
+            result = testIntegers.get(i).toHTMLString().replace(" ", "");
+            assertEquals(expResult, result);
+        }
+    }
+
+    /**
+     * Test of toHTMLStringAlt method, of class ImaginaryQuadraticInteger. For 
+     * methods that return Strings, spaces are desirable but not required.
+     * Therefore the tests should strip out spaces before asserting equality.
+     * If the test of the toHTMLString method fails, the result of this test is 
+     * irrelevant.
+     */
+    @Test
+    public void testToHTMLStringAlt() {
+        System.out.println("toHTMLStringAlt");
+        String expResult, result;
+        ImaginaryQuadraticInteger currIQI;
+        int nonThetaPart;
+        // Treating the ring of Eisenstein integers as a special case
+        for (int a = -32; a < 32; a++) {
+            for (int b = -9; b < 9; b++) {
+                if ((a % 2) == (b % 2)) {
+                    nonThetaPart = (a + b)/2;
+                    if (nonThetaPart == 0) {
+                        expResult = b + "&omega;";
+                    } else {
+                        expResult = nonThetaPart + "+" + b + "&omega;";
+                    }
+                    expResult = expResult.replace("+-", "-");
+                    expResult = expResult.replace("+1&omega;", "+&omega;");
+                    expResult = expResult.replace("-1&omega;", "-&omega;");
+                    if (expResult.equals("0&omega;")) {
+                        expResult = "0";
+                    }
+                    if (expResult.equals("1&omega;")) {
+                        expResult = "&omega;";
+                    }
+                    expResult = expResult.replace("+0&omega;", "");
+                    expResult = expResult.replace("-", "&minus;");
+                    currIQI = new ImaginaryQuadraticInteger(a, b, ringEisenstein, 2);
+                    result = currIQI.toHTMLStringAlt().replace(" ", "");
+                    assertEquals(expResult, result);
+                }
+            }
+        }
+        /* Now to test in O_Q(sqrt(-7)) and some random ring with 
+        "half-integers" */
+        for (int m = -32; m < 32; m++) {
+            for (int n = -9; n < 9; n++) {
+                if ((m % 2) == (n % 2)) {
+                    nonThetaPart = (m - n)/2;
+                    if (nonThetaPart == 0) {
+                        expResult = n + "&theta;";
+                    } else {
+                        expResult = nonThetaPart + "+" + n + "&theta;";
+                    }
+                    expResult = expResult.replace("+-", "-");
+                    expResult = expResult.replace("+1&theta;", "+&theta;");
+                    expResult = expResult.replace("-1&theta;", "-&theta;");
+                    if (expResult.equals("0&theta;")) {
+                        expResult = "0";
+                    }
+                    if (expResult.equals("1&theta;")) {
+                        expResult = "&theta;";
+                    }
+                    expResult = expResult.replace("+0&theta;", "");
+                    expResult = expResult.replace("-", "&minus;");
+                    currIQI = new ImaginaryQuadraticInteger(m, n, ringOQi7, 2);
+                    result = currIQI.toHTMLStringAlt().replace(" ", "");
+                    assertEquals(expResult, result);
+                    // No need to change expResult to test in ringRandomForAltTesting
+                    currIQI = new ImaginaryQuadraticInteger(m, n, ringRandomForAltTesting, 2);
+                    result = currIQI.toHTMLStringAlt().replace(" ", "");
+                    assertEquals(expResult, result);
+                }
+            }
+        }
+        /* For integers in rings without "half-integers," we expect 
+        toHTMLString() and toHTMLStringAlt() to give the same result. */
+        for (int i = 0; i < totalTestIntegers; i++) {
+            if (!testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+                assertEquals(testIntegers.get(i).toHTMLString(), testIntegers.get(i).toHTMLStringAlt());
+            }
+        }
+    }
+    
+    /**
      * Test of hashCode method, of class ImaginaryQuadraticInteger. It is 
      * expected that if two ImaginaryQuadraticInteger objects are equal, their 
      * hash codes are equal as well. It is also expected that a + b sqrt(c) and 
@@ -714,18 +962,14 @@ public class ImaginaryQuadraticIntegerTest {
     public void testEquals() {
         System.out.println("equals");
         ImaginaryQuadraticInteger temporaryHold, transitiveHold, kindaDiffZero;
-        int normCalc;
-        boolean expResult, result;
         for (int i = 0; i < totalTestIntegers; i++) {
             assertTrue(testIntegers.get(i).equals(testIntegers.get(i))); // Reflexive test
             if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
                 temporaryHold = new ImaginaryQuadraticInteger(randomRealForHalfInts, randomImagForHalfInts, testIntegers.get(i).imagQuadRing, 2);
                 transitiveHold = new ImaginaryQuadraticInteger(randomRealForHalfInts, randomImagForHalfInts, testIntegers.get(i).imagQuadRing, 2);
-                normCalc = (randomRealForHalfInts * randomRealForHalfInts + testIntegers.get(i).imagQuadRing.getAbsNegRad() * randomImagForHalfInts * randomImagForHalfInts)/4;
             } else {
                 temporaryHold = new ImaginaryQuadraticInteger(randomRealPart, randomImagPart, testIntegers.get(i).imagQuadRing, 1);
                 transitiveHold = new ImaginaryQuadraticInteger(randomRealPart, randomImagPart, testIntegers.get(i).imagQuadRing, 1);
-                normCalc = randomRealPart * randomRealPart + testIntegers.get(i).imagQuadRing.getAbsNegRad() * randomImagPart * randomImagPart;
             }
             assertTrue(testIntegers.get(i).equals(testIntegers.get(i))); // First consistency test
             assertEquals(testIntegers.get(i), temporaryHold);
@@ -757,6 +1001,65 @@ public class ImaginaryQuadraticIntegerTest {
             assertFalse(testIntegers.get(i).equalsInt(randomRealForHalfInts));
         }
         assertTrue(zeroIQI.equalsInt(0));
+    }
+    
+    /**
+     * Test of parseImaginaryQuadraticInteger, of class 
+     * ImaginaryQuadraticInteger. Whatever is output by toString, toStringAlt, 
+     * toASCIIString, toASCIIStringAlt, toTeXString, toTeXStringSingleDenom, 
+     * toTeXStringAlt, toHTMLString or toHTMLStringAlt should be parseable by 
+     * parseImaginaryQuadraticInteger.
+     */
+    @Test
+    public void testParseImaginaryQuadraticInteger() {
+        System.out.println("parseImaginaryQuadraticInteger");
+        String numberString;
+        ImaginaryQuadraticInteger numberIQI;
+        for (int i = 0; i < totalTestIntegers; i++) {
+            numberString = testIntegers.get(i).toString();
+            numberIQI = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString);
+            assertEquals(testIntegers.get(i), numberIQI);
+            numberString = testIntegers.get(i).toStringAlt();
+            numberIQI = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(testIntegers.get(i).getRing(), numberString);
+            assertEquals(testIntegers.get(i), numberIQI);
+            numberString = testIntegers.get(i).toASCIIString();
+            numberIQI = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString);
+            assertEquals(testIntegers.get(i), numberIQI);
+            numberString = testIntegers.get(i).toASCIIStringAlt();
+            numberIQI = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(testIntegers.get(i).getRing(), numberString);
+            assertEquals(testIntegers.get(i), numberIQI);
+            numberString = testIntegers.get(i).toTeXString();
+            numberIQI = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString);
+            assertEquals(testIntegers.get(i), numberIQI);
+            numberString = testIntegers.get(i).toTeXStringSingleDenom();
+            numberIQI = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString);
+            assertEquals(testIntegers.get(i), numberIQI);
+            numberString = testIntegers.get(i).toTeXStringAlt();
+            numberIQI = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(testIntegers.get(i).getRing(), numberString);
+            assertEquals(testIntegers.get(i), numberIQI);
+            numberString = testIntegers.get(i).toHTMLString();
+            numberIQI = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString);
+            assertEquals(testIntegers.get(i), numberIQI);
+            numberString = testIntegers.get(i).toHTMLStringAlt();
+            numberIQI = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(testIntegers.get(i).getRing(), numberString);
+            assertEquals(testIntegers.get(i), numberIQI);
+        }
+        // A few special cases to check
+        numberString = "i";
+        numberIQI = new ImaginaryQuadraticInteger(0, 1, ringGaussian);
+        assertEquals(numberIQI, ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString));
+        numberString = "-sqrt(-2)";
+        numberIQI = new ImaginaryQuadraticInteger(0, -1, ringZi2);
+        assertEquals(numberIQI, ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString));
+        /* Lastly, to check the appropriate exception is thrown for non-numeric 
+           strings */
+        numberString = "one plus imaginary unit";
+        try {
+            numberIQI = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString);
+            fail("Attempting to call parseImaginaryQuadraticInteger on \"" + numberString + "\" should have triggered NumberFormatException, not given " + numberIQI.toASCIIString() + ".");
+        } catch (NumberFormatException nfe) {
+            System.out.println("Attempting to call parseImaginaryQuadraticInteger on \"" + numberString + "\" correctly triggered NumberFormatException: " + nfe.getMessage());
+        }
     }
 
     /**

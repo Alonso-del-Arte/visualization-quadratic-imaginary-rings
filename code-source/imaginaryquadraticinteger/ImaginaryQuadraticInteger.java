@@ -1,24 +1,22 @@
 /*
  * Copyright (C) 2018 Alonso del Arte
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under 
+ * the terms of the GNU General Public License as published by the Free Software 
+ * Foundation, either version 3 of the License, or (at your option) any later 
+ * version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
+ * details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with 
+ * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package imaginaryquadraticinteger;
 
 import java.util.Objects;
-import java.util.Scanner;
-import java.util.InputMismatchException;
 
 /**
  * The main class, defines an imaginary quadratic integer. The real part, and 
@@ -422,6 +420,45 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         }
     }
     
+    public String toTeXString() {
+        return "Placeholder string for failing first test.";
+    }
+    
+    public String toTeXStringSingleDenom() {
+        return "Placeholder string for failing first test.";
+    }
+
+    public String toTeXStringAlt() {
+        if (this.imagQuadRing.d1mod4) {
+            String IQIString = this.toStringAlt();
+            IQIString = IQIString.replace("\u03C9", "\\omega");
+            IQIString = IQIString.replace("\u03B8", "\\theta");
+            return IQIString;
+        } else {
+            return this.toTeXString();
+        }
+    }
+    
+    public String toHTMLString() {
+        String IQIString = this.toString();
+        IQIString = IQIString.replace("i", "<i>i</i>");
+        IQIString = IQIString.replace("\u221A", "&radic;");
+        IQIString = IQIString.replace("-", "&minus;");
+        return IQIString;
+    }
+
+    public String toHTMLStringAlt() {
+        if (this.imagQuadRing.d1mod4) {
+            String IQIString = this.toStringAlt();
+            IQIString = IQIString.replace("\u03C9", "&omega;");
+            IQIString = IQIString.replace("\u03B8", "&theta;");
+            IQIString = IQIString.replace("-", "&minus;");
+            return IQIString;
+        } else {
+            return this.toHTMLString();
+        }
+    }
+    
     /**
      * Returns a hash code value for the imaginary quadratic integer. Overriding 
      * {@link Object#hashCode} on account of needing to override 
@@ -487,17 +524,73 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     /**
      * Checks whether this imaginary quadratic integer is equal to a purely real 
      * integer.
-     * @param i The purely real integer to check against.
+     * @param num The purely real integer to check against.
      * @return True if the imaginary quadratic integer is indeed equal to the 
      * purely real integer, false otherwise.
      */
-    public boolean equalsInt(int i) {
+    public boolean equalsInt(int num) {
         if (this.imagPartMult == 0) {
-            return (this.realPartMult == i);
+            return (this.realPartMult == num);
         } else {
             return false;
         }
     }
+    
+    private static String preprocessNumberString(String stringToPreprocess) {
+        String str = stringToPreprocess;
+        str = str.replace(" ", "");
+        str = str.replace("&minus;", "-");
+        str = str.replace("\\frac{", "");
+        str = str.replace("}{", "/");
+        str = str.replace("{", "");
+        str = str.replace("}", "");
+        str = str.replace("<i>i</i>", "i");
+        str = str.replace("\\sqrt", "\u221A");
+        str = str.replace("sqrt", "\u221A");
+        str = str.replace("&radic;", "\u221A");
+        str = str.replace("\\omega", "\u03C9");
+        str = str.replace("&omega;", "\u03C9");
+        str = str.replace("omega", "\u03C9");
+        str = str.replace("\\theta", "\u03B8");
+        str = str.replace("&theta;", "\u03B8");
+        str = str.replace("theta", "\u03B8");
+        return str;
+    }
+    
+//    private static ImaginaryQuadraticInteger parseIQI(ImaginaryQuadraticRing ring, String str) {
+//        return new ImaginaryQuadraticInteger(0, 0, ring);
+//    }
+//        
+//    public static ImaginaryQuadraticInteger parseImaginaryQuadraticInteger(ImaginaryQuadraticRing ring, String str) {
+//        String parsingString = preprocessNumberString(str);
+//        return parseIQI(ring, str);
+//    }
+//    
+//    public static ImaginaryQuadraticInteger parseImaginaryQuadraticInteger(String str) {
+//        String parsingString = preprocessNumberString(str);
+//        char currToken = str.charAt(0);
+//        switch (currToken) {
+//            case '(':
+//            case '+':
+//            case '-':
+//            case '0':
+//            case '1':
+//            case '2':
+//            case '3':
+//            case '4':
+//            case '5':
+//            case '6':
+//            case '7':
+//            case '8':
+//            case '9':
+//                //
+//                break;
+//            default:
+//                String exceptionMessage = currToken + " is not a valid ImaginaryQuadraticInteger starting character.";
+//                throw new NumberFormatException(exceptionMessage);
+//        }
+//        return new ImaginaryQuadraticInteger(0, 0, new ImaginaryQuadraticRing(-1));
+//    }
   
     /**
      * Addition operation, since operator+ (plus) can't be overloaded. 
@@ -919,115 +1012,13 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         this.imagQuadRing = R;
     }
     
-    private static int getIntFromConsole(Scanner input) {
-        int enteredInteger = 0;
-        boolean invalidInput = true;
-        while (invalidInput) {
-            try {
-                enteredInteger = input.nextInt();
-                invalidInput = false;
-            } catch (InputMismatchException ime) {
-                System.out.println("Please enter an integer.");
-                input.nextLine();
-            }
-        }
-        return enteredInteger;
-    }
-
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         
-        Scanner inputScanner = new Scanner(System.in);
-        int chosenRingD = RingWindowDisplay.DEFAULT_RING_D;
-        int chosenRealPartMult;
-        int chosenImagPartMult;
-        int chosenDenom;
-        
-        ImaginaryQuadraticRing imR;
-        ImaginaryQuadraticInteger currIQI, prevIQI, operIQI;
-        int[] currPolCoeffs;
-        
-        /*
-        The idea here is that the user will be able to choose between a graphical interface and a text interface.
-        
-        if (args.length > 0) {
-            if (args[0] == "-gui" || args[0] == "-GUI") {
-                RingWindowDisplay(chosenRingD)
-            }
-            if (args[0] == "-text" || args[0] == "-TEXT") {
-                text stuff
-            }
-        }
-        */    
-       
         RingWindowDisplay.startRingWindowDisplay(-1);
-        
-/*
-        while (chosenRingD != 0) {
-            System.out.print("Please enter a negative squarefree integer d for the ring discriminant (or 0 to quit): ");
-            chosenRingD = getIntFromConsole(inputScanner);
-            if (chosenRingD > 0) {
-                System.out.print("Taking " + chosenRingD + " to be ");
-                chosenRingD *= -1;
-                System.out.println(chosenRingD);
-            }
-            if (NumberTheoreticFunctionsCalculator.isSquareFree(chosenRingD)) {
-                imR = new ImaginaryQuadraticRing(chosenRingD);
-                if (imR.d1mod4) {
-                    System.out.println("Given that " + chosenRingD + " is congruent to 1 mod 4, please enter real and imaginary parts multiplied by 2.");
-                    chosenDenom = 2;
-                } else {
-                    chosenDenom = 1;
-                }
-                prevIQI = new ImaginaryQuadraticInteger(1, 1, imR, chosenDenom);
-                chosenImagPartMult = 1;
-                while (chosenImagPartMult != 0) {
-                    System.out.print("Please enter real part of quadratic integer: ");
-                    chosenRealPartMult = getIntFromConsole(inputScanner);
-                    System.out.print("Please enter imaginary part of quadratic integer (or 0 to change ring): ");
-                    chosenImagPartMult = getIntFromConsole(inputScanner);
-                    if (imR.d1mod4 && (Math.abs(chosenRealPartMult % 2) != Math.abs(chosenImagPartMult % 2))) {
-                        chosenImagPartMult++;
-                    }
-                    currIQI = new ImaginaryQuadraticInteger(chosenRealPartMult, chosenImagPartMult, imR, chosenDenom);
-                    System.out.println(currIQI.toString());
-                    System.out.println("Algebraic degree is " + currIQI.algebraicDegree());
-                    System.out.println("Trace is " + currIQI.trace());
-                    System.out.println("Norm is " + currIQI.norm());
-                    System.out.println("Minimal polynomial is " + currIQI.minPolynomialString());
-                    try {
-                        operIQI = currIQI.plus(prevIQI);
-                        System.out.println("(" + currIQI.toString() + ") + (" + prevIQI.toString() + ") = " + operIQI.toString());
-                    } catch (AlgebraicDegreeOverflowException adoe) {
-                        System.out.println(adoe.toString());
-                    }
-                    try {
-                        operIQI = currIQI.minus(prevIQI);
-                        System.out.println("(" + currIQI.toString() + ") - (" + prevIQI.toString() + ") = " + operIQI.toString());
-                    } catch (AlgebraicDegreeOverflowException adoe) {
-                        System.out.println(adoe.toString());
-                    }
-                    try {
-                        operIQI = currIQI.times(prevIQI);
-                        System.out.println("(" + currIQI.toString() + ") * (" + prevIQI.toString() + ") = " + operIQI.toString());
-                    } catch (AlgebraicDegreeOverflowException adoe) {
-                        System.out.println(adoe.toString());
-                    }
-                    try {
-                        operIQI = currIQI.divides(prevIQI);
-                        System.out.println("(" + currIQI.toString() + ") / (" + prevIQI.toString() + ") = " + operIQI.toString());
-                    } catch (AlgebraicDegreeOverflowException adoe) {
-                        System.out.println(adoe.toString());
-                    } catch (NotDivisibleException nde) {
-                        System.out.println(currIQI.toString() + " is not divisible by " + prevIQI.toString() + ".");
-                    }
-                    prevIQI = currIQI;
-                    System.out.println(" ");
-                }
-            } 
-        } */
+    
     } 
     
 }

@@ -1038,8 +1038,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     /**
-     * Function to zoom in on the diagram. This is done by reducing 
-     * pixelsPerUnitInterval by zoomInterval and calling repaint().
+     * Zooms in on the diagram. This is done by reducing pixelsPerUnitInterval 
+     * by zoomInterval and calling repaint().
      */
     public void zoomIn() {
         int newPixelsPerUnitInterval = this.pixelsPerUnitInterval + this.zoomInterval;
@@ -1056,7 +1056,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     /**
-     * Function to zoom out on the diagram. This is done by increasing 
+     * Zooms out on the diagram. This is done by increasing 
      * pixelsPerUnitInterval by zoomInterval and calling repaint().
      */
     public void zoomOut() {
@@ -1083,8 +1083,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     /**
-     * Function to decrease the zoom interval. The zoom interval is decremented 
-     * by 1, taking care that it not become less than MINIMUM_ZOOM_INTERVAL.
+     * Decreases the zoom interval. The zoom interval is decremented by 1, 
+     * taking care that it does not become less than {@link 
+     * #MINIMUM_ZOOM_INTERVAL MINIMUM_ZOOM_INTERVAL}.
      */
     public void decreaseZoomInterval() {
         int newZoomInterval = this.zoomInterval - 1;
@@ -1106,8 +1107,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
 
     /**
-     * Function to increase the zoom interval. The zoom interval is incremented 
-     * by 1, taking care that it not become more than MAXIMUM_ZOOM_INTERVAL.
+     * Increases the zoom interval. The zoom interval is incremented by 1, 
+     * taking care that it does not become more than {@link 
+     * #MAXIMUM_ZOOM_INTERVAL MAXIMUM_ZOOM_INTERVAL}.
      */
     public void increaseZoomInterval() {
         int newZoomInterval = this.zoomInterval + 1;
@@ -1128,6 +1130,11 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         checkViewMenuEnablements();
     }
 
+    /**
+     * Decreases the dot radius for 0, units and primes on the diagram. The dot 
+     * radius is decreased by 1 pixel, taking care that it does not become less 
+     * than {@link #MINIMUM_DOT_RADIUS MINIMUM_DOT_RADIUS}.
+     */
     public void decreaseDotRadius() {
         int newDotRadius = this.dotRadius - 1;
         if (newDotRadius >= MINIMUM_DOT_RADIUS) {
@@ -1142,6 +1149,11 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         }
     }
 
+    /**
+     * Increases the dot radius for 0, units and primes on the diagram. The dot 
+     * radius is increased by 1 pixel, taking care that it does not become more 
+     * than {@link #MAXIMUM_DOT_RADIUS MAXIMUM_DOT_RADIUS}.
+     */
     public void increaseDotRadius() {
         int newDotRadius = this.dotRadius + 1;
         if (newDotRadius <= MAXIMUM_DOT_RADIUS) {
@@ -1157,9 +1169,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     /**
-     * Function to reset pixels per unit interval, dot radius and zoom interval.
-     * This does not change the discriminant, nor whether or not readouts are 
-     * updated, nor the preference for theta notation.
+     * Resets pixels per unit interval, dot radius and zoom interval. This does 
+     * not change the discriminant, nor whether or not readouts are updated, nor 
+     * the preference for theta notation.
      */
     public void resetViewDefaults() {
         /* Since the program does not yet allow the user to change colors, the 
@@ -1189,17 +1201,17 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     /**
-     * Function to enable or disable the use of theta notation in the readout 
-     * field for integer when imagQuadRing.d1mod4 is true. Of course updating of 
-     * readouts has to be enabled for this to be any of consequence.
+     * Enable or disable the use of theta notation in the readout field for 
+     * integer when the discriminant is congruent to 1 modulo 4. Of course the
+     * updating of readouts has to be enabled for this to be any of consequence.
      */
     public void toggleThetaNotation() {
         this.preferenceForThetaNotation = this.preferThetaNotationMenuItem.isSelected();
     }
     
     /**
-     * Function to enable or disable updating of the readout fields for integer, 
-     * trace, norm and polynomial.
+     * Enable or disable updating of the readout fields for integer, trace, norm 
+     * and polynomial.
      */
     public void toggleReadOutsEnabled() {
         if (this.toggleReadOutsEnabledMenuItem.isSelected()) {
@@ -1210,7 +1222,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     /**
-     * Function to show the About box, a simple MessageDialog from JOptionPage.
+     * Show the About box, a simple MessageDialog from JOptionPage.
      */
     public void showAboutBox() {
         JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.94\n\u00A9 2018 Alonso del Arte");

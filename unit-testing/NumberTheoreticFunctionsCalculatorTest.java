@@ -295,8 +295,8 @@ public class NumberTheoreticFunctionsCalculatorTest {
                 assertTrue(NumberTheoreticFunctionsCalculator.isPrime(m));
             }
         }
-        System.out.println("isPrime(ImaginaryQuadraticInteger)");
         // That does it for testing isPrime in the context of Z.
+        System.out.println("isPrime(ImaginaryQuadraticInteger)");
         ImaginaryQuadraticRing ufdRing;
         ImaginaryQuadraticInteger numberFromUFD;
         String assertionMessage;
@@ -312,6 +312,20 @@ public class NumberTheoreticFunctionsCalculatorTest {
             numberFromUFD = new ImaginaryQuadraticInteger(HEEGNER_COMPANION_PRIMES[d], 0, ufdRing);
             assertionMessage = numberFromUFD.toString() + " should have been identified as prime in " + ufdRing.toString();
             assertTrue(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(numberFromUFD));
+        }
+        // There are some special cases to test in the Gaussian integers
+        ImaginaryQuadraticRing ringGaussian = new ImaginaryQuadraticRing(-1);
+        ImaginaryQuadraticInteger gaussianInteger;
+        ImaginaryQuadraticInteger twoStepImagIncr = new ImaginaryQuadraticInteger(0, 2, ringGaussian);
+        for (int g = 3; g < 256; g += 4) {
+            if (NumberTheoreticFunctionsCalculator.isPrime(g)) {
+                gaussianInteger = new ImaginaryQuadraticInteger(0, g, ringGaussian);
+                assertionMessage = gaussianInteger.toString() + " should have been identified as prime in " + ringGaussian.toString();
+                assertTrue(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(gaussianInteger));
+                gaussianInteger = gaussianInteger.plus(twoStepImagIncr);
+                assertionMessage = gaussianInteger.toString() + " should not have been identified as prime in " + ringGaussian.toString();
+                assertFalse(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(gaussianInteger));
+            }
         }
         // Now to test some complex numbers in Z[sqrt(-5)]
         ImaginaryQuadraticRing nonUFDRing = new ImaginaryQuadraticRing(-5);
@@ -702,6 +716,8 @@ public class NumberTheoreticFunctionsCalculatorTest {
             assertEquals(expResultLong, resultLong);
         }
         /* TO DO: Write more tests for euclideanGCD(IQI, IQI). */
+        /* TO DO: Write tests for euclideanGCD(a, IQI). */
+        /* TO DO: Write tests for euclideanGCD(IQI, b). */
         /* Last but not least, euclideanGCD(ImaginaryQuadraticInteger, 
            ImaginaryQuadraticInteger). */
         ImaginaryQuadraticRing r = new ImaginaryQuadraticRing(-1);

@@ -350,15 +350,16 @@ public class ImaginaryQuadraticIntegerTest {
     }
 
     /**
-     * Test of getRealPartMult method, of class ImaginaryQuadraticInteger.
+     * Test of getRealPartMultNumeric method, of class 
+     * ImaginaryQuadraticInteger.
      */
     @Test
-    public void testGetRealPartMult() {
-        System.out.println("getRealPartMult");
+    public void testGetRealPartMultNumeric() {
+        System.out.println("getRealPartMultNumeric");
         double expResult = (double) randomRealForHalfInts/2;
         double result;
         for (int i = 0; i < totalTestIntegers; i++) {
-            result = testIntegers.get(i).getRealPartMult();
+            result = testIntegers.get(i).getRealPartMultNumeric();
             if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
                 assertEquals(expResult, result, ImaginaryQuadraticRingTest.TEST_DELTA);
             } else {
@@ -368,14 +369,15 @@ public class ImaginaryQuadraticIntegerTest {
     }
 
     /**
-     * Test of getImagPartwRadMult method, of class ImaginaryQuadraticInteger.
+     * Test of getImagPartwRadMultNumeric method, of class 
+     * ImaginaryQuadraticInteger.
      */
     @Test
-    public void testGetImagPartwRadMult() {
-        System.out.println("getImagPartwRadMult");
+    public void testGetImagPartwRadMultNumeric() {
+        System.out.println("getImagPartwRadMultNumeric");
         double expResult, result;
         for (int i = 0; i < totalTestIntegers; i++) {
-            result = testIntegers.get(i).getImagPartwRadMult();
+            result = testIntegers.get(i).getImagPartwRadMultNumeric();
             if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
                 expResult = ((double) randomImagForHalfInts * testIntegers.get(i).imagQuadRing.getAbsNegRadSqrt())/2;
             } else {
@@ -421,6 +423,45 @@ public class ImaginaryQuadraticIntegerTest {
         }
     }
     
+    /**
+     * Test of getRealPartMult method, of class ImaginaryQuadraticInteger.
+     */
+    @Test
+    public void testGetRealPartMult() {
+        System.out.println("getRealPartMult");
+        int expResult, result;
+        for (int i = 0; i < totalTestIntegers; i++) {
+            if (testIntegers.get(i).getRing().hasHalfIntegers()) {
+                expResult = randomRealForHalfInts;
+            } else {
+                expResult = randomRealPart;
+            }
+            result = testIntegers.get(i).getRealPartMult();
+            assertEquals(expResult, result);
+        }
+    }
+    
+    /**
+     * Test of getImagPartMult method, of class ImaginaryQuadraticInteger.
+     */
+    @Test
+    public void testGetImagPartMult() {
+        System.out.println("getImagPartMult");
+        int expResult, result;
+        for (int i = 0; i < totalTestIntegers; i++) {
+            if (testIntegers.get(i).getRing().hasHalfIntegers()) {
+                expResult = randomImagForHalfInts;
+            } else {
+                expResult = randomImagPart;
+            }
+            result = testIntegers.get(i).getImagPartMult();
+            assertEquals(expResult, result);
+        }
+    }
+    
+    /**
+     * Test of getRing method, of class ImaginaryQuadraticInteger.
+     */
     @Test
     public void testGetRing() {
         System.out.println("getRing");
@@ -429,6 +470,23 @@ public class ImaginaryQuadraticIntegerTest {
         assertEquals(ringEisenstein, testIntegers.get(2).getRing());
         assertEquals(ringOQi7, testIntegers.get(3).getRing());
         assertEquals(ringRandom, testIntegers.get(4).getRing());
+    }
+    
+    /**
+     * Test of getDenominator method, of class ImaginaryQuadraticInteger. This 
+     * tests depends on the test integers determined by setUpClass() which come 
+     * from rings with "half-integers" to themselves be "half-integers."
+     */
+    @Test
+    public void testGetDenominator() {
+        System.out.println("getDenominator");
+        for (int i = 0; i < totalTestIntegers; i++) {
+            if (testIntegers.get(i).getRing().hasHalfIntegers()) {
+                assertEquals(2, testIntegers.get(i).getDenominator());
+            } else {
+                assertEquals(1, testIntegers.get(i).getDenominator());
+            }
+        }
     }
     
     /**
@@ -687,7 +745,7 @@ public class ImaginaryQuadraticIntegerTest {
         assertEquals(expResult, result);
         for (int i = 1; i < totalTestIntegers; i++) {
             if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
-                expResult = "\\frac{" + randomRealForHalfInts + "}{2}+\\frac{" + randomImagForHalfInts + "\\sqrt{" + testIntegers.get(i).imagQuadRing.getNegRad() + "}{2}";
+                expResult = "\\frac{" + randomRealForHalfInts + "}{2}+\\frac{" + randomImagForHalfInts + "\\sqrt{" + testIntegers.get(i).imagQuadRing.getNegRad() + "}}{2}";
             } else {
                 if (randomRealPart == 0) {
                     expResult = randomImagPart + "\\sqrt{" + testIntegers.get(i).imagQuadRing.getNegRad() + "}";
@@ -696,9 +754,8 @@ public class ImaginaryQuadraticIntegerTest {
                 }
             }
             expResult = expResult.replace("\\frac{-", "-\\frac{");
+            expResult = expResult.replace("1\\sqrt", "\\sqrt");
             expResult = expResult.replace("+-", "-");
-            expResult = expResult.replace("+1\\sqrt", "+\\sqrt");
-            expResult = expResult.replace("-1\\sqrt", "-\\sqrt");
             result = testIntegers.get(i).toTeXString().replace(" ", "");
             assertEquals(expResult, result);
         }
@@ -712,6 +769,17 @@ public class ImaginaryQuadraticIntegerTest {
     @Test
     public void testToTeXStringSingleDenom() {
         System.out.println("toTeXStringSingleDenom");
+        String expResult, result;
+        for (int i = 0; i < totalTestIntegers; i++) {
+            if (testIntegers.get(i).getDenominator() == 2) {
+                expResult = "\\frac{" + randomRealForHalfInts + "+" + randomImagForHalfInts + "\\sqrt{" + testIntegers.get(i).imagQuadRing.getNegRad() + "}}{2}";
+                expResult = expResult.replace("+-", "-");
+                result = testIntegers.get(i).toTeXStringSingleDenom().replace(" ", "");
+                assertEquals(expResult, result);
+            } else {
+                assertEquals(testIntegers.get(i).toTeXString(), testIntegers.get(i).toTeXStringSingleDenom());
+            }
+        }
     }
 
     /**

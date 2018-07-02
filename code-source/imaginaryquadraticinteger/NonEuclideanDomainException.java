@@ -55,7 +55,7 @@ public class NonEuclideanDomainException extends Exception {
     /**
      * This is an exception to be thrown by an Euclidean GCD function if called 
      * upon a and b in a ring of Q(sqrt(d)) for d other than the ones listed in 
-     * NORM_EUCLIDEAN_IMAGINARY_RINGS_D.
+     * {@link #NORM_EUCLIDEAN_QUADRATIC_IMAGINARY_RINGS_D}.
      * @param message Should probably just be something like 
      * a.getRing().toString() + " is not an Euclidean domain." This message 
      * is just passed on to the superclass.

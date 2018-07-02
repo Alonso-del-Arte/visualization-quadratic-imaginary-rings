@@ -207,7 +207,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
      * @return The real part of the imaginary quadratic integer. For example, 
      * for -1/2 + sqrt(-7)/2, the result should be -0.5.
      */
-    public double getRealPartMult() {
+    public double getRealPartMultNumeric() {
         double realPart = this.realPartMult;
         if (this.denominator == 2) {
             realPart /= 2;
@@ -217,12 +217,13 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     
     /**
      * Gets the imaginary part of the imaginary quadratic integer multiplied by 
-     * -i. May be the rational approximation of an irrational real number.
+     * -i. It will most likely be the rational approximation of an irrational 
+     * real number.
      * @return The imaginary part of the imaginary quadratic integer multiplied 
      * by -i. For example, for -1/2 + sqrt(-7)/2, the result should be something 
      * like 1.32287565553229529525.
      */
-    public double getImagPartwRadMult() {
+    public double getImagPartwRadMultNumeric() {
         double imagPartwRad = this.imagPartMult * this.imagQuadRing.absNegRadSqrt;
         if (this.denominator == 2) {
             imagPartwRad /= 2;
@@ -259,6 +260,14 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         return twiceImagPartMult;
     }
     
+    public int getRealPartMult() {
+        return this.realPartMult;
+    }
+    
+    public int getImagPartMult() {
+        return this.imagPartMult;
+    }
+    
     /**
      * Gets the imaginary quadratic ring which this imaginary quadratic integer 
      * belongs to.
@@ -268,6 +277,10 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
      */
     public ImaginaryQuadraticRing getRing() {
         return this.imagQuadRing;
+    }
+    
+    public int getDenominator() {
+        return this.denominator;
     }
     
     /**
@@ -332,10 +345,12 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     
     /**
      * A text representation of the imaginary quadratic integer, using theta 
-     * notation when imagQuadRing.d1mod4 is true.
+     * notation when {@link #getRing()}{@link 
+     * ImaginaryQuadraticRing#hasHalfIntegers() .hasHalfIntegers()} is true.
      * @return A String representing the imaginary quadratic integer which can 
-     * be used in a JTextField. If imagQuadRing.d1mod4 is false, this just 
-     * returns the same String as toString().
+     * be used in a JTextField. If {@link #getRing()}{@link 
+     * ImaginaryQuadraticRing#hasHalfIntegers() .hasHalfIntegers()} is false, 
+     * this just returns the same String as {@link #toString()}.
      */
     public String toStringAlt() {
 
@@ -403,8 +418,9 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
      * but using only ASCII characters. After writing toASCIIString, it only 
      * made sense to write this one as well.
      * @return A String using only ASCII characters. For instance, for "-1 + 
-     * &theta;", the result will be "-1 + theta". If imagQuadRing.d1mod4 is 
-     * false, this just returns the same String as toASCIIString().
+     * &theta;", the result will be "-1 + theta". If {@link #getRing()}{@link 
+     * ImaginaryQuadraticRing#hasHalfIntegers() .hasHalfIntegers()} is false, 
+     * this just returns the same String as {@link #toASCIIString()}.
      */
     public String toASCIIStringAlt() {
         if (this.imagQuadRing.d1mod4) {
@@ -420,14 +436,62 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         }
     }
     
+    /**
+     * A text representation of the integer suitable for use in a TeX document. 
+     * If you prefer a single denominator instead of a separate denominator for 
+     * the real and imaginary parts, use {@link #toTeXStringSingleDenom()}.
+     * Although I have a unit test for this function, I have not tested 
+     * inserting the output of this function into an actual TeX document.
+     * @return A String. For example, for 1/2 + sqrt(-7)/2, the result should be 
+     * "\frac{1}{2} + \frac{\sqrt{-7}}{2}".
+     */
     public String toTeXString() {
-        return "Placeholder string for failing first test.";
+        if (this.imagQuadRing.negRad == -1) {
+            return this.toString();
+        }
+        String IQIString;
+        if (this.denominator == 1) {
+            IQIString = this.realPartMult + " + " + this.imagPartMult + " \\sqrt{" + this.imagQuadRing.negRad + "}";
+            IQIString = IQIString.replace("+ -", " - ");
+            IQIString = IQIString.replace(" 1 \\sqrt", " \\sqrt");
+        } else {
+            IQIString = "\\frac{" + this.realPartMult + "}{2} + \\frac{" + this.imagPartMult + " \\sqrt{" + this.imagQuadRing.negRad + "}}{2}";
+            IQIString = IQIString.replace("1 \\sqrt", "\\sqrt");
+            IQIString = IQIString.replace("\\frac{-", "-\\frac{");
+            IQIString = IQIString.replace("+ -", " - ");
+        }
+        return IQIString;
     }
     
+    /**
+     * A text representation of the integer suitable for use in a TeX document, 
+     * but only with a single denominator for both the real and imaginary parts, 
+     * as opposed to {@link #toTeXString()}.
+     * Although I have a unit test for this function, I have not tested 
+     * inserting the output of this function into an actual TeX document.
+     * @return A String. For example, for 1/2 + sqrt(-7)/2, the result should be 
+     * "\frac{1 + \sqrt{-7}}{2}".
+     */
     public String toTeXStringSingleDenom() {
-        return "Placeholder string for failing first test.";
+        if (this.denominator == 2) {
+            String IQIString;
+            IQIString = "\\frac{" + this.realPartMult + " + " + this.imagPartMult + " \\sqrt{" + this.imagQuadRing.negRad + "}}{2}";
+            IQIString = IQIString.replace("1 \\sqrt", "\\sqrt");
+            IQIString = IQIString.replace("+ -", " - ");
+            return IQIString;
+        } else {
+            return this.toTeXString();
+        }
     }
 
+    /**
+     * A text representation of the integer suitable for use in a TeX document, 
+     * with theta notation when applicable.
+     * @return A String. For example, for "-1 + &theta;", the result will be "-1 + 
+     * \theta". If {@link #getRing()}{@link 
+     * ImaginaryQuadraticRing#hasHalfIntegers() .hasHalfIntegers()} is false, 
+     * this just returns the same String as {@link #toTeXString()}.
+     */
     public String toTeXStringAlt() {
         if (this.imagQuadRing.d1mod4) {
             String IQIString = this.toStringAlt();
@@ -439,6 +503,15 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         }
     }
     
+    /**
+     * A text representation of the integer suitable for use in an HTML 
+     * document. Although I have a unit test for this function, I have not 
+     * tested inserting the output of this function into an actual HTML 
+     * document.
+     * @return  A String. For example, for 1/2 + sqrt(-7)/2, the result should 
+     * be "1/2 + &radic;(-7)/2". Note that a character entity is used for the 
+     * square root symbol.
+     */
     public String toHTMLString() {
         String IQIString = this.toString();
         IQIString = IQIString.replace("i", "<i>i</i>");
@@ -447,6 +520,16 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         return IQIString;
     }
 
+    /**
+     * A text representation of the integer suitable for use in a TeX document, 
+     * with theta notation when applicable.
+     * @return  A String. For example, for "-1 + &theta;", the result will be 
+     * "-1 + &theta;". If {@link #getRing()}{@link 
+     * ImaginaryQuadraticRing#hasHalfIntegers() .hasHalfIntegers()} is false, 
+     * this just returns the same String as {@link #toHTMLString()}. Note that 
+     * character entities are used for the square root symbol and the Greek 
+     * letters theta and omega.
+     */
     public String toHTMLStringAlt() {
         if (this.imagQuadRing.d1mod4) {
             String IQIString = this.toStringAlt();
@@ -544,7 +627,9 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         str = str.replace("}{", "/");
         str = str.replace("{", "");
         str = str.replace("}", "");
-        str = str.replace("<i>i</i>", "i");
+        str = str.replace("i", "\u221A(-1)");
+        str = str.replace("j", "\u221A(-1)");
+        str = str.replace("<i>i</i>", "\u221A(-1)");
         str = str.replace("\\sqrt", "\u221A");
         str = str.replace("sqrt", "\u221A");
         str = str.replace("&radic;", "\u221A");
@@ -1013,11 +1098,99 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
+     * The main entry point for the package. For now, it only starts {@link 
+     * RingWindowDisplay}. In a later version (no later than 1.0), it will be 
+     * able to accept command line arguments.
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         
         RingWindowDisplay.startRingWindowDisplay(-1);
+//        switch (args.length) {
+//            case 0:
+//                RingWindowDisplay.startRingWindowDisplay(RingWindowDisplay.DEFAULT_RING_D);
+//                break;
+//            case 1:
+//                switch (args[0]) {
+//                    case "-v":
+//                    case "-vers":
+//                    case "-version":
+//                    case "v":
+//                    case "vers":
+//                    case "version":
+//                        System.out.println("Imaginary Quadratic Integer package\nVersion 0.9\n\u00A9 2018 Alonso del Arte");
+//                        break;
+//                    default:
+//                        int ringChoice = RingWindowDisplay.DEFAULT_RING_D;
+//                        try {
+//                            ringChoice = Integer.parseInt(args[0]);
+//                            if (ringChoice > 0) {
+//                                System.out.print(ringChoice + " is not negative.");
+//                                ringChoice *= -1;
+//                                System.out.println(" Substituting " + ringChoice + ".");
+//                            }
+//                            while (!NumberTheoreticFunctionsCalculator.isSquareFree(ringChoice)) {
+//                                System.out.print(ringChoice + " is not squarefree.");
+//                                ringChoice--;
+//                                System.out.println(" Substituting " + ringChoice + "...");
+//                            }
+//                            if (ringChoice < RingWindowDisplay.MINIMUM_RING_D) {
+//                                System.out.print(ringChoice + " is less than " + RingWindowDisplay.MINIMUM_RING_D + ", which is the minimum for the Ring Viewer program.");
+//                                ringChoice = RingWindowDisplay.DEFAULT_RING_D;
+//                                System.out.println(" Substituting " + ringChoice + ".");
+//                            }
+//                        } catch (NumberFormatException nfe) {
+//                            System.out.println(nfe.getMessage());
+//                            System.out.println("Substituting " + ringChoice + ".");
+//                        }
+//                        RingWindowDisplay.startRingWindowDisplay(ringChoice);
+//                }
+//            /* If there are more than two parameters, only the first two 
+//               parameters will be processed */
+//            default:
+//                int ringDiscr = RingWindowDisplay.DEFAULT_RING_D;
+//                ImaginaryQuadraticRing ring;
+//                ImaginaryQuadraticInteger number;
+//                try {
+//                    ringDiscr = Integer.parseInt(args[0]);
+//                    while (!NumberTheoreticFunctionsCalculator.isSquareFree(ringDiscr)) {
+//                        System.out.print(ringDiscr + " is not squarefree.");
+//                        ringDiscr--;
+//                        System.out.println(" Substituting " + ringDiscr + "...");
+//                    }
+//                    if (ringDiscr > 0) {
+//                        System.out.println(ringDiscr + " is not negative.");
+//                        ringDiscr *= -1;
+//                        System.out.println(" Substituting " + ringDiscr + ".");
+//                    }
+//                } catch (NumberFormatException nfe) {
+//                    System.out.println(nfe.getMessage());
+//                    System.out.println("Substituting " + ringDiscr);
+//                }
+//                ring = new ImaginaryQuadraticRing(ringDiscr);
+//                number = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(ring, args[1]);
+//                System.out.print(number.toASCIIString());
+//                if (ring.hasHalfIntegers()) {
+//                    System.out.print(" = " + number.toASCIIStringAlt());
+//                }
+//                if (NumberTheoreticFunctionsCalculator.isIrreducible(number)) {
+//                    System.out.print(" is irreducible ");
+//                    if (NumberTheoreticFunctionsCalculator.isPrime(number)) {
+//                        System.out.println(" and prime.");
+//                    } else {
+//                        System.out.println(" but not prime.");
+//                    }
+//                }
+//                System.out.print("Conjugate is " + number.conjugate().toASCIIString());
+//                if (ring.hasHalfIntegers()) {
+//                    System.out.println(" = " + number.conjugate().toASCIIString() + ".");
+//                } else {
+//                    System.out.println(".");
+//                }
+//                System.out.println("Trace is " + number.trace());
+//                System.out.println("Norm is " + number.norm());
+//                System.out.println("Minimal polynomial is " + number.minPolynomialString());
+//        }
     
     } 
     

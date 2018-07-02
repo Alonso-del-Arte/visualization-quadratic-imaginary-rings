@@ -278,6 +278,9 @@ public class NumberTheoreticFunctionsCalculator {
         if (isPrime(num.norm())) {
             return true;
         } else {
+            if (num.imagQuadRing.negRad == -1 && num.realPartMult == 0) {
+                return ((Math.abs(num.imagPartMult)) % 4 == 3);
+            }
             if (num.imagPartMult == 0) {
                 int absRealPartMult = Math.abs(num.realPartMult);
                 if (isPrime(absRealPartMult)) {
@@ -564,6 +567,46 @@ public class NumberTheoreticFunctionsCalculator {
             currA = currA.times(-1);
         }
         return currA;
+    }
+
+    /**
+     * Computes the greatest common divisor (GCD) of two imaginary quadratic 
+     * integers, one of which may be a purely real integer passed in as an int, 
+     * by using the Euclidean algorithm. WARNING: I have not yet written tests 
+     * for this one, so I can't guarantee that this works correctly, or at all.
+     * @param a A purely real integer passed in as an int. For example, 4.
+     * @param b An imaginary quadratic integer, which may be purely real, purely 
+     * imaginary, or complex. For example, 3sqrt(-2).
+     * @return The GCD. For example, sqrt(-2).
+     * @throws NonEuclideanDomainException If the algebraic integers come from 
+     * any imaginary quadratic ring other than Z[i], Z[&radic;-2], Z[\u03C9], 
+     * O_Q(&radic;-7) or O_Q(&radic;-11), the function assumes the Euclidean GCD 
+     * algorithm will fail without even trying, and throws this checked 
+     * exception.
+     */
+    public static ImaginaryQuadraticInteger euclideanGCD(int a, ImaginaryQuadraticInteger b) throws NonEuclideanDomainException {
+        ImaginaryQuadraticInteger wrappedA = new ImaginaryQuadraticInteger(a, 0, b.imagQuadRing);
+        return euclideanGCD(wrappedA, b);
+    }
+
+    /**
+     * Computes the greatest common divisor (GCD) of two imaginary quadratic 
+     * integers, one of which may be a purely real integer passed in as an int, 
+     * by using the Euclidean algorithm. WARNING: I have not yet written tests 
+     * for this one, so I can't guarantee that this works correctly, or at all.
+     * @param a An imaginary quadratic integer, which may be purely real, purely 
+     * imaginary, or complex. For example, 3sqrt(-2).
+     * @param b A purely real integer passed in as an int. For example, 4.
+     * @return The GCD. For example, sqrt(-2).
+     * @throws NonEuclideanDomainException If the algebraic integers come from 
+     * any imaginary quadratic ring other than Z[i], Z[&radic;-2], Z[\u03C9], 
+     * O_Q(&radic;-7) or O_Q(&radic;-11), the function assumes the Euclidean GCD 
+     * algorithm will fail without even trying, and throws this checked 
+     * exception.
+     */
+    public static ImaginaryQuadraticInteger euclideanGCD(ImaginaryQuadraticInteger a, int b) throws NonEuclideanDomainException {
+        ImaginaryQuadraticInteger wrappedB = new ImaginaryQuadraticInteger(b, 0, a.imagQuadRing);
+        return euclideanGCD(a, wrappedB);
     }
     
     /**

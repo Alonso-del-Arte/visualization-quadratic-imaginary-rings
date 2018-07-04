@@ -23,14 +23,14 @@ package imaginaryquadraticinteger;
  * Q(sqrt(-2)) but not Z[sqrt(-2)]. This is the wrong exception to throw for 
  * division by 0. Throwing this exception implies the result of a division is an 
  * algebraic number but not an algebraic integer. Whatever we think an algebraic 
- * integer divided by 0 is, it is neither algebraic number nor algebraic 
+ * integer divided by 0 is, it is neither an algebraic number nor an algebraic 
  * integer. Also, throwing this exception implies the result of a division can 
  * be rounded to an algebraic integer nearby in the relevant ring.
  * @author Alonso del Arte
  */
 public class NotDivisibleException extends Exception {
     
-    private static final long serialVersionUID = 1058231799;
+    private static final long serialVersionUID = 1058247852;
     
     private final long resultingFractionRealPartNumerator;
     private final long resultingFractionImagPartNumerator;
@@ -119,12 +119,46 @@ public class NotDivisibleException extends Exception {
         return numericImagPart;
     }
     
-    // Uncomment next five lines for failing first test
-//    public ImaginaryQuadraticInteger[] getBoundingIntegers() {
-//        ImaginaryQuadraticInteger zeroIQI = new ImaginaryQuadraticInteger(0, 0, workingRing);
-//        ImaginaryQuadraticInteger[] algIntArray = {zeroIQI, zeroIQI, zeroIQI, zeroIQI};
-//        return algIntArray;
-//    }
+    /**
+     * Gets the algebraic integers which surround the algebraic number 
+     * represented by ({@link #getResReFractNumer()} + 
+     * {@link getResImFractNumer()} * sqrt({@link getResFractNegRad()})) / 
+     * {@link getResFractDenom()}.
+     * @return An array of ImaginaryQuadraticInteger. Do not expect the integers 
+     * to be in any particular order: I or anyone else working on this project 
+     * in the future is free to change the implementation in the interest of 
+     * efficiency. If you need the bounding integers in a specific order, sort 
+     * the array returned by this function prior to the point where you need the 
+     * contents to be in a specific order. For example, for 1/2 + i/2, this 
+     * function should return {0, i, 1 + i, 1}, not necessarily in that order.
+     */
+    public ImaginaryQuadraticInteger[] getBoundingIntegers() {
+        ImaginaryQuadraticInteger zeroIQI = new ImaginaryQuadraticInteger(0, 0, workingRing);
+        ImaginaryQuadraticInteger[] algIntArray = {zeroIQI, zeroIQI, zeroIQI, zeroIQI};
+        if (workingRing.hasHalfIntegers()) {
+            int topPointA, topPointB;
+            topPointA = (int) Math.ceil(numericRealPart * 2);
+            topPointB = (int) Math.ceil(numericImagPartMult * 2);
+            if ((topPointA % 2 == 0 && topPointB % 2 != 0) || (topPointA % 2 != 0 && topPointB % 2 == 0)) {
+                topPointA--;
+            }
+            algIntArray[0] = new ImaginaryQuadraticInteger(topPointA, topPointB, workingRing, 2);
+            algIntArray[1] = new ImaginaryQuadraticInteger(topPointA - 1, topPointB - 1, workingRing, 2);
+            algIntArray[2] = new ImaginaryQuadraticInteger(topPointA + 1, topPointB - 1, workingRing, 2);
+            algIntArray[3] = new ImaginaryQuadraticInteger(topPointA, topPointB - 2, workingRing, 2);
+        } else {
+            int floorA, floorB, ceilA, ceilB;
+            floorA = (int) Math.floor(numericRealPart);
+            floorB = (int) Math.floor(numericImagPartMult);
+            ceilA = (int) Math.ceil(numericRealPart);
+            ceilB = (int) Math.ceil(numericImagPartMult);
+            algIntArray[0] = new ImaginaryQuadraticInteger(floorA, floorB, workingRing);
+            algIntArray[1] = new ImaginaryQuadraticInteger(ceilA, floorB, workingRing);
+            algIntArray[2] = new ImaginaryQuadraticInteger(floorA, ceilB, workingRing);
+            algIntArray[3] = new ImaginaryQuadraticInteger(ceilA, ceilB, workingRing);
+        }
+        return algIntArray;
+    }
     
     // TODO: FINE-TUNE FUNCTION FOR DOMAINS WITH "HALF-INTEGERS"
     // I think this will pass tests that don't involve domains with "half-integers", but more thorough tests may be necessary...

@@ -30,6 +30,22 @@ import java.util.Scanner;
 public class NumberTheoreticFunctionsCalculator {
     
     /**
+     * The only five values d such that new ImaginaryQuadraticRing(d) represents 
+     * a norm-Euclidean domain. These numbers, -11, -7, -3, -2, -1, are the 
+     * first five terms listed in <a href="http://oeis.org/A048981">Sloane's 
+     * A048981</a>.
+     */
+    public static final int[] NORM_EUCLIDEAN_QUADRATIC_IMAGINARY_RINGS_D = {-11, -7, -3, -2, -1};
+    
+    public static final int[] UNIQUE_FACTORIZATON_QUADRATIC_IMAGINARY_RINGS_D = {-163, -67, -43, -19, -11, -7, -3, -2, -1};
+    
+    public static final ImaginaryQuadraticRing RING_GAUSSIAN = new ImaginaryQuadraticRing(-1);
+    public static final ImaginaryQuadraticInteger IMAG_UNIT_I = new ImaginaryQuadraticInteger(0, 1, RING_GAUSSIAN);
+    public static final ImaginaryQuadraticInteger IMAG_UNIT_NEG_I = IMAG_UNIT_I.times(-1);
+    
+    public static final ImaginaryQuadraticRing RING_EISENSTEIN = new ImaginaryQuadraticRing(-3);
+
+    /**
      * Determines the prime factors of a given number. Uses simple trial 
      * division with only basic optimization.
      * @param num The integer for which to determine prime factors of.
@@ -545,6 +561,7 @@ public class NumberTheoreticFunctionsCalculator {
             throw new NonEuclideanDomainException(exceptionMessage, a, b);
         }
         ImaginaryQuadraticInteger currA, currB, tempMultiple, currRemainder;
+        ImaginaryQuadraticInteger[] bounds;
         if (a.norm() < b.norm()) {
             currA = b;
             currB = a;
@@ -556,12 +573,22 @@ public class NumberTheoreticFunctionsCalculator {
             try {
                 tempMultiple = currA.divides(currB);
             } catch (NotDivisibleException nde) {
-                tempMultiple = nde.roundTowardsZero();
+                bounds = nde.getBoundingIntegers();
+                boolean notFound;
+                int counter = 0;
+                do {
+                    tempMultiple = bounds[counter];
+                    notFound = tempMultiple.norm() >= currB.norm();
+                    counter++;
+                } while (notFound);
             }
             tempMultiple = tempMultiple.times(currB);
             currRemainder = currA.minus(tempMultiple);
             currA = currB;
             currB = currRemainder;
+        }
+        if (currA.imagQuadRing.negRad == -1 && currA.realPartMult == 0) {
+            currA = currA.times(IMAG_UNIT_NEG_I);
         }
         if (currA.realPartMult < 0) {
             currA = currA.times(-1);

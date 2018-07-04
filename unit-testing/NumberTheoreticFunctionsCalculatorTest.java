@@ -720,19 +720,62 @@ public class NumberTheoreticFunctionsCalculatorTest {
         /* TO DO: Write tests for euclideanGCD(IQI, b). */
         /* Last but not least, euclideanGCD(ImaginaryQuadraticInteger, 
            ImaginaryQuadraticInteger). */
-        ImaginaryQuadraticRing r = new ImaginaryQuadraticRing(-1);
-        ImaginaryQuadraticInteger iqia = new ImaginaryQuadraticInteger(-2, 2, r);
-        ImaginaryQuadraticInteger iqib = new ImaginaryQuadraticInteger(-2, 4, r);
-        ImaginaryQuadraticInteger expResultIQI = new ImaginaryQuadraticInteger(0, 2, r);
-        ImaginaryQuadraticInteger resultIQI;
+        ImaginaryQuadraticRing r;
+        ImaginaryQuadraticInteger iqia, iqib, expResultIQI, resultIQI;
+        // sqrt(d) and 1 + sqrt(d) should be coprime in any ring
+        for (Integer iterDiscr : NumberTheoreticFunctionsCalculator.NORM_EUCLIDEAN_QUADRATIC_IMAGINARY_RINGS_D) {
+            r = new ImaginaryQuadraticRing(iterDiscr);
+            iqia = new ImaginaryQuadraticInteger(0, 1, r);
+            iqib = new ImaginaryQuadraticInteger(1, 1, r);
+            expResultIQI = new ImaginaryQuadraticInteger(1, 0, r);
+            try {
+                resultIQI = NumberTheoreticFunctionsCalculator.euclideanGCD(iqia, iqib);
+            } catch (AlgebraicDegreeOverflowException adoe) {
+                resultIQI = iqia; // Just to avoid "may not have been initialized" warning
+                fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") should not have triggered AlgebraicDegreeOverflowException" + adoe.getMessage());
+            } catch (NonEuclideanDomainException nede) {
+                resultIQI = iqib; // Same reason as previous
+                fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") should not have triggered NonEuclideanDomainException" + nede.getMessage());
+            } catch (NullPointerException npe) {
+                resultIQI = iqia;
+                System.out.println("NullPointerException encountered: " + npe.getMessage());
+                System.out.println("This could indicate a problem with NotDivisibleException.getBoundingIntegers().");
+            }
+            assertEquals(expResultIQI, resultIQI);
+        }
+        // In most cases, gcd(sqrt(d), -d) = sqrt(d)
+        for (int iterDiscrA = 0; iterDiscrA < NumberTheoreticFunctionsCalculator.NORM_EUCLIDEAN_QUADRATIC_IMAGINARY_RINGS_D.length - 1; iterDiscrA++) {
+            r = new ImaginaryQuadraticRing(NumberTheoreticFunctionsCalculator.NORM_EUCLIDEAN_QUADRATIC_IMAGINARY_RINGS_D[iterDiscrA]);
+            iqia = new ImaginaryQuadraticInteger(0, 1, r);
+            iqib = new ImaginaryQuadraticInteger(NumberTheoreticFunctionsCalculator.NORM_EUCLIDEAN_QUADRATIC_IMAGINARY_RINGS_D[iterDiscrA], 0, r);
+            expResultIQI = iqia;
+            try {
+                resultIQI = NumberTheoreticFunctionsCalculator.euclideanGCD(iqia, iqib);
+            } catch (AlgebraicDegreeOverflowException adoe) {
+                resultIQI = NumberTheoreticFunctionsCalculator.IMAG_UNIT_I; // Just to avoid "may not have been initialized" warning
+                fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") should not have triggered AlgebraicDegreeOverflowException" + adoe.getMessage());
+            } catch (NonEuclideanDomainException nede) {
+                resultIQI = NumberTheoreticFunctionsCalculator.IMAG_UNIT_NEG_I; // Same reason as previous
+                fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") should not have triggered NonEuclideanDomainException" + nede.getMessage());
+            } catch (NullPointerException npe) {
+                resultIQI = iqib;
+                System.out.println("NullPointerException encountered: " + npe.getMessage());
+                System.out.println("This could indicate a problem with NotDivisibleException.getBoundingIntegers().");
+            }
+            assertEquals(expResultIQI, resultIQI);
+        }
+        r = new ImaginaryQuadraticRing(-1);
+        iqia = new ImaginaryQuadraticInteger(-2, 2, r);
+        iqib = new ImaginaryQuadraticInteger(-2, 4, r);
+        expResultIQI = new ImaginaryQuadraticInteger(2, 0, r);
         try {
             resultIQI = NumberTheoreticFunctionsCalculator.euclideanGCD(iqia, iqib);
         } catch (AlgebraicDegreeOverflowException adoe) {
-            resultIQI = iqia; // Just to avoid "may not have been initialized" warning
+            resultIQI = iqia;
             fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") should not have triggered AlgebraicDegreeOverflowException" + adoe.getMessage());
-        } catch (NonEuclideanDomainException nde) {
-            resultIQI = iqib; // Same reason as previous
-            fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") should not have triggered NonEuclideanDomainException" + nde.getMessage());
+        } catch (NonEuclideanDomainException nede) {
+            resultIQI = iqib;
+            fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") should not have triggered NonEuclideanDomainException" + nede.getMessage());
         }
         assertEquals(expResultIQI, resultIQI);
         // Now to check the appropriate exceptions are thrown

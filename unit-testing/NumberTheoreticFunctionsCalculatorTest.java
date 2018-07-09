@@ -70,13 +70,6 @@ public class NumberTheoreticFunctionsCalculatorTest {
      */
     private static List<Integer> fibonacciList;
     
-    /**
-     * There are the only nine negative numbers d such that the ring of 
-     * algebraic integers of Q(sqrt(d)) is a unique factorization domain (though 
-     * not necessarily Euclidean).
-     */
-    public static final int[] HEEGNER_NUMBERS = {-163, -67, -43, -19, -11, -7, -3, -2, -1};
-    
     private static final int[] HEEGNER_COMPANION_PRIMES = new int[9];
     
     /**
@@ -113,7 +106,7 @@ public class NumberTheoreticFunctionsCalculatorTest {
             do {
                 currPrime += 2;
                 currIndex = (currPrime - 3)/2;
-            } while (currIndex < (halfThreshold - 1) && primeFlags[currIndex] == false);
+            } while (currIndex < (halfThreshold - 1) && !primeFlags[currIndex]);
         }
         primesListLength = primesList.size();
         /* Now to make a list of composite numbers, from 4 up to and perhaps 
@@ -147,8 +140,8 @@ public class NumberTheoreticFunctionsCalculatorTest {
            better term, "the Heegner companion primes." */
         int absD, currDiff, currCompCand, currSqrIndex, currSqrDMult;
         boolean numNotFoundYet;
-        for (int d = 0; d < HEEGNER_NUMBERS.length; d++) {
-            absD = (-1) * HEEGNER_NUMBERS[d];
+        for (int d = 0; d < NumberTheoreticFunctionsCalculator.HEEGNER_NUMBERS.length; d++) {
+            absD = (-1) * NumberTheoreticFunctionsCalculator.HEEGNER_NUMBERS[d];
             currIndex = 0;
             do {
                 currPrime = primesList.get(currIndex);
@@ -177,8 +170,8 @@ public class NumberTheoreticFunctionsCalculatorTest {
             HEEGNER_COMPANION_PRIMES[d] = currPrime;
         }
         System.out.println("setUpClass() has generated a list of \"Heegner companion primes\": ");
-        for (int dReport = 0; dReport < HEEGNER_NUMBERS.length; dReport++) {
-            System.out.print(HEEGNER_COMPANION_PRIMES[dReport] + " for " + HEEGNER_NUMBERS[dReport] + ", ");
+        for (int dReport = 0; dReport < NumberTheoreticFunctionsCalculator.HEEGNER_NUMBERS.length; dReport++) {
+            System.out.print(HEEGNER_COMPANION_PRIMES[dReport] + " for " + NumberTheoreticFunctionsCalculator.HEEGNER_NUMBERS[dReport] + ", ");
         }
         System.out.println();
     }
@@ -191,6 +184,19 @@ public class NumberTheoreticFunctionsCalculatorTest {
      * The expectation is that if -n is a negative number, its factorization 
      * will be the same as that of n but with a single -1 at the beginning. This
      * test does not set out any expectations for the factorization of 0.
+     * <p>As for testing primeFactors(ImaginaryQuadraticInteger), some purely 
+     * real primes of <b>Z</b> are tested in the context of the imaginary 
+     * quadratic rings that are unique factorization domains, but just that 
+     * their lists of factors in the particular ring have one or two factors. 
+     * This is followed by a more comprehensive test in which a few small 
+     * complex primes are multiplied together and the expected and actual factor 
+     * lists are compared. I believe that particular test does not prescribe a 
+     * particular order, though I am assuming java.util.List.containsAll() does 
+     * not require the order to be the same.</p>
+     * <p>However, if an order is required, I suggest this one: first a unit (if 
+     * not 1), followed by primes in order by norm, and a prime with negative 
+     * imaginary part should precede a prime with positive imaginary part of the 
+     * same norm, e.g., 1 - i precedes 1 + i.</p>
      */
     @Test
     public void testPrimeFactors() {
@@ -236,12 +242,70 @@ public class NumberTheoreticFunctionsCalculatorTest {
             }
             primeIndex++;
         }
-        System.out.print("Last number tested was " + lastNumTested + ", which has this factorization: " + result.get(0));
+        System.out.print("Last integer in Z tested was " + lastNumTested + ", which has this factorization: " + result.get(0));
         for (int i = 1; i < result.size(); i++) {
             System.out.print(" \u00D7 ");
             System.out.print(result.get(i));
         }
         System.out.println(" ");
+        // Now to test primeFactors() on imaginary quadratic integers
+        ImaginaryQuadraticRing r;
+        ImaginaryQuadraticInteger z, imagPrimor;
+        List<ImaginaryQuadraticInteger> expectedFactorsList, factorsList;
+        int expFacLen, facLen, imagPrimorThreshold, currNorm, a;
+        String assertionMessage;
+        for (Integer d : NumberTheoreticFunctionsCalculator.HEEGNER_NUMBERS) {
+            r = new ImaginaryQuadraticRing(d);
+            /* First to test purely real integers that are prime in Z in the 
+               context of a particular ring r, e.g., 5 in Z[sqrt(-2)] */
+            for (Integer p : primesList) {
+                z = new ImaginaryQuadraticInteger(p, 0, r);
+                if (NumberTheoreticFunctionsCalculator.isPrime(z)) {
+                    expFacLen = 1;
+                } else {
+                    expFacLen = 2;
+                }
+                try {
+                    factorsList = NumberTheoreticFunctionsCalculator.primeFactors(z);
+                    facLen = factorsList.size();
+                } catch (NonUniqueFactorizationDomainException nufde) {
+                    facLen = 0;
+                    fail("NonUniqueFactorizationDomainException should not have happened in this context: " + nufde.getMessage());
+                }
+                assertEquals(expFacLen, facLen);
+            }
+            // Now, to build a sort of primorial
+            imagPrimorThreshold = d * d + 20;
+            currNorm = 0;
+            a = 0;
+            imagPrimor = new ImaginaryQuadraticInteger(1, 0, r);
+            expectedFactorsList = new ArrayList<>();
+            while (currNorm < imagPrimorThreshold) {
+                z = new ImaginaryQuadraticInteger(a, 1, r);
+                if (NumberTheoreticFunctionsCalculator.isPrime(z)) {
+                    imagPrimor = imagPrimor.times(z);
+                    expectedFactorsList.add(z);
+                    currNorm = imagPrimor.norm();
+                }
+                a++;
+            }
+            System.out.print(imagPrimor.toASCIIString() + " = (" + expectedFactorsList.get(0).toASCIIString() + ")");
+            for (int j = 1; j < expectedFactorsList.size(); j++) {
+                System.out.print(" \u00D7 (" + expectedFactorsList.get(j).toASCIIString() + ")");
+            }
+            System.out.println();
+            try {
+                factorsList = NumberTheoreticFunctionsCalculator.primeFactors(imagPrimor);
+            } catch (NonUniqueFactorizationDomainException nufde) {
+                factorsList = new ArrayList<>();
+                factorsList.add(NumberTheoreticFunctionsCalculator.IMAG_UNIT_I);
+                fail("NonUniqueFactorizationDomainException should not have happened in this context: " + nufde.getMessage());
+            }
+            assertionMessage = "Expected list of factors and actual list of factors of " + imagPrimor.toString() + " should be of the same length.";
+            assertEquals(assertionMessage, expectedFactorsList.size(), factorsList.size());
+            assertionMessage = "Expected list of factors and actual list of factors of " + imagPrimor.toString() + " should contain the same numbers.";
+            assertTrue(assertionMessage, factorsList.containsAll(expectedFactorsList));
+        }
     }
 
     /**
@@ -300,13 +364,13 @@ public class NumberTheoreticFunctionsCalculatorTest {
         ImaginaryQuadraticRing ufdRing;
         ImaginaryQuadraticInteger numberFromUFD;
         String assertionMessage;
-        for (int d = 0; d < HEEGNER_NUMBERS.length; d++) {
-            ufdRing = new ImaginaryQuadraticRing(HEEGNER_NUMBERS[d]);
+        for (int d = 0; d < NumberTheoreticFunctionsCalculator.HEEGNER_NUMBERS.length; d++) {
+            ufdRing = new ImaginaryQuadraticRing(NumberTheoreticFunctionsCalculator.HEEGNER_NUMBERS[d]);
             // d should not be prime in the ring of Q(sqrt(d))
-            numberFromUFD = new ImaginaryQuadraticInteger(HEEGNER_NUMBERS[d], 0, ufdRing);
+            numberFromUFD = new ImaginaryQuadraticInteger(NumberTheoreticFunctionsCalculator.HEEGNER_NUMBERS[d], 0, ufdRing);
             assertFalse(NumberTheoreticFunctionsCalculator.isPrime(numberFromUFD));
             // Nor should d + 4 be prime even if it is prime in Z
-            numberFromUFD = new ImaginaryQuadraticInteger(-HEEGNER_NUMBERS[d] + 4, 0, ufdRing);
+            numberFromUFD = new ImaginaryQuadraticInteger(-NumberTheoreticFunctionsCalculator.HEEGNER_NUMBERS[d] + 4, 0, ufdRing);
             assertFalse(NumberTheoreticFunctionsCalculator.isPrime(numberFromUFD));
             // The "Heegner companion primes" should indeed be prime
             numberFromUFD = new ImaginaryQuadraticInteger(HEEGNER_COMPANION_PRIMES[d], 0, ufdRing);
@@ -314,34 +378,62 @@ public class NumberTheoreticFunctionsCalculatorTest {
             assertTrue(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(numberFromUFD));
         }
         // There are some special cases to test in the Gaussian integers
-        ImaginaryQuadraticRing ringGaussian = new ImaginaryQuadraticRing(-1);
         ImaginaryQuadraticInteger gaussianInteger;
-        ImaginaryQuadraticInteger twoStepImagIncr = new ImaginaryQuadraticInteger(0, 2, ringGaussian);
+        ImaginaryQuadraticInteger twoStepImagIncr = new ImaginaryQuadraticInteger(0, 2, NumberTheoreticFunctionsCalculator.RING_GAUSSIAN);
         for (int g = 3; g < 256; g += 4) {
             if (NumberTheoreticFunctionsCalculator.isPrime(g)) {
-                gaussianInteger = new ImaginaryQuadraticInteger(0, g, ringGaussian);
-                assertionMessage = gaussianInteger.toString() + " should have been identified as prime in " + ringGaussian.toString();
+                gaussianInteger = new ImaginaryQuadraticInteger(0, g, NumberTheoreticFunctionsCalculator.RING_GAUSSIAN);
+                assertionMessage = gaussianInteger.toString() + " should have been identified as prime in Z[i]";
                 assertTrue(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(gaussianInteger));
                 gaussianInteger = gaussianInteger.plus(twoStepImagIncr);
-                assertionMessage = gaussianInteger.toString() + " should not have been identified as prime in " + ringGaussian.toString();
+                assertionMessage = gaussianInteger.toString() + " should not have been identified as prime in Z[i]";
                 assertFalse(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(gaussianInteger));
             }
         }
-        // Now to test some complex numbers in Z[sqrt(-5)]
-        ImaginaryQuadraticRing nonUFDRing = new ImaginaryQuadraticRing(-5);
+        // Now to test some complex numbers in Z[sqrt(-5)] and O_Q(sqrt(-31))
+        ImaginaryQuadraticRing Zi5 = new ImaginaryQuadraticRing(-5);
+        ImaginaryQuadraticRing OQi31 = new ImaginaryQuadraticRing(-31);
         ImaginaryQuadraticInteger numberFromNonUFD;
         int norm;
         for (int a = -1; a > -10; a--) {
             for (int b = 1; b < 10; b++) {
-                numberFromNonUFD = new ImaginaryQuadraticInteger(a, b, nonUFDRing);
+                numberFromNonUFD = new ImaginaryQuadraticInteger(a, b, Zi5);
                 norm = a * a + 5 * b * b;
                 if (NumberTheoreticFunctionsCalculator.isPrime(norm)) {
-                    assertionMessage = numberFromNonUFD.toString() + " should have been identified as prime in " + nonUFDRing.toString();
+                    assertionMessage = numberFromNonUFD.toString() + " should have been identified as prime in " + Zi5.toString();
                     assertTrue(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(numberFromNonUFD));
                 } else {
-                    assertionMessage = numberFromNonUFD.toString() + " should not have been identified as prime in " + nonUFDRing.toString();
+                    assertionMessage = numberFromNonUFD.toString() + " should not have been identified as prime in " + Zi5.toString();
                     assertFalse(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(numberFromNonUFD));
                 }
+                numberFromNonUFD = new ImaginaryQuadraticInteger(a, b, OQi31);
+                norm = a * a + 31 * b * b;
+                if (NumberTheoreticFunctionsCalculator.isPrime(norm)) {
+                    assertionMessage = numberFromNonUFD.toString() + " should have been identified as prime in " + OQi31.toString();
+                    assertTrue(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(numberFromNonUFD));
+                } else {
+                    assertionMessage = numberFromNonUFD.toString() + " should not have been identified as prime in " + OQi31.toString();
+                    assertFalse(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(numberFromNonUFD));
+                }
+            }
+        }
+        /* And lastly, to check some purely real integers in the context of a 
+           few non-UFDs */
+        ImaginaryQuadraticRing r;
+        int re;
+        ImaginaryQuadraticInteger z;
+        for (int iterDiscr = -6; iterDiscr > -200; iterDiscr--) {
+            if (NumberTheoreticFunctionsCalculator.isSquareFree(iterDiscr)) {
+                r = new ImaginaryQuadraticRing(iterDiscr);
+                re = -iterDiscr + 1;
+                z = new ImaginaryQuadraticInteger(re, 0, r);
+                assertionMessage = re + " in " + r.toString() + " should not have been identified as prime.";
+                assertFalse(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(z));
+//                re += 2;
+//                z = z.plus(2);
+//                if (primesList.contains(re)) {
+//                    assertionMessage = FIGURE IT OUT IN THE MORNING
+//                }
             }
         }
     }
@@ -699,8 +791,8 @@ public class NumberTheoreticFunctionsCalculatorTest {
         }
         expResult = 2; /* Now to test with consecutive even integers, result 
                           should be 2 each time */
-        for (int i = -30; i < 31; i += 2) {
-            result = NumberTheoreticFunctionsCalculator.euclideanGCD(i, i + 2);
+        for (int m = -30; m < 31; m += 2) {
+            result = NumberTheoreticFunctionsCalculator.euclideanGCD(m, m + 2);
             assertEquals(expResult, result);
         }
         // And now some of the same tests again but with the long data type
@@ -757,14 +849,45 @@ public class NumberTheoreticFunctionsCalculatorTest {
             } catch (NonEuclideanDomainException nede) {
                 resultIQI = NumberTheoreticFunctionsCalculator.IMAG_UNIT_NEG_I; // Same reason as previous
                 fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") should not have triggered NonEuclideanDomainException" + nede.getMessage());
-            } catch (NullPointerException npe) {
+            } catch (ArrayIndexOutOfBoundsException aioobe) {
                 resultIQI = iqib;
-                System.out.println("NullPointerException encountered: " + npe.getMessage());
-                System.out.println("This could indicate a problem with NotDivisibleException.getBoundingIntegers().");
+                System.out.println("ArrayIndexOutOfBoundsException encountered: " + aioobe.getMessage());
+                System.out.println("This could indicate either a flaw in the implementation of the Euclidean algorithm or a problem with NotDivisibleException.getBoundingIntegers().");
+                fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + iqib.toASCIIString() + ") should not have triggered ArrayIndexOutOfBoundsException: " + aioobe.getMessage());
             }
             assertEquals(expResultIQI, resultIQI);
         }
-        r = new ImaginaryQuadraticRing(-1);
+        int b;
+        for (int iterDiscrOQ = 0; iterDiscrOQ < NumberTheoreticFunctionsCalculator.NORM_EUCLIDEAN_QUADRATIC_IMAGINARY_RINGS_D.length - 3; iterDiscrOQ++) {
+            r = new ImaginaryQuadraticRing(NumberTheoreticFunctionsCalculator.NORM_EUCLIDEAN_QUADRATIC_IMAGINARY_RINGS_D[iterDiscrOQ]);
+            iqia = new ImaginaryQuadraticInteger(1, 1, r, 2);
+            b = iqia.norm() * HEEGNER_COMPANION_PRIMES[iterDiscrOQ + 4];
+            expResultIQI = iqia;
+            iqia = iqia.times(iqia);
+            try {
+                resultIQI = NumberTheoreticFunctionsCalculator.euclideanGCD(iqia, b);
+            } catch (AlgebraicDegreeOverflowException adoe) {
+                resultIQI = NumberTheoreticFunctionsCalculator.IMAG_UNIT_I; // Just to avoid "may not have been initialized" warning
+                fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + b + ") should not have triggered AlgebraicDegreeOverflowException" + adoe.getMessage());
+            } catch (NonEuclideanDomainException nede) {
+                resultIQI = NumberTheoreticFunctionsCalculator.IMAG_UNIT_NEG_I; // Same reason as previous
+                fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + b + ") should not have triggered NonEuclideanDomainException" + nede.getMessage());
+            } catch (ArrayIndexOutOfBoundsException aioobe) {
+                resultIQI = new ImaginaryQuadraticInteger(0, 0, r);
+                System.out.println("ArrayIndexOutOfBoundsException encountered: " + aioobe.getMessage());
+                System.out.println("This could indicate either a flaw in the implementation of the Euclidean algorithm or a problem with NotDivisibleException.getBoundingIntegers().");
+                fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + b + ") should not have triggered ArrayIndexOutOfBoundsException: " + aioobe.getMessage());
+            }
+            assertEquals(expResultIQI, resultIQI);
+            try {
+                resultIQI = NumberTheoreticFunctionsCalculator.euclideanGCD(b, iqia);
+            } catch (NonEuclideanDomainException nede) {
+                resultIQI = NumberTheoreticFunctionsCalculator.IMAG_UNIT_NEG_I; // Same reason as previous
+                fail("Attempting to calculate gcd(" + iqia.toASCIIString() + ", " + b + ") should not have triggered NonEuclideanDomainException" + nede.getMessage());
+            }
+            assertEquals(expResultIQI, resultIQI);
+        }
+        r = NumberTheoreticFunctionsCalculator.RING_GAUSSIAN;
         iqia = new ImaginaryQuadraticInteger(-2, 2, r);
         iqib = new ImaginaryQuadraticInteger(-2, 4, r);
         expResultIQI = new ImaginaryQuadraticInteger(2, 0, r);

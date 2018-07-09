@@ -45,7 +45,7 @@ public class ImaginaryQuadraticIntegerTest {
      */
     private static ImaginaryQuadraticInteger zeroIQI;
     
-    private static int randomDiscr, randomRealPart, randomImagPart, randomRealForHalfInts, randomImagForHalfInts, totalTestIntegers;
+    private static int randomRealPart, randomImagPart, randomRealForHalfInts, randomImagForHalfInts, totalTestIntegers;
     
     public ImaginaryQuadraticIntegerTest() {
     }
@@ -57,7 +57,7 @@ public class ImaginaryQuadraticIntegerTest {
     @BeforeClass
     public static void setUpClass() {
         int maxAB;
-        randomDiscr = NumberTheoreticFunctionsCalculator.randomNegativeSquarefreeNumber(RingWindowDisplay.MINIMUM_RING_D);
+        int randomDiscr = NumberTheoreticFunctionsCalculator.randomNegativeSquarefreeNumber(RingWindowDisplay.MINIMUM_RING_D);
         if (randomDiscr > -5) {
             randomDiscr = -5; // This is just in case we get -3 or -1, which we are already testing for and which require special treatment in some of the tests.
         }
@@ -178,8 +178,8 @@ public class ImaginaryQuadraticIntegerTest {
             assertEquals(expResult, result);
         }
         expResult = 1; // Purely real nonzero integers should have algebraic degree 1
-        for (int j = 0; j < testNorms.size(); j++) {
-            result = testNorms.get(j).algebraicDegree();
+        for (ImaginaryQuadraticInteger normIQI : testNorms) {
+            result = normIQI.algebraicDegree();
             assertEquals(expResult, result);
         }
         expResult = 0; // And last but not least, 0 should have algebraic degree 0
@@ -524,6 +524,16 @@ public class ImaginaryQuadraticIntegerTest {
             result = testIntegers.get(i).toString().replace(" ", "");
             assertEquals(expResult, result);
         }
+        // Lastly to test on a couple of complex units
+        expResult = "i";
+        result = NumberTheoreticFunctionsCalculator.IMAG_UNIT_I.toString();
+        assertEquals(expResult, result);
+        expResult = "-i";
+        result = NumberTheoreticFunctionsCalculator.IMAG_UNIT_NEG_I.toString();
+        assertEquals(expResult, result);
+        expResult = "-1/2+\u221A(-3)/2";
+        result = NumberTheoreticFunctionsCalculator.COMPLEX_CUBIC_ROOT_OF_UNITY.toString().replace(" ", "");
+        assertEquals(expResult, result);
     }
 
     /**
@@ -604,6 +614,16 @@ public class ImaginaryQuadraticIntegerTest {
                 assertEquals(testIntegers.get(i).toString(), testIntegers.get(i).toStringAlt());
             }
         }
+        // Lastly to test on a couple of complex units
+        expResult = "i";
+        result = NumberTheoreticFunctionsCalculator.IMAG_UNIT_I.toStringAlt();
+        assertEquals(expResult, result);
+        expResult = "-i";
+        result = NumberTheoreticFunctionsCalculator.IMAG_UNIT_NEG_I.toStringAlt();
+        assertEquals(expResult, result);
+        expResult = "\u03C9";
+        result = NumberTheoreticFunctionsCalculator.COMPLEX_CUBIC_ROOT_OF_UNITY.toStringAlt();
+        assertEquals(expResult, result);
     }
 
     /**
@@ -641,6 +661,16 @@ public class ImaginaryQuadraticIntegerTest {
             result = testIntegers.get(i).toASCIIString().replace(" ", "");
             assertEquals(expResult, result);
         }
+        // Lastly to test on a couple of complex units
+        expResult = "i";
+        result = NumberTheoreticFunctionsCalculator.IMAG_UNIT_I.toASCIIString();
+        assertEquals(expResult, result);
+        expResult = "-i";
+        result = NumberTheoreticFunctionsCalculator.IMAG_UNIT_NEG_I.toASCIIString();
+        assertEquals(expResult, result);
+        expResult = "-1/2+sqrt(-3)/2";
+        result = NumberTheoreticFunctionsCalculator.COMPLEX_CUBIC_ROOT_OF_UNITY.toASCIIString().replace(" ", "");
+        assertEquals(expResult, result);
     }
 
     /**
@@ -722,6 +752,16 @@ public class ImaginaryQuadraticIntegerTest {
                 assertEquals(testIntegers.get(i).toASCIIString(), testIntegers.get(i).toASCIIStringAlt());
             }
         }
+        // Lastly to test on a couple of complex units
+        expResult = "i";
+        result = NumberTheoreticFunctionsCalculator.IMAG_UNIT_I.toASCIIStringAlt();
+        assertEquals(expResult, result);
+        expResult = "-i";
+        result = NumberTheoreticFunctionsCalculator.IMAG_UNIT_NEG_I.toASCIIStringAlt();
+        assertEquals(expResult, result);
+        expResult = "omega";
+        result = NumberTheoreticFunctionsCalculator.COMPLEX_CUBIC_ROOT_OF_UNITY.toASCIIStringAlt();
+        assertEquals(expResult, result);
     }
     
     /**
@@ -753,12 +793,23 @@ public class ImaginaryQuadraticIntegerTest {
                     expResult = randomRealPart + "+" + randomImagPart + "\\sqrt{" + testIntegers.get(i).imagQuadRing.getNegRad() + "}";
                 }
             }
+            expResult = expResult.replace("-1\\sqrt", "-\\sqrt");
+            expResult = expResult.replace("+1\\sqrt", "+\\sqrt");
             expResult = expResult.replace("\\frac{-", "-\\frac{");
-            expResult = expResult.replace("1\\sqrt", "\\sqrt");
             expResult = expResult.replace("+-", "-");
             result = testIntegers.get(i).toTeXString().replace(" ", "");
             assertEquals(expResult, result);
         }
+        // Lastly to test on a couple of complex units
+        expResult = "i";
+        result = NumberTheoreticFunctionsCalculator.IMAG_UNIT_I.toTeXString();
+        assertEquals(expResult, result);
+        expResult = "-i";
+        result = NumberTheoreticFunctionsCalculator.IMAG_UNIT_NEG_I.toTeXString();
+        assertEquals(expResult, result);
+        expResult = "-\\frac{1}{2}+\\frac{\\sqrt{-3}}{2}";
+        result = NumberTheoreticFunctionsCalculator.COMPLEX_CUBIC_ROOT_OF_UNITY.toTeXString().replace(" ", "");
+        assertEquals(expResult, result);
     }
     
     /**
@@ -780,6 +831,16 @@ public class ImaginaryQuadraticIntegerTest {
                 assertEquals(testIntegers.get(i).toTeXString(), testIntegers.get(i).toTeXStringSingleDenom());
             }
         }
+        // Lastly to test on a couple of complex units
+        expResult = "i";
+        result = NumberTheoreticFunctionsCalculator.IMAG_UNIT_I.toTeXStringSingleDenom();
+        assertEquals(expResult, result);
+        expResult = "-i";
+        result = NumberTheoreticFunctionsCalculator.IMAG_UNIT_NEG_I.toTeXStringSingleDenom();
+        assertEquals(expResult, result);
+        expResult = "\\frac{-1+\\sqrt{-3}}{2}";
+        result = NumberTheoreticFunctionsCalculator.COMPLEX_CUBIC_ROOT_OF_UNITY.toTeXStringSingleDenom().replace(" ", "");
+        assertEquals(expResult, result);
     }
 
     /**
@@ -860,6 +921,16 @@ public class ImaginaryQuadraticIntegerTest {
                 assertEquals(testIntegers.get(i).toTeXString(), testIntegers.get(i).toTeXStringAlt());
             }
         }
+        // Lastly to test on a couple of complex units
+        expResult = "i";
+        result = NumberTheoreticFunctionsCalculator.IMAG_UNIT_I.toTeXStringAlt();
+        assertEquals(expResult, result);
+        expResult = "-i";
+        result = NumberTheoreticFunctionsCalculator.IMAG_UNIT_NEG_I.toTeXStringAlt();
+        assertEquals(expResult, result);
+        expResult = "\\omega";
+        result = NumberTheoreticFunctionsCalculator.COMPLEX_CUBIC_ROOT_OF_UNITY.toTeXStringAlt();
+        assertEquals(expResult, result);
     }
     
     /**
@@ -899,6 +970,16 @@ public class ImaginaryQuadraticIntegerTest {
             result = testIntegers.get(i).toHTMLString().replace(" ", "");
             assertEquals(expResult, result);
         }
+        // Lastly to test on a couple of complex units
+        expResult = "<i>i</i>";
+        result = NumberTheoreticFunctionsCalculator.IMAG_UNIT_I.toHTMLString();
+        assertEquals(expResult, result);
+        expResult = "&minus;<i>i</i>";
+        result = NumberTheoreticFunctionsCalculator.IMAG_UNIT_NEG_I.toHTMLString();
+        assertEquals(expResult, result);
+        expResult = "&minus;1/2+&radic;(&minus;3)/2";
+        result = NumberTheoreticFunctionsCalculator.COMPLEX_CUBIC_ROOT_OF_UNITY.toHTMLString().replace(" ", "");
+        assertEquals(expResult, result);
     }
 
     /**
@@ -980,6 +1061,16 @@ public class ImaginaryQuadraticIntegerTest {
                 assertEquals(testIntegers.get(i).toHTMLString(), testIntegers.get(i).toHTMLStringAlt());
             }
         }
+        // Lastly to test on a couple of complex units
+        expResult = "<i>i</i>";
+        result = NumberTheoreticFunctionsCalculator.IMAG_UNIT_I.toHTMLStringAlt();
+        assertEquals(expResult, result);
+        expResult = "&minus;<i>i</i>";
+        result = NumberTheoreticFunctionsCalculator.IMAG_UNIT_NEG_I.toHTMLStringAlt();
+        assertEquals(expResult, result);
+        expResult = "&omega;";
+        result = NumberTheoreticFunctionsCalculator.COMPLEX_CUBIC_ROOT_OF_UNITY.toHTMLStringAlt();
+        assertEquals(expResult, result);
     }
     
     /**
@@ -1076,7 +1167,9 @@ public class ImaginaryQuadraticIntegerTest {
      * ImaginaryQuadraticInteger. Whatever is output by toString, toStringAlt, 
      * toASCIIString, toASCIIStringAlt, toTeXString, toTeXStringSingleDenom, 
      * toTeXStringAlt, toHTMLString or toHTMLStringAlt should be parseable by 
-     * parseImaginaryQuadraticInteger.
+     * parseImaginaryQuadraticInteger. With the following caveats: &omega; 
+     * should always be understood to mean -1/2 + sqrt(-3)/2, &theta; means 1/2 
+     * + sqrt(d)/2 with d = 1 mod 4, but d may be ambiguous.
      */
     @Test
     public void testParseImaginaryQuadraticInteger() {

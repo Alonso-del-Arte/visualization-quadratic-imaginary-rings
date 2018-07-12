@@ -92,7 +92,8 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
      * Calculates the norm of the imaginary quadratic integer (real part plus 
      * real integer times square root of a negative integer).
      * WARNING: There is no overflow checking. That might slow things down 
-     * unacceptably in RingWindowDisplay.drawPoints().
+     * unacceptably in 
+     * {@link RingWindowDisplay#paintComponent(java.awt.Graphics)}.
      * @return Square of the real part minus square of the imaginary part. For 
      * example, given 5/2 + sqrt(-7)/2, the norm would be 8.
      * May be 0 but should never be negative. If it is negative, most likely an 
@@ -449,15 +450,31 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         if (this.imagQuadRing.negRad == -1) {
             return this.toString();
         }
+        if (this.norm() == 0) {
+            return "0";
+        }
         String IQIString;
         if (this.denominator == 1) {
-            IQIString = this.realPartMult + " + " + this.imagPartMult + " \\sqrt{" + this.imagQuadRing.negRad + "}";
-            IQIString = IQIString.replace("+ -", " - ");
-            IQIString = IQIString.replace(" 1 \\sqrt", " \\sqrt");
+            if (this.realPartMult == 0) {
+                switch (this.imagPartMult) {
+                    case -1:
+                        IQIString = "-\\sqrt{" + this.imagQuadRing.negRad + "}";
+                        break;
+                    case 1:
+                        IQIString = "\\sqrt{" + this.imagQuadRing.negRad + "}";
+                        break;
+                    default:
+                        IQIString = this.imagPartMult + " \\sqrt{" + this.imagQuadRing.negRad + "}";
+                }
+            } else {
+                IQIString = this.realPartMult + " + " + this.imagPartMult + " \\sqrt{" + this.imagQuadRing.negRad + "}";
+                IQIString = IQIString.replace("+ -", " - ");
+                IQIString = IQIString.replace(" 1 \\sqrt", " \\sqrt");
+            }
         } else {
             IQIString = "\\frac{" + this.realPartMult + "}{2} + \\frac{" + this.imagPartMult + " \\sqrt{" + this.imagQuadRing.negRad + "}}{2}";
-            IQIString = IQIString.replace("1 \\sqrt", "\\sqrt");
             IQIString = IQIString.replace("\\frac{-", "-\\frac{");
+            IQIString = IQIString.replace("\\frac{1 \\sqrt", "\\frac{\\sqrt");
             IQIString = IQIString.replace("+ -", " - ");
         }
         return IQIString;
@@ -476,7 +493,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         if (this.denominator == 2) {
             String IQIString;
             IQIString = "\\frac{" + this.realPartMult + " + " + this.imagPartMult + " \\sqrt{" + this.imagQuadRing.negRad + "}}{2}";
-            IQIString = IQIString.replace("1 \\sqrt", "\\sqrt");
+            IQIString = IQIString.replace(" 1 \\sqrt", " \\sqrt");
             IQIString = IQIString.replace("+ -", " - ");
             return IQIString;
         } else {
@@ -598,18 +615,20 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         if (this.denominator != other.denominator) {
             return false;
         }
-        if (this.imagPartMult == 0 && other.imagPartMult == 0) {
+        if (this.imagPartMult == 0) {
             return true; // negRad might be different, but its square root multiplied by 0 is still 0
         }
         return (this.imagQuadRing.negRad == other.imagQuadRing.negRad);
     }
     
     /**
-     * Checks whether this imaginary quadratic integer is equal to a purely real 
-     * integer.
-     * @param num The purely real integer to check against.
+     * Checks whether this imaginary quadratic integer is arithmetically equal 
+     * to a purely real integer. Not to be confused with {@link #norm()}.
+     * @param num The purely real integer to check against. For example, 7.
      * @return True if the imaginary quadratic integer is indeed equal to the 
-     * purely real integer, false otherwise.
+     * purely real integer, false otherwise. For example, given num = 7 + 0 * 
+     * sqrt(-3), num.equalsInt(7) returns true. If instead num = 5/2 + 
+     * sqrt(-3)/2, num.equalsInt(7) returns false even though num.norm() = 7.
      */
     public boolean equalsInt(int num) {
         if (this.imagPartMult == 0) {
@@ -627,9 +646,10 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         str = str.replace("}{", "/");
         str = str.replace("{", "");
         str = str.replace("}", "");
+        str = str.replace("<i>i</i>", "\u221A(-1)");
+        str = str.replace("<i>j</i>", "\u221A(-1)");
         str = str.replace("i", "\u221A(-1)");
         str = str.replace("j", "\u221A(-1)");
-        str = str.replace("<i>i</i>", "\u221A(-1)");
         str = str.replace("\\sqrt", "\u221A");
         str = str.replace("sqrt", "\u221A");
         str = str.replace("&radic;", "\u221A");
@@ -642,40 +662,41 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         return str;
     }
     
-//    private static ImaginaryQuadraticInteger parseIQI(ImaginaryQuadraticRing ring, String str) {
-//        return new ImaginaryQuadraticInteger(0, 0, ring);
-//    }
-//        
-//    public static ImaginaryQuadraticInteger parseImaginaryQuadraticInteger(ImaginaryQuadraticRing ring, String str) {
-//        String parsingString = preprocessNumberString(str);
-//        return parseIQI(ring, str);
-//    }
-//    
-//    public static ImaginaryQuadraticInteger parseImaginaryQuadraticInteger(String str) {
-//        String parsingString = preprocessNumberString(str);
-//        char currToken = str.charAt(0);
-//        switch (currToken) {
-//            case '(':
-//            case '+':
-//            case '-':
-//            case '0':
-//            case '1':
-//            case '2':
-//            case '3':
-//            case '4':
-//            case '5':
-//            case '6':
-//            case '7':
-//            case '8':
-//            case '9':
-//                //
-//                break;
-//            default:
-//                String exceptionMessage = currToken + " is not a valid ImaginaryQuadraticInteger starting character.";
-//                throw new NumberFormatException(exceptionMessage);
-//        }
-//        return new ImaginaryQuadraticInteger(0, 0, new ImaginaryQuadraticRing(-1));
-//    }
+    private static ImaginaryQuadraticInteger parseIQI(ImaginaryQuadraticRing ring, String str) {
+        return new ImaginaryQuadraticInteger(0, 0, ring);
+    }
+        
+    public static ImaginaryQuadraticInteger parseImaginaryQuadraticInteger(ImaginaryQuadraticRing ring, String str) {
+        String parsingString = preprocessNumberString(str);
+        int presumedD = ring.negRad;
+        return parseIQI(ring, str);
+    }
+    
+    public static ImaginaryQuadraticInteger parseImaginaryQuadraticInteger(String str) {
+        String parsingString = preprocessNumberString(str);
+        char currToken = str.charAt(0);
+        switch (currToken) {
+            case '(':
+            case '+':
+            case '-':
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                //
+                break;
+            default:
+                String exceptionMessage = currToken + " is not a valid ImaginaryQuadraticInteger starting character.";
+                throw new NumberFormatException(exceptionMessage);
+        }
+        return new ImaginaryQuadraticInteger(0, 0, new ImaginaryQuadraticRing(-1));
+    }
   
     /**
      * Addition operation, since operator+ (plus) can't be overloaded. 
@@ -946,6 +967,9 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         boolean divisibleFlag;
         if (this.imagQuadRing.d1mod4) {
             divisibleFlag = (intermediateDenom == 1 || intermediateDenom == 2);
+            if (intermediateDenom == 2) {
+                divisibleFlag = (NumberTheoreticFunctionsCalculator.euclideanGCD(intermediateRealPart, 2) == NumberTheoreticFunctionsCalculator.euclideanGCD(intermediateImagPart, 2));
+            }
         } else {
             divisibleFlag = (intermediateDenom == 1);
         }
@@ -1006,6 +1030,9 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         boolean divisibleFlag;
         if (this.imagQuadRing.d1mod4) {
             divisibleFlag = (intermediateDenom == 1 || intermediateDenom == 2);
+            if (intermediateDenom == 2) {
+                divisibleFlag = (NumberTheoreticFunctionsCalculator.euclideanGCD(intermediateRealPart, 2) == NumberTheoreticFunctionsCalculator.euclideanGCD(intermediateImagPart, 2));
+            }
         } else {
             divisibleFlag = (intermediateDenom == 1);
         }
@@ -1106,91 +1133,91 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     public static void main(String[] args) {
         
         RingWindowDisplay.startRingWindowDisplay(-1);
-//        switch (args.length) {
-//            case 0:
-//                RingWindowDisplay.startRingWindowDisplay(RingWindowDisplay.DEFAULT_RING_D);
-//                break;
-//            case 1:
-//                switch (args[0]) {
-//                    case "-v":
-//                    case "-vers":
-//                    case "-version":
-//                    case "v":
-//                    case "vers":
-//                    case "version":
-//                        System.out.println("Imaginary Quadratic Integer package\nVersion 0.9\n\u00A9 2018 Alonso del Arte");
-//                        break;
-//                    default:
-//                        int ringChoice = RingWindowDisplay.DEFAULT_RING_D;
-//                        try {
-//                            ringChoice = Integer.parseInt(args[0]);
-//                            if (ringChoice > 0) {
-//                                System.out.print(ringChoice + " is not negative.");
-//                                ringChoice *= -1;
-//                                System.out.println(" Substituting " + ringChoice + ".");
-//                            }
-//                            while (!NumberTheoreticFunctionsCalculator.isSquareFree(ringChoice)) {
-//                                System.out.print(ringChoice + " is not squarefree.");
-//                                ringChoice--;
-//                                System.out.println(" Substituting " + ringChoice + "...");
-//                            }
-//                            if (ringChoice < RingWindowDisplay.MINIMUM_RING_D) {
-//                                System.out.print(ringChoice + " is less than " + RingWindowDisplay.MINIMUM_RING_D + ", which is the minimum for the Ring Viewer program.");
-//                                ringChoice = RingWindowDisplay.DEFAULT_RING_D;
-//                                System.out.println(" Substituting " + ringChoice + ".");
-//                            }
-//                        } catch (NumberFormatException nfe) {
-//                            System.out.println(nfe.getMessage());
-//                            System.out.println("Substituting " + ringChoice + ".");
-//                        }
-//                        RingWindowDisplay.startRingWindowDisplay(ringChoice);
-//                }
-//            /* If there are more than two parameters, only the first two 
-//               parameters will be processed */
-//            default:
-//                int ringDiscr = RingWindowDisplay.DEFAULT_RING_D;
-//                ImaginaryQuadraticRing ring;
-//                ImaginaryQuadraticInteger number;
-//                try {
-//                    ringDiscr = Integer.parseInt(args[0]);
-//                    while (!NumberTheoreticFunctionsCalculator.isSquareFree(ringDiscr)) {
-//                        System.out.print(ringDiscr + " is not squarefree.");
-//                        ringDiscr--;
-//                        System.out.println(" Substituting " + ringDiscr + "...");
-//                    }
-//                    if (ringDiscr > 0) {
-//                        System.out.println(ringDiscr + " is not negative.");
-//                        ringDiscr *= -1;
-//                        System.out.println(" Substituting " + ringDiscr + ".");
-//                    }
-//                } catch (NumberFormatException nfe) {
-//                    System.out.println(nfe.getMessage());
-//                    System.out.println("Substituting " + ringDiscr);
-//                }
-//                ring = new ImaginaryQuadraticRing(ringDiscr);
-//                number = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(ring, args[1]);
-//                System.out.print(number.toASCIIString());
-//                if (ring.hasHalfIntegers()) {
-//                    System.out.print(" = " + number.toASCIIStringAlt());
-//                }
-//                if (NumberTheoreticFunctionsCalculator.isIrreducible(number)) {
-//                    System.out.print(" is irreducible ");
-//                    if (NumberTheoreticFunctionsCalculator.isPrime(number)) {
-//                        System.out.println(" and prime.");
-//                    } else {
-//                        System.out.println(" but not prime.");
-//                    }
-//                }
-//                System.out.print("Conjugate is " + number.conjugate().toASCIIString());
-//                if (ring.hasHalfIntegers()) {
-//                    System.out.println(" = " + number.conjugate().toASCIIString() + ".");
-//                } else {
-//                    System.out.println(".");
-//                }
-//                System.out.println("Trace is " + number.trace());
-//                System.out.println("Norm is " + number.norm());
-//                System.out.println("Minimal polynomial is " + number.minPolynomialString());
-//        }
+        switch (args.length) {
+            case 0:
+                RingWindowDisplay.startRingWindowDisplay(RingWindowDisplay.DEFAULT_RING_D);
+                break;
+            case 1:
+                switch (args[0]) {
+                    case "-v":
+                    case "-vers":
+                    case "-version":
+                    case "v":
+                    case "vers":
+                    case "version":
+                        System.out.println("Imaginary Quadratic Integer package\nVersion 0.9\n\u00A9 2018 Alonso del Arte");
+                        break;
+                    default:
+                        int ringChoice = RingWindowDisplay.DEFAULT_RING_D;
+                        try {
+                            ringChoice = Integer.parseInt(args[0]);
+                            if (ringChoice > 0) {
+                                System.out.print(ringChoice + " is not negative.");
+                                ringChoice *= -1;
+                                System.out.println(" Substituting " + ringChoice + ".");
+                            }
+                            while (!NumberTheoreticFunctionsCalculator.isSquareFree(ringChoice)) {
+                                System.out.print(ringChoice + " is not squarefree.");
+                                ringChoice--;
+                                System.out.println(" Substituting " + ringChoice + "...");
+                            }
+                            if (ringChoice < RingWindowDisplay.MINIMUM_RING_D) {
+                                System.out.print(ringChoice + " is less than " + RingWindowDisplay.MINIMUM_RING_D + ", which is the minimum for the Ring Viewer program.");
+                                ringChoice = RingWindowDisplay.DEFAULT_RING_D;
+                                System.out.println(" Substituting " + ringChoice + ".");
+                            }
+                        } catch (NumberFormatException nfe) {
+                            System.out.println(nfe.getMessage());
+                            System.out.println("Substituting " + ringChoice + ".");
+                        }
+                        RingWindowDisplay.startRingWindowDisplay(ringChoice);
+                }
+            /* If there are more than two parameters, only the first two 
+               parameters will be processed */
+            default:
+                int ringDiscr = RingWindowDisplay.DEFAULT_RING_D;
+                ImaginaryQuadraticRing ring;
+                ImaginaryQuadraticInteger number;
+                try {
+                    ringDiscr = Integer.parseInt(args[0]);
+                    while (!NumberTheoreticFunctionsCalculator.isSquareFree(ringDiscr)) {
+                        System.out.print(ringDiscr + " is not squarefree.");
+                        ringDiscr--;
+                        System.out.println(" Substituting " + ringDiscr + "...");
+                    }
+                    if (ringDiscr > 0) {
+                        System.out.println(ringDiscr + " is not negative.");
+                        ringDiscr *= -1;
+                        System.out.println(" Substituting " + ringDiscr + ".");
+                    }
+                } catch (NumberFormatException nfe) {
+                    System.out.println(nfe.getMessage());
+                    System.out.println("Substituting " + ringDiscr);
+                }
+                ring = new ImaginaryQuadraticRing(ringDiscr);
+                number = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(ring, args[1]);
+                System.out.print(number.toASCIIString());
+                if (ring.hasHalfIntegers()) {
+                    System.out.print(" = " + number.toASCIIStringAlt());
+                }
+                if (NumberTheoreticFunctionsCalculator.isIrreducible(number)) {
+                    System.out.print(" is irreducible ");
+                    if (NumberTheoreticFunctionsCalculator.isPrime(number)) {
+                        System.out.println(" and prime.");
+                    } else {
+                        System.out.println(" but not prime.");
+                    }
+                }
+                System.out.print("Conjugate is " + number.conjugate().toASCIIString());
+                if (ring.hasHalfIntegers()) {
+                    System.out.println(" = " + number.conjugate().toASCIIString() + ".");
+                } else {
+                    System.out.println(".");
+                }
+                System.out.println("Trace is " + number.trace());
+                System.out.println("Norm is " + number.norm());
+                System.out.println("Minimal polynomial is " + number.minPolynomialString());
+        }
     
     } 
     

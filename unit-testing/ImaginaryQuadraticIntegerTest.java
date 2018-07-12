@@ -810,6 +810,13 @@ public class ImaginaryQuadraticIntegerTest {
         expResult = "-\\frac{1}{2}+\\frac{\\sqrt{-3}}{2}";
         result = NumberTheoreticFunctionsCalculator.COMPLEX_CUBIC_ROOT_OF_UNITY.toTeXString().replace(" ", "");
         assertEquals(expResult, result);
+        /* This last one is to make sure that a least significant digit that is 
+           1 but is not also the most significant digit does not get erroneously 
+           chopped off */
+        ImaginaryQuadraticInteger norm97Eisen = new ImaginaryQuadraticInteger(5, 11, NumberTheoreticFunctionsCalculator.RING_EISENSTEIN, 2);
+        expResult = "\\frac{5}{2}+\\frac{11\\sqrt{-3}}{2}";
+        result = norm97Eisen.toTeXString().replace(" ", "");
+        assertEquals(expResult, result);
     }
     
     /**
@@ -840,6 +847,13 @@ public class ImaginaryQuadraticIntegerTest {
         assertEquals(expResult, result);
         expResult = "\\frac{-1+\\sqrt{-3}}{2}";
         result = NumberTheoreticFunctionsCalculator.COMPLEX_CUBIC_ROOT_OF_UNITY.toTeXStringSingleDenom().replace(" ", "");
+        assertEquals(expResult, result);
+        /* This last one is to make sure that a least significant digit that is 
+           1 but is not also the most significant digit does not get erroneously 
+           chopped off */
+        ImaginaryQuadraticInteger norm97Eisen = new ImaginaryQuadraticInteger(5, 11, NumberTheoreticFunctionsCalculator.RING_EISENSTEIN, 2);
+        expResult = "\\frac{5+11\\sqrt{-3}}{2}";
+        result = norm97Eisen.toTeXStringSingleDenom().replace(" ", "");
         assertEquals(expResult, result);
     }
 
@@ -979,6 +993,13 @@ public class ImaginaryQuadraticIntegerTest {
         assertEquals(expResult, result);
         expResult = "&minus;1/2+&radic;(&minus;3)/2";
         result = NumberTheoreticFunctionsCalculator.COMPLEX_CUBIC_ROOT_OF_UNITY.toHTMLString().replace(" ", "");
+        assertEquals(expResult, result);
+        /* This last one is to make sure that a least significant digit that is 
+           1 but is not also the most significant digit does not get erroneously 
+           chopped off */
+        ImaginaryQuadraticInteger norm97Eisen = new ImaginaryQuadraticInteger(5, 11, NumberTheoreticFunctionsCalculator.RING_EISENSTEIN, 2);
+        expResult = "5/2+11&radic;(&minus;3)/2";
+        result = norm97Eisen.toHTMLString().replace(" ", "");
         assertEquals(expResult, result);
     }
 
@@ -1470,7 +1491,7 @@ public class ImaginaryQuadraticIntegerTest {
                                     fail("Dividing one integer by another from the same ring should not have triggered AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"");
                                 } catch (NotDivisibleException nde) {
                                     result = zeroIQI; // Avoiding "variable result might not have been initialized" error
-                                    fail("Dividing " + testDividend.toASCIIString() + " by " + testDivisor.toASCIIString() + " should not have triggered NotDivisibleException.");
+                                    fail("Dividing " + testDividend.toASCIIString() + " by " + testDivisor.toASCIIString() + " should not have triggered NotDivisibleException \"" + nde.getMessage() + "\"");
                                 }
                                 assertEquals(testQuotient, result);
                             }
@@ -1481,11 +1502,31 @@ public class ImaginaryQuadraticIntegerTest {
                                 result = testDividend.divides(x);
                             } catch (NotDivisibleException nde) {
                                 result = zeroIQI; // Avoiding "variable result might not have been initialized" error
-                                fail("Dividing " + testDividend.toASCIIString() + " by " + x + " should not have tirggered NotDivisibleException.");
+                                fail("Dividing " + testDividend.toASCIIString() + " by " + x + " should not have tirggered NotDivisibleException\"" + nde.getMessage() + "\"");
                             }
                             assertEquals(expResult, result);
                         }
                     }
+                }
+            }
+        }
+        /* Now to test dividing a purely real integer held in an 
+           ImaginaryQuadraticInteger object divided by a purely real integer in 
+           an int */
+        int testDivRealPartMult;
+        for (int iterDiscrOQ = -11; iterDiscrOQ > -84; iterDiscrOQ -= 8) {
+            if (NumberTheoreticFunctionsCalculator.isSquareFree(iterDiscrOQ)) {
+                currRing = new ImaginaryQuadraticRing(iterDiscrOQ);
+                testDivRealPartMult = (-iterDiscrOQ + 1)/4;
+                testDividend = new ImaginaryQuadraticInteger(testDivRealPartMult, 0, currRing);
+                try {
+                    result = testDividend.divides(2);
+                    fail("Trying to divide " + testDividend.toString() + " by 2 in " + currRing.toString() + " should have triggered NotDivisibleException, not given result " + result.toString());
+                } catch (NotDivisibleException nde) {
+                    System.out.println("Trying to divide " + testDividend.toASCIIString() + " by 2 in " + currRing.toASCIIString() + " correctly triggered NotDivisibleException \"" + nde.getMessage() + "\"");
+                } catch (Exception e) {
+                    System.out.println("Encountered this exception: " + e.getClass().getName() + " \"" + e.getMessage() + "\"");
+                    fail("Trying to divide " + testDividend.toString() + " by 2 in " + currRing.toString() + " triggered the wrong exception.");
                 }
             }
         }
@@ -1494,7 +1535,7 @@ public class ImaginaryQuadraticIntegerTest {
                 result = testNorms.get(i).divides(testConjugates.get(i));
             } catch (AlgebraicDegreeOverflowException adoe) {
                 result = zeroIQI;
-                fail("AlgebraicDegreeOverflowException should not have occurred.");
+                fail("AlgebraicDegreeOverflowException should not have occurred \"" + adoe.getMessage() + "\"");
             } catch (NotDivisibleException nde) {
                 result = zeroIQI;
                 System.out.println(testNorms.get(i).toASCIIString() + " divided by " + testConjugates.get(i).toASCIIString() + " is (" + nde.getResReFractNumer() + " + " + nde.getResImFractNumer() + "sqrt(" + nde.getResFractNegRad() + "))/" + nde.getResFractDenom());
@@ -1506,7 +1547,7 @@ public class ImaginaryQuadraticIntegerTest {
                 result = testNorms.get(i).divides(testIntegers.get(i));
             } catch (AlgebraicDegreeOverflowException adoe) {
                 result = zeroIQI;
-                fail("AlgebraicDegreeOverflowException should not have occurred.");
+                fail("AlgebraicDegreeOverflowException should not have occurred \"" + adoe.getMessage() + "\"");
             } catch (NotDivisibleException nde) {
                 result = zeroIQI;
                 System.out.println(testNorms.get(i).toASCIIString() + " divided by " + testIntegers.get(i).toASCIIString() + " is (" + nde.getResReFractNumer() + " + " + nde.getResImFractNumer() + "sqrt(" + nde.getResFractNegRad() + "))/" + nde.getResFractDenom());
@@ -1519,24 +1560,24 @@ public class ImaginaryQuadraticIntegerTest {
             try {
                 testIntegers.get(i).divides(zeroIQI);
             } catch (AlgebraicDegreeOverflowException adoe) {
-                fail("AlgebraicDegreeOverflowException is the wrong exception to throw for division by 0.");
+                fail("AlgebraicDegreeOverflowException is the wrong exception to throw for division by 0 \"" + adoe.getMessage() + "\"");
             } catch (NotDivisibleException nde) {
-                fail("NotDivisibleException is the wrong exception to throw for division by 0.");
+                fail("NotDivisibleException is the wrong exception to throw for division by 0 \"" + nde.getMessage() + "\"");
             } catch (IllegalArgumentException iae) {
-                System.out.println("IllegalArgumentException correctly triggered upon attempt to divide by 0 + 0i.");
+                System.out.println("IllegalArgumentException correctly triggered upon attempt to divide by 0 + 0i \"" + iae.getMessage() + "\"");
             } catch (ArithmeticException ae) {
-                System.out.println("ArithmeticException correctly triggered upon attempt to divide by 0 + 0i.");
+                System.out.println("ArithmeticException correctly triggered upon attempt to divide by 0 + 0i \"" + ae.getMessage() + "\"");
             } catch (Exception e) {
                 System.out.println("Wrong exception thrown for attempt to divide by 0 + 0i. " + e.getMessage());
             }
             try {
                 testIntegers.get(i).divides(0);
             } catch (NotDivisibleException nde) {
-                fail("NotDivisibleException is the wrong exception to throw for division by 0.");
+                fail("NotDivisibleException is the wrong exception to throw for division by 0 \"" + nde.getMessage() + "\"");
             } catch (IllegalArgumentException iae) {
-                System.out.println("IllegalArgumentException correctly triggered upon attempt to divide by 0.");
+                System.out.println("IllegalArgumentException correctly triggered upon attempt to divide by 0 \"" + iae.getMessage() + "\"");
             } catch (ArithmeticException ae) {
-                System.out.println("ArithmeticException correctly triggered upon attempt to divide by 0.");
+                System.out.println("ArithmeticException correctly triggered upon attempt to divide by 0. \"" + ae.getMessage() + "\"");
             } catch (Exception e) {
                 System.out.println("Wrong exception thrown for attempt to divide by 0. " + e.getMessage());
             }

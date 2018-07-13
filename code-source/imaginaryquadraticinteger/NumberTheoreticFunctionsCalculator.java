@@ -17,10 +17,8 @@
 package imaginaryquadraticinteger;
 
 import java.util.ArrayList;
-import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Random;
-import java.util.Scanner;
 
 /**
  * A collection of number theoretic functions, including basic primality testing 
@@ -37,13 +35,19 @@ public class NumberTheoreticFunctionsCalculator {
      */
     public static final int[] NORM_EUCLIDEAN_QUADRATIC_IMAGINARY_RINGS_D = {-11, -7, -3, -2, -1};
     
-    public static final int[] UNIQUE_FACTORIZATON_QUADRATIC_IMAGINARY_RINGS_D = {-163, -67, -43, -19, -11, -7, -3, -2, -1};
+    /**
+     * There are the only nine negative numbers d such that the ring of 
+     * algebraic integers of Q(sqrt(d)) is a unique factorization domain (though 
+     * not necessarily Euclidean).
+     */
+    public static final int[] HEEGNER_NUMBERS = {-163, -67, -43, -19, -11, -7, -3, -2, -1};
     
     public static final ImaginaryQuadraticRing RING_GAUSSIAN = new ImaginaryQuadraticRing(-1);
     public static final ImaginaryQuadraticInteger IMAG_UNIT_I = new ImaginaryQuadraticInteger(0, 1, RING_GAUSSIAN);
     public static final ImaginaryQuadraticInteger IMAG_UNIT_NEG_I = IMAG_UNIT_I.times(-1);
     
     public static final ImaginaryQuadraticRing RING_EISENSTEIN = new ImaginaryQuadraticRing(-3);
+    public static final ImaginaryQuadraticInteger COMPLEX_CUBIC_ROOT_OF_UNITY = new ImaginaryQuadraticInteger(-1, 1, RING_EISENSTEIN, 2);
 
     /**
      * Determines the prime factors of a given number. Uses simple trial 
@@ -299,6 +303,9 @@ public class NumberTheoreticFunctionsCalculator {
             }
             if (num.imagPartMult == 0) {
                 int absRealPartMult = Math.abs(num.realPartMult);
+                if (absRealPartMult == 2) {
+                    return (symbolKronecker(num.imagQuadRing.negRad, 2) == -1);
+                }
                 if (isPrime(absRealPartMult)) {
                     switch (num.imagQuadRing.negRad) {
                         case -1:
@@ -307,15 +314,15 @@ public class NumberTheoreticFunctionsCalculator {
                             return (absRealPartMult % 8 == 5 || absRealPartMult % 8 == 7);
                         case -3:
                             return (absRealPartMult % 3 == 2);
-                        case -7:
-                        case -11:
-                        case -19:
-                        case -43:
-                        case -67:
-                        case -163:
-                            return (symbolLegendre(absRealPartMult, num.imagQuadRing.negRad) == -1);
+//                        case -7:
+//                        case -11:
+//                        case -19:
+//                        case -43:
+//                        case -67:
+//                        case -163:
+//                            return (symbolLegendre(num.imagQuadRing.negRad, absRealPartMult) == -1);
                         default:
-                            return (symbolLegendre(absRealPartMult, num.imagQuadRing.negRad) == -1);
+                            return (symbolLegendre(num.imagQuadRing.negRad, absRealPartMult) == -1);
                     }
                 } else {
                     return false;
@@ -324,6 +331,123 @@ public class NumberTheoreticFunctionsCalculator {
                 return false;
             }
         }
+    }
+    
+    private static void sortListIQIByNorm(List<ImaginaryQuadraticInteger> listIQI) {
+        boolean swapFlag;
+        ImaginaryQuadraticInteger a, b;
+        int counter = 0;
+        int opLen = listIQI.size() - 1;
+        if (opLen > 0) {
+            do {
+                swapFlag = false;
+                a = listIQI.get(counter);
+                b = listIQI.get(counter + 1);
+                if (a.norm() < b.norm()) {
+                    listIQI.set(counter, b);
+                    listIQI.set(counter + 1, a);
+                    swapFlag = true;
+                }
+                counter++;
+            } while (swapFlag && counter < opLen);
+        }
+    }
+    
+    public static List<ImaginaryQuadraticInteger> primeFactors(ImaginaryQuadraticInteger num) throws NonUniqueFactorizationDomainException {
+        int d = num.getRing().getNegRad();
+        boolean notUFDFlag = true;
+        if (d > -164) {
+            for (int heegNum : HEEGNER_NUMBERS) {
+                if (d == heegNum) {
+                    notUFDFlag = false;
+                }
+            }
+        }
+        if (notUFDFlag) {
+            String exceptionMessage = num.getRing().toASCIIString() + " is not a unique factorization domain.";
+            throw new NonUniqueFactorizationDomainException(exceptionMessage, num);
+        }
+        ImaginaryQuadraticInteger n = num;
+        List<ImaginaryQuadraticInteger> factors = new ArrayList<>();
+        boolean unitFlagNeedAdd = true;
+        if ((n.norm() < 2) || isPrime(n)) {
+            factors.add(n);
+            unitFlagNeedAdd = false;
+        } else {
+            ImaginaryQuadraticInteger testDivisor = new ImaginaryQuadraticInteger(2, 0, n.getRing());
+            boolean keepGoing = true;
+            if (isPrime(testDivisor)) {
+                while (n.norm() % 4 == 0) {
+                    try {
+                        n = n.divides(testDivisor);
+                        factors.add(testDivisor);
+                    } catch (NotDivisibleException nde) {
+                        keepGoing = ((Math.abs(nde.getNumericRealPart()) > 1) || (Math.abs(nde.getNumericImagPart()) > 1));
+                    }
+                }
+            }
+            testDivisor = testDivisor.plus(1);
+            while ((n.norm() > testDivisor.norm()) && keepGoing) {
+                if (isPrime(testDivisor)) {
+                    while (n.norm() % testDivisor.norm() == 0) {
+                        try {
+                            n = n.divides(testDivisor);
+                            factors.add(testDivisor);
+                        } catch (NotDivisibleException nde) {
+                            keepGoing = ((Math.abs(nde.getNumericRealPart()) > 1) || (Math.abs(nde.getNumericImagPart()) > 1));
+                        }
+                    }
+                }
+                testDivisor = testDivisor.plus(2);
+            }
+            int testDivRealPartMult = 0;
+            int testDivImagPartMult = 2;
+            if (n.getRing().hasHalfIntegers()) {
+                testDivRealPartMult = 1;
+                testDivImagPartMult = 1;
+            }
+            boolean withinRange;
+            while (n.norm() > 1) {
+                testDivisor = new ImaginaryQuadraticInteger(testDivRealPartMult, testDivImagPartMult, n.getRing(), 2);
+                if (isPrime(testDivisor)) {
+                    while (n.norm() % testDivisor.norm() == 0) {
+                        try {
+                            n = n.divides(testDivisor.conjugate());
+                            factors.add(testDivisor.conjugate());
+                        } catch (NotDivisibleException nde) {
+                            // withinRange = ((Math.abs(nde.getNumericRealPart()) > 1) || (Math.abs(nde.getNumericImagPart()) > 1));
+                        }
+                        try {
+                            n = n.divides(testDivisor);
+                            factors.add(testDivisor);
+                        } catch (NotDivisibleException nde) {
+                            // withinRange = ((Math.abs(nde.getNumericRealPart()) > 1) || (Math.abs(nde.getNumericImagPart()) > 1));
+                        }
+                    }
+                }
+                withinRange = (testDivisor.norm() < n.norm());
+                if (withinRange) {
+                    testDivRealPartMult += 2;
+                } else {
+                    if (!num.getRing().hasHalfIntegers()) {
+                        testDivRealPartMult = 0;
+                        testDivImagPartMult += 2;
+                    } else {
+                        if (testDivImagPartMult % 2 == 0) {
+                            testDivRealPartMult = 1;
+                        } else {
+                            testDivRealPartMult = 0;
+                        }
+                        testDivImagPartMult++;
+                    }
+                }
+            }
+        }
+        if ((!n.equalsInt(1)) && unitFlagNeedAdd) {
+            factors.add(0, n);
+        }
+        sortListIQIByNorm(factors);
+        return factors;
     }
     
     /**
@@ -530,9 +654,10 @@ public class NumberTheoreticFunctionsCalculator {
 
     /**
      * Computes the greatest common divisor (GCD) of two imaginary quadratic 
-     * integers by using the Euclidean algorithm. WARNING: I have not yet 
-     * written a test for this function yet, so for now I can't guarantee that 
-     * it works correctly, or at all.
+     * integers by using the Euclidean algorithm. WARNING: Although I have 
+     * written some tests for this function, more testing is still needed before 
+     * I can guarantee it gives the correct result in a reasonable majority of 
+     * cases.
      * @param a One of the two imaginary quadratic integers. Need not have 
      * greater norm than the other.
      * @param b One of the two imaginary quadratic integers. Need not have 
@@ -572,18 +697,19 @@ public class NumberTheoreticFunctionsCalculator {
         while (!currB.equalsInt(0)) {
             try {
                 tempMultiple = currA.divides(currB);
+                tempMultiple = tempMultiple.times(currB);
+                currRemainder = currA.minus(tempMultiple);
             } catch (NotDivisibleException nde) {
                 bounds = nde.getBoundingIntegers();
                 boolean notFound;
                 int counter = 0;
                 do {
-                    tempMultiple = bounds[counter];
-                    notFound = tempMultiple.norm() >= currB.norm();
+                    tempMultiple = bounds[counter].times(currB);
+                    currRemainder = currA.minus(tempMultiple);
+                    notFound = currRemainder.norm() >= currB.norm();
                     counter++;
                 } while (notFound);
             }
-            tempMultiple = tempMultiple.times(currB);
-            currRemainder = currA.minus(tempMultiple);
             currA = currB;
             currB = currRemainder;
         }
@@ -597,10 +723,12 @@ public class NumberTheoreticFunctionsCalculator {
     }
 
     /**
-     * Computes the greatest common divisor (GCD) of two imaginary quadratic 
-     * integers, one of which may be a purely real integer passed in as an int, 
-     * by using the Euclidean algorithm. WARNING: I have not yet written tests 
-     * for this one, so I can't guarantee that this works correctly, or at all.
+     * Computes the greatest common divisor (GCD) of a purely real integer 
+     * passed in as an int and an imaginary quadratic integer which may or may 
+     * not have nonzero imaginary part, passed in as an 
+     * ImaginaryQuadraticInteger. WARNING: Although I have written some tests 
+     * for this function, more testing is still needed before I can guarantee it 
+     * gives the correct result in a reasonable majority of cases.
      * @param a A purely real integer passed in as an int. For example, 4.
      * @param b An imaginary quadratic integer, which may be purely real, purely 
      * imaginary, or complex. For example, 3sqrt(-2).
@@ -617,10 +745,12 @@ public class NumberTheoreticFunctionsCalculator {
     }
 
     /**
-     * Computes the greatest common divisor (GCD) of two imaginary quadratic 
-     * integers, one of which may be a purely real integer passed in as an int, 
-     * by using the Euclidean algorithm. WARNING: I have not yet written tests 
-     * for this one, so I can't guarantee that this works correctly, or at all.
+     * Computes the greatest common divisor (GCD) of an imaginary quadratic 
+     * integer which may or may not have nonzero imaginary part, passed in as an 
+     * ImaginaryQuadraticInteger and a purely real integer passed in as an int. 
+     * WARNING: Although I have written some tests for this function, more 
+     * testing is still needed before I can guarantee it gives the correct 
+     * result in a reasonable majority of cases.
      * @param a An imaginary quadratic integer, which may be purely real, purely 
      * imaginary, or complex. For example, 3sqrt(-2).
      * @param b A purely real integer passed in as an int. For example, 4.
@@ -654,73 +784,6 @@ public class NumberTheoreticFunctionsCalculator {
             randomNumber++;
         }
         return randomNumber;
-    }
-    
-    /**
-     * A console program for testing the number theoretic functions with user 
-     * inputs.
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        
-        Scanner input = new Scanner(System.in);
-        int prevInteger = 0;
-        int enteredInteger = 1;
-        List<Integer> prFacts;
-        boolean invalidInput = true;
-        
-        while (enteredInteger != 0) {
-            System.out.print("Please enter an integer to factor (or 0 to quit): ");
-            while (invalidInput) {
-                try {
-                    enteredInteger = input.nextInt();
-                    invalidInput = false;
-                } catch (InputMismatchException inputMismatch) {
-                    System.out.println("Please enter an integer.");
-                    input.nextLine();
-                }
-            }
-            switch (enteredInteger) {
-                case -1:
-                case 1:
-                    System.out.println(enteredInteger + " is a unit.");
-                    System.out.println(enteredInteger + " is squarefree.");
-                    System.out.println("\u03BC(" + enteredInteger + ") = 1.");
-                    System.out.println(" ");
-                    break;
-                case 0:
-                    System.out.println("0 is not prime, nor squarefree.");
-                    System.out.println("\u03BC(0) = 0.");
-                    System.out.println("gcd(0, " + prevInteger + ") = " + euclideanGCD(0, prevInteger));
-                    System.out.println(" ");
-                    break;
-                default:
-                    if (isPrime(enteredInteger)) {
-                        System.out.println(enteredInteger + " is prime.");
-                    } else {
-                        prFacts = primeFactors(enteredInteger);
-                        System.out.print("The prime factorization of " + enteredInteger + " is " + prFacts.get(0));
-                        for (int i = 1; i < prFacts.size(); i++) {
-                            System.out.print(" \u00D7 ");
-                            System.out.print(prFacts.get(i));
-                        }
-                        System.out.println(" ");
-                    }
-                    if (isSquareFree(enteredInteger)) {
-                        System.out.println(enteredInteger + " is squarefree.");
-                    } else {
-                        System.out.println(enteredInteger + " is not squarefree.");
-                    }
-                    System.out.println("\u03BC(" + enteredInteger + ") = " + moebiusMu(enteredInteger));
-                    System.out.println(enteredInteger + " is congruent to " + (enteredInteger % 4) + " modulo 4.");
-                    System.out.println("gcd(" + enteredInteger + ", " + prevInteger + ") = " + euclideanGCD(enteredInteger, prevInteger));
-                    System.out.println(" ");
-                    break;
-            }
-            invalidInput = true;
-            prevInteger = enteredInteger;
-        }
-        
     }
     
 }

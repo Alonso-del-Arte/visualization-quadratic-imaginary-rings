@@ -249,37 +249,34 @@ public class NumberTheoreticFunctionsCalculatorTest {
         }
         System.out.println(" ");
         // Now to test primeFactors() on imaginary quadratic integers
-        // 12 JULY 2018: No, another day, getting unexpected error overflow norm 46341/2 + sqrt(-7)/2
-//        System.out.println("primeFactors(ImaginaryQuadraticInteger)");
-//        ImaginaryQuadraticRing r;
-//        ImaginaryQuadraticInteger z;
-//        List<ImaginaryQuadraticInteger> factorsList;
-//        int p, expFacLen, facLen;
-//        String assertionMessage;
-//        for (Integer d : NumberTheoreticFunctionsCalculator.HEEGNER_NUMBERS) {
-//            r = new ImaginaryQuadraticRing(d);
-//            /* First to test purely real integers that are prime in Z in the 
-//               context of a particular ring r, e.g., 5 in Z[sqrt(-2)] */
-//            for (int pIndex = 0; pIndex < 25; pIndex++) {
-//                p = primesList.get(pIndex);
-//                z = new ImaginaryQuadraticInteger(p, 0, r);
-//                if (NumberTheoreticFunctionsCalculator.isPrime(z)) {
-//                    expFacLen = 1;
-//                } else {
-//                    expFacLen = 2;
-//                }
-//                System.out.println("Factor list of " + z.toString() + " in " + z.getRing().toASCIIString() + " should contain " + expFacLen + " factors.");
-//                try {
-//                    factorsList = NumberTheoreticFunctionsCalculator.primeFactors(z);
-//                    facLen = factorsList.size();
-//                } catch (NonUniqueFactorizationDomainException nufde) {
-//                    facLen = 0;
-//                    fail("NonUniqueFactorizationDomainException should not have happened in this context: " + nufde.getMessage());
-//                }
-//                assertionMessage = "Factor list of " + z.toString() + " in " + z.getRing().toString() + " should contain " + expFacLen + " factors.";
-//                assertEquals(assertionMessage, expFacLen, facLen);
-//            }
-//        }
+        System.out.println("primeFactors(ImaginaryQuadraticInteger)");
+        ImaginaryQuadraticRing r;
+        ImaginaryQuadraticInteger z;
+        List<ImaginaryQuadraticInteger> factorsList;
+        int expFacLen, facLen;
+        String assertionMessage;
+        for (Integer d : NumberTheoreticFunctionsCalculator.HEEGNER_NUMBERS) {
+            r = new ImaginaryQuadraticRing(d);
+            /* First to test purely real integers that are prime in Z in the 
+               context of a particular ring r, e.g., 5 in Z[sqrt(-2)] */
+            for (Integer p : primesList) {
+                z = new ImaginaryQuadraticInteger(p, 0, r);
+                if (NumberTheoreticFunctionsCalculator.isPrime(z)) {
+                    expFacLen = 1;
+                } else {
+                    expFacLen = 2;
+                }
+                try {
+                    factorsList = NumberTheoreticFunctionsCalculator.primeFactors(z);
+                    facLen = factorsList.size();
+                } catch (NonUniqueFactorizationDomainException nufde) {
+                    facLen = 0;
+                    fail("NonUniqueFactorizationDomainException should not have happened in this context: " + nufde.getMessage());
+                }
+                assertionMessage = "Factor list of " + z.toString() + " in " + z.getRing().toString() + " should contain " + expFacLen + " factor(s).";
+                assertEquals(assertionMessage, expFacLen, facLen);
+            }
+        }
     }
 
     /**

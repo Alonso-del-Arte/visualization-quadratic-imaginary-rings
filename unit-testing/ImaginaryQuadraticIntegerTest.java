@@ -1460,7 +1460,7 @@ public class ImaginaryQuadraticIntegerTest {
      */
     @Test
     public void testDivides() {
-        System.out.println("divides");
+        System.out.println("divides(ImaginaryQuadraticInteger)");
         ImaginaryQuadraticRing currRing;
         ImaginaryQuadraticInteger expResult, result, testQuotient, testDivisor, testDividend;
         int currDenom;
@@ -1513,6 +1513,7 @@ public class ImaginaryQuadraticIntegerTest {
         /* Now to test dividing a purely real integer held in an 
            ImaginaryQuadraticInteger object divided by a purely real integer in 
            an int */
+        System.out.println("divides(int)");
         int testDivRealPartMult;
         for (int iterDiscrOQ = -11; iterDiscrOQ > -84; iterDiscrOQ -= 8) {
             if (NumberTheoreticFunctionsCalculator.isSquareFree(iterDiscrOQ)) {

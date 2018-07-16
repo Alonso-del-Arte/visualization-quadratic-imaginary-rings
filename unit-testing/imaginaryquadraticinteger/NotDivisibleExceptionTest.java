@@ -21,7 +21,10 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- *
+ * Tests for the NotDivisibleException class. The purpose of this test class is 
+ * only to make sure the exception object works as it should. Testing whether 
+ * this exception is thrown for the right reasons or not is the responsibility 
+ * of other test classes.
  * @author Alonso del Arte
  */
 public class NotDivisibleExceptionTest {
@@ -45,6 +48,7 @@ public class NotDivisibleExceptionTest {
         } catch (NotDivisibleException nde) {
             notDivGaussian = nde;
         }
+        System.out.println("NotDivisibleException for the Gaussian integers example has this message: \"" + notDivGaussian.getMessage() + "\"");
         dividend = new ImaginaryQuadraticInteger(61, 0, NumberTheoreticFunctionsCalculator.RING_EISENSTEIN);
         divisor = new ImaginaryQuadraticInteger(1, 9, NumberTheoreticFunctionsCalculator.RING_EISENSTEIN);
         try {
@@ -56,7 +60,6 @@ public class NotDivisibleExceptionTest {
         } catch (NotDivisibleException nde) {
             notDivEisenstein = nde;
         }
-        System.out.println("NotDivisibleException for the Gaussian integers example has this message: \"" + notDivGaussian.getMessage() + "\"");
         System.out.println("NotDivisibleException for the Eisenstein integers example has this message: \"" + notDivEisenstein.getMessage() + "\"");
     }
     

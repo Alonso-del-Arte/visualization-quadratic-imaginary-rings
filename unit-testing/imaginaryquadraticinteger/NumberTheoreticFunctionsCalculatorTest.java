@@ -253,7 +253,7 @@ public class NumberTheoreticFunctionsCalculatorTest {
         ImaginaryQuadraticRing r;
         ImaginaryQuadraticInteger z;
         List<ImaginaryQuadraticInteger> factorsList;
-        int expFacLen, facLen;
+        int facLen;
         String assertionMessage;
         for (Integer d : NumberTheoreticFunctionsCalculator.HEEGNER_NUMBERS) {
             r = new ImaginaryQuadraticRing(d);
@@ -261,11 +261,6 @@ public class NumberTheoreticFunctionsCalculatorTest {
                context of a particular ring r, e.g., 5 in Z[sqrt(-2)] */
             for (Integer p : primesList) {
                 z = new ImaginaryQuadraticInteger(p, 0, r);
-                if (NumberTheoreticFunctionsCalculator.isPrime(z)) {
-                    expFacLen = 1;
-                } else {
-                    expFacLen = 2;
-                }
                 try {
                     factorsList = NumberTheoreticFunctionsCalculator.primeFactors(z);
                     facLen = factorsList.size();
@@ -273,8 +268,41 @@ public class NumberTheoreticFunctionsCalculatorTest {
                     facLen = 0;
                     fail("NonUniqueFactorizationDomainException should not have happened in this context: " + nufde.getMessage());
                 }
-                assertionMessage = "Factor list of " + z.toString() + " in " + z.getRing().toString() + " should contain " + expFacLen + " factor(s).";
-                assertEquals(assertionMessage, expFacLen, facLen);
+                if (NumberTheoreticFunctionsCalculator.isPrime(z)) {
+                    assertionMessage = "Factor list of " + z.toString() + " in " + z.getRing().toString() + " should contain just one prime factor.";
+                    assertEquals(assertionMessage, 1, facLen);
+                } else {
+                    assertionMessage = "Factor list of " + z.toString() + " in " + z.getRing().toString() + " should contain two or three factors.";
+                    assertTrue(assertionMessage, facLen > 1);
+                }
+            }
+            // Lastly, to look at some consecutive algebraic integers
+            int expFacLen;
+            for (int a = -4; a < 5; a++) {
+                for (int b = 3; b > -1; b--) {
+                    z = new ImaginaryQuadraticInteger(a, b, r);
+                    try {
+                        factorsList = NumberTheoreticFunctionsCalculator.primeFactors(z);
+                        facLen = factorsList.size();
+                        expFacLen = 0;
+                        if ((factorsList.get(0).norm() == 1) && (factorsList.size() > 1)) {
+                            expFacLen = 1;
+                        }
+                        if (z.norm() > 1) {
+                            expFacLen++;
+                        }
+                        if (NumberTheoreticFunctionsCalculator.isPrime(z)) {
+                            assertionMessage = z.toString() + " is expected to have " + expFacLen + " factor(s).";
+                            assertEquals(assertionMessage, expFacLen, facLen);
+                        } else {
+                            expFacLen++;
+                            assertionMessage = z.toString() + " is expected to have at least " + expFacLen + " factors.";
+                            assertTrue(assertionMessage, facLen >= expFacLen);
+                        }
+                    } catch (NonUniqueFactorizationDomainException nufde) {
+                        fail("NonUniqueFactorizationDomainException should not have happened in this context: " + nufde.getMessage());
+                    }
+                }
             }
         }
     }
@@ -359,6 +387,32 @@ public class NumberTheoreticFunctionsCalculatorTest {
                 gaussianInteger = gaussianInteger.plus(twoStepImagIncr);
                 assertionMessage = gaussianInteger.toString() + " should not have been identified as prime in Z[i]";
                 assertFalse(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(gaussianInteger));
+            }
+        }
+        /* There are also special cases in the Eisenstein integers, thanks to 
+           the units. If p is a purely real integer that is prime among the 
+           Eisenstein integers, then omega * p, omega^2 * p, -omega * p and 
+           -omega^2 * p should all be prime also. */
+        ImaginaryQuadraticInteger eisensteinInteger;
+        for (int eisen = -29; eisen < 30; eisen++) {
+            eisensteinInteger = new ImaginaryQuadraticInteger(eisen, 0, NumberTheoreticFunctionsCalculator.RING_EISENSTEIN);
+            if (NumberTheoreticFunctionsCalculator.isPrime(eisensteinInteger)) {
+                eisensteinInteger = eisensteinInteger.times(NumberTheoreticFunctionsCalculator.COMPLEX_CUBIC_ROOT_OF_UNITY);
+                assertionMessage = eisensteinInteger.toString() + " should be found to be prime.";
+                assertTrue(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(eisensteinInteger));
+                eisensteinInteger = eisensteinInteger.times(NumberTheoreticFunctionsCalculator.COMPLEX_CUBIC_ROOT_OF_UNITY);
+                assertionMessage = eisensteinInteger.toString() + " should be found to be prime.";
+                assertTrue(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(eisensteinInteger));
+                eisensteinInteger = eisensteinInteger.times(NumberTheoreticFunctionsCalculator.COMPLEX_CUBIC_ROOT_OF_UNITY);
+                eisensteinInteger = eisensteinInteger.times(-1); // This should bring us to -eisen
+                assertionMessage = eisensteinInteger.toString() + " should be found to be prime.";
+                assertTrue(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(eisensteinInteger));
+                eisensteinInteger = eisensteinInteger.times(NumberTheoreticFunctionsCalculator.COMPLEX_CUBIC_ROOT_OF_UNITY);
+                assertionMessage = eisensteinInteger.toString() + " should be found to be prime.";
+                assertTrue(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(eisensteinInteger));
+                eisensteinInteger = eisensteinInteger.times(NumberTheoreticFunctionsCalculator.COMPLEX_CUBIC_ROOT_OF_UNITY);
+                assertionMessage = eisensteinInteger.toString() + " should be found to be prime.";
+                assertTrue(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(eisensteinInteger));
             }
         }
         // Now to test some complex numbers in Z[sqrt(-5)] and O_Q(sqrt(-31))

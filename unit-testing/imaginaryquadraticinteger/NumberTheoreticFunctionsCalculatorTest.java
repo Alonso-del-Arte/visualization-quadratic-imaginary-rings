@@ -251,8 +251,12 @@ public class NumberTheoreticFunctionsCalculatorTest {
         // Now to test primeFactors() on imaginary quadratic integers
         System.out.println("primeFactors(ImaginaryQuadraticInteger)");
         ImaginaryQuadraticRing r;
-        ImaginaryQuadraticInteger z;
-        List<ImaginaryQuadraticInteger> factorsList;
+        ImaginaryQuadraticInteger z = NumberTheoreticFunctionsCalculator.COMPLEX_CUBIC_ROOT_OF_UNITY.times(-1);
+        /* The arbitrary initialization of z with -omega and factorsList with 
+           omega is to avoid "variable might not have been initialized" 
+           errors */
+        List<ImaginaryQuadraticInteger> factorsList = new ArrayList<>();
+        factorsList.add(NumberTheoreticFunctionsCalculator.COMPLEX_CUBIC_ROOT_OF_UNITY);
         int facLen;
         String assertionMessage;
         for (Integer d : NumberTheoreticFunctionsCalculator.HEEGNER_NUMBERS) {
@@ -278,8 +282,8 @@ public class NumberTheoreticFunctionsCalculatorTest {
             }
             // Lastly, to look at some consecutive algebraic integers
             int expFacLen;
-            for (int a = -4; a < 5; a++) {
-                for (int b = 3; b > -1; b--) {
+            for (int a = -4; a < 6; a++) {
+                for (int b = 3; b > -2; b--) {
                     z = new ImaginaryQuadraticInteger(a, b, r);
                     try {
                         factorsList = NumberTheoreticFunctionsCalculator.primeFactors(z);
@@ -304,6 +308,20 @@ public class NumberTheoreticFunctionsCalculatorTest {
                     }
                 }
             }
+            System.out.print("Last algebraic integer tested in " + r.toASCIIString() + " was " + z.toASCIIString() + ", which has this factorization: ");
+            if (factorsList.get(0).getImagPartMult() == 0) {
+                System.out.print(factorsList.get(0).toASCIIString());
+            } else {
+                System.out.print("(" + factorsList.get(0) + ")");
+            }
+            for (int currFactorIndex = 1; currFactorIndex < factorsList.size(); currFactorIndex++) {
+                if (factorsList.get(currFactorIndex).getImagPartMult() == 0) {
+                    System.out.print(" \u00D7 " + factorsList.get(currFactorIndex).toASCIIString());
+                } else {
+                    System.out.print(" \u00D7 (" + factorsList.get(currFactorIndex).toASCIIString() + ")");
+                }
+            }
+            System.out.println();
         }
     }
 
@@ -360,6 +378,7 @@ public class NumberTheoreticFunctionsCalculatorTest {
         }
         /* One more thing before moving on to complex UFDs: testing 
            isPrime(long) */
+        System.out.println("isPrime(long)");
         long longNum = Integer.MAX_VALUE;
         String assertionMessage = "2^31 - 1 should be found to be prime.";
         assertTrue(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(longNum));
@@ -756,12 +775,18 @@ public class NumberTheoreticFunctionsCalculatorTest {
     @Test
     public void testIsSquareFree() {
         System.out.println("isSquareFree");
-        int num;
+        String assertionMessage;
+        int number;
         for (int i = 0; i < primesListLength - 1; i++) {
-            num = primesList.get(i) * primesList.get(i + 1); // A squarefree semiprime, pq
-            assertTrue(NumberTheoreticFunctionsCalculator.isSquareFree(num));
-            num *= primesList.get(i); // Repeat one prime factor, (p^2)q
-            assertFalse(NumberTheoreticFunctionsCalculator.isSquareFree(num));
+            number = primesList.get(i) * primesList.get(i + 1); // A squarefree semiprime, pq
+            assertionMessage = number + " should have been found to be squarefree";
+            assertTrue(assertionMessage, NumberTheoreticFunctionsCalculator.isSquareFree(number));
+            number *= primesList.get(i); // Repeat one prime factor, (p^2)q
+            assertionMessage = number + " should not have been found to be squarefree";
+            assertFalse(assertionMessage, NumberTheoreticFunctionsCalculator.isSquareFree(number));
+            number /= primesList.get(i + 1); // Now this should be p^2
+            assertionMessage = number + " should not have been found to be squarefree";
+            assertFalse(assertionMessage, NumberTheoreticFunctionsCalculator.isSquareFree(number));
         }
     }
 

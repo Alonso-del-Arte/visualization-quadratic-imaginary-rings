@@ -1,18 +1,18 @@
 /*
  * Copyright (C) 2018 Alonso del Arte
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under 
+ * the terms of the GNU General Public License as published by the Free Software 
+ * Foundation, either version 3 of the License, or (at your option) any later 
+ * version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
+ * details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with 
+ * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package imaginaryquadraticinteger;
 
@@ -41,20 +41,26 @@ public class ImaginaryQuadraticRingTest {
      */
     public static final double TEST_DELTA = 0.00001;
     
-    public ImaginaryQuadraticRingTest() {
-    }
-    
     /**
-     * Sets up five ImaginaryQuadraticRing objects, corresponding to Z[i], 
-     * Z[sqrt(-2)], Z[omega], O_(Q(sqrt(-7))) and a randomly chosen ring.
-     * The randomly chosen ring O_(Q(sqrt(d))) is determined by d being at least
-     * {@link RingWindowDisplay#MINIMUM_RING_D MINIMUM_RING_D} and at most -5.
+     * Sets up five ImaginaryQuadraticRing objects, corresponding to 
+     * <b>Z</b>[<i>i</i>], <b>Z</b>[&radic;-2], <b>Z</b>[&omega;], 
+     * <i>O</i><sub><b>Q</b>(&radic;-7)</sub> and a randomly chosen ring.
+     * The randomly chosen ring <i>O</i><sub><b>Q</b>(&radic;<i>d</i>)</sub> is 
+     * determined by <i>d</i> being at most -5. It is unlikely but not 
+     * impossible that this could turn out to be 
+     * <i>O</i><sub><b>Q</b>(&radic;-7)</sub>, which would be just fine if it 
+     * just made some of the tests redundant, but since it could make {@link 
+     * #testEquals()} fail, it is necessary to guard against this unlikely 
+     * eventuality.
      */
     @BeforeClass
     public static void setUpClass() {
         randomDiscr = NumberTheoreticFunctionsCalculator.randomNegativeSquarefreeNumber(RingWindowDisplay.MINIMUM_RING_D);
         if (randomDiscr > -5) {
             randomDiscr = -5; // This is just in case we get -3 or -1, which we are already testing for and which require special treatment in some of the tests.
+        }
+        if (randomDiscr == -7) {
+            randomDiscr = -11; // Resetting -7 to -11 since -7 is being tested regardless
         }
         ringRandomd1mod4 = (randomDiscr % 4 == -3);
         ringGaussian = new ImaginaryQuadraticRing(-1);
@@ -110,27 +116,33 @@ public class ImaginaryQuadraticRingTest {
     @Test
     public void testHasHalfIntegers() {
         System.out.println("hasHalfIntegers");
-        assertFalse(ringGaussian.hasHalfIntegers());
-        assertFalse(ringZi2.hasHalfIntegers());
-        assertTrue(ringEisenstein.hasHalfIntegers());
-        assertTrue(ringOQi7.hasHalfIntegers());
-        assertEquals(ringRandomd1mod4, ringRandom.hasHalfIntegers());
+        String assertionMessage = ringGaussian.toASCIIString() + " should not be said to have half-integers.";
+        assertFalse(assertionMessage, ringGaussian.hasHalfIntegers());
+        assertionMessage = ringZi2.toASCIIString() + " should not be said to have half-integers.";
+        assertFalse(assertionMessage, ringZi2.hasHalfIntegers());
+        assertionMessage = ringEisenstein.toASCIIString() + " should be said to have half-integers.";
+        assertTrue(assertionMessage, ringEisenstein.hasHalfIntegers());
+        assertionMessage = ringOQi7.toASCIIString() + " should be said to have half-integers.";
+        assertTrue(assertionMessage, ringOQi7.hasHalfIntegers());
+        assertionMessage = ringRandom.toASCIIString() + " should ";
+        if (ringRandomd1mod4) {
+            assertionMessage = assertionMessage + "be said to have half-integers.";
+        } else {
+            assertionMessage = assertionMessage + "not be said to have half-integers.";
+        }
+        assertEquals(assertionMessage, ringRandomd1mod4, ringRandom.hasHalfIntegers());
     }
 
     /**
      * Test of preferBlackboardBold method, of class ImaginaryQuadraticRing.
      * Without arguments, preferBlackboardBold is the getter method. With 
      * arguments, preferBlackboardBold is the setter method. This is perhaps an 
-     * unnecessary test.
+     * unnecessary test. The results of {@link #testToString()} and {@link 
+     * #testToHTMLString()} are far more important.
      */
     @Test
     public void testPreferBlackboardBold() {
-        System.out.println("preferBlackboardBold, no arguments");
-        ImaginaryQuadraticRing.preferBlackboardBold(true);
-        assertTrue(ImaginaryQuadraticRing.preferBlackboardBold());
-        ImaginaryQuadraticRing.preferBlackboardBold(false);
-        assertFalse(ImaginaryQuadraticRing.preferBlackboardBold());
-        System.out.println("preferBlackboardBold, with boolean argument");
+        System.out.println("preferBlackboardBold");
         ImaginaryQuadraticRing.preferBlackboardBold(true);
         assertTrue(ImaginaryQuadraticRing.preferBlackboardBold());
         ImaginaryQuadraticRing.preferBlackboardBold(false);
@@ -147,11 +159,24 @@ public class ImaginaryQuadraticRingTest {
     public void testHashCode() {
         System.out.println("hashCode");
         ImaginaryQuadraticRing someRing = new ImaginaryQuadraticRing(-1);
-        assertEquals(ringGaussian.hashCode(), someRing.hashCode());
-        assertNotEquals(someRing.hashCode(), ringZi2.hashCode());
+        int expResult = ringGaussian.hashCode();
+        System.out.println("BeforeClass-initialized " + ringGaussian.toASCIIString() + " hashed as " + expResult);
+        int result = someRing.hashCode();
+        System.out.println("Test-initialized " + someRing.toASCIIString() + " hashed as " + expResult);
+        String assertionMessage = "BeforeClass-initialized and test-initialized Z[i] should hash the same.";
+        assertEquals(assertionMessage, expResult, result);
+        assertionMessage = ringGaussian.toASCIIString() + " and " + ringZi2.toASCIIString() + " should hash differently.";
+        assertNotEquals(assertionMessage, someRing.hashCode(), ringZi2.hashCode());
         someRing = new ImaginaryQuadraticRing(-2);
+        expResult = ringZi2.hashCode();
+        System.out.println("BeforeClass-initialized " + ringZi2.toASCIIString() + " hashed as " + expResult);
         assertEquals(ringZi2.hashCode(), someRing.hashCode());
-        assertNotEquals(someRing.hashCode(), ringGaussian.hashCode());
+        result = someRing.hashCode();
+        System.out.println("Test-initialized " + someRing.toASCIIString() + " hashed as " + expResult);
+        assertionMessage = "BeforeClass-initialized and test-initialized Z[i] should hash the same.";
+        assertEquals(assertionMessage, expResult, result);
+        assertionMessage = ringGaussian.toASCIIString() + " and " + ringZi2.toASCIIString() + " should hash differently.";
+        assertNotEquals(assertionMessage, someRing.hashCode(), ringGaussian.hashCode());
     }
     
     /**
@@ -232,7 +257,8 @@ public class ImaginaryQuadraticRingTest {
     }
     
     /**
-     * Test of toTeXString method, of class ImaginaryQuadraticRing.
+     * Test of toTeXString method, of class ImaginaryQuadraticRing. Note that 
+     * the blackboard preference has an effect on the output.
      */
     @Test
     public void testToTeXString() {
@@ -280,7 +306,8 @@ public class ImaginaryQuadraticRingTest {
     }
 
     /**
-     * Test of toHTMLString method, of class ImaginaryQuadraticRing.
+     * Test of toHTMLString method, of class ImaginaryQuadraticRing. Note that 
+     * the blackboard preference has an effect on the output.
      */
     @Test
     public void testToHTMLString() {

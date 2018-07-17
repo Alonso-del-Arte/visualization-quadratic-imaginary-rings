@@ -375,8 +375,6 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         
         ImaginaryQuadraticInteger currIQI;
         
-        int currSplitPrime, currSplitPrimePointX, currNegSplitPrimePointX;
-        
         if (this.imagQuadRing.d1mod4) {
             maxY = (int) Math.floor((this.ringCanvasVerticMax - this.zeroCoordY)/(2 * this.pixelsPerBasicImaginaryInterval));
             verticalGridDistance *= 2;
@@ -491,8 +489,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                 currIQI = new ImaginaryQuadraticInteger(0, y, this.imagQuadRing);
                 if (NumberTheoreticFunctionsCalculator.isPrime(currIQI.norm())) {
                     if (NumberTheoreticFunctionsCalculator.euclideanGCD(currIQI.norm(), this.imagQuadRing.negRad) > 1) {
-                        int ramifyPoint = this.zeroCoordX + currIQI.norm() * this.pixelsPerUnitInterval;
-                        int negRamifyPoint = this.zeroCoordX - currIQI.norm() * this.pixelsPerUnitInterval;
+                        int ramifyPoint = this.zeroCoordX + (int) currIQI.norm() * this.pixelsPerUnitInterval;
+                        int negRamifyPoint = this.zeroCoordX - (int) currIQI.norm() * this.pixelsPerUnitInterval;
                         graphicsForPoints.setColor(this.ramifiedPrimeColor);
                         graphicsForPoints.fillOval(ramifyPoint - this.dotRadius, this.zeroCoordY - this.dotRadius, dotDiameter, dotDiameter);
                         graphicsForPoints.fillOval(negRamifyPoint - this.dotRadius, this.zeroCoordY - this.dotRadius, dotDiameter, dotDiameter);
@@ -506,6 +504,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         }
         
         // Now the complex integer points, but not the "half-integers" yet
+        long currSplitPrime;
+        int currSplitPrimePointX, currNegSplitPrimePointX;
         for (int x = 1; x <= maxX; x++) {
             currPointX = this.zeroCoordX + (x * this.pixelsPerUnitInterval);
             currNegPointX = this.zeroCoordX - (x * this.pixelsPerUnitInterval);
@@ -521,15 +521,15 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                     graphicsForPoints.fillOval(currNegPointX - this.dotRadius, currNegPointY - this.dotRadius, dotDiameter, dotDiameter);
                     currSplitPrime = currIQI.norm();
                     if (currSplitPrime <= maxX) {
-                        currSplitPrimePointX = this.zeroCoordX + (currSplitPrime * this.pixelsPerUnitInterval);
-                        currNegSplitPrimePointX = this.zeroCoordX - (currSplitPrime * this.pixelsPerUnitInterval);
+                        currSplitPrimePointX = this.zeroCoordX + ((int) currSplitPrime * this.pixelsPerUnitInterval);
+                        currNegSplitPrimePointX = this.zeroCoordX - ((int) currSplitPrime * this.pixelsPerUnitInterval);
                         graphicsForPoints.setColor(this.splitPrimeColor);
                         graphicsForPoints.fillOval(currSplitPrimePointX - this.dotRadius, this.zeroCoordY - this.dotRadius, dotDiameter, dotDiameter);
                         graphicsForPoints.fillOval(currNegSplitPrimePointX - this.dotRadius, this.zeroCoordY - this.dotRadius, dotDiameter, dotDiameter);
                     }
                     if (currSplitPrime <= maxY && this.imagQuadRing.negRad == -1) {
-                        currSplitPrimePointX = this.zeroCoordY + (currSplitPrime * this.pixelsPerUnitInterval);
-                        currNegSplitPrimePointX = this.zeroCoordY - (currSplitPrime * this.pixelsPerUnitInterval);
+                        currSplitPrimePointX = this.zeroCoordY + ((int) currSplitPrime * this.pixelsPerUnitInterval);
+                        currNegSplitPrimePointX = this.zeroCoordY - ((int) currSplitPrime * this.pixelsPerUnitInterval);
                         graphicsForPoints.fillOval(this.zeroCoordX - this.dotRadius, currSplitPrimePointX - this.dotRadius, dotDiameter, dotDiameter);
                         graphicsForPoints.fillOval(this.zeroCoordX - this.dotRadius, currNegSplitPrimePointX - this.dotRadius, dotDiameter, dotDiameter);
                     }
@@ -575,8 +575,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                         graphicsForPoints.fillOval(currNegPointX - this.dotRadius, currNegPointY - this.dotRadius, dotDiameter, dotDiameter);
                         currSplitPrime = currIQI.norm();
                         if (currSplitPrime <= maxX) {
-                            currSplitPrimePointX = this.zeroCoordX + (currSplitPrime * this.pixelsPerUnitInterval);
-                            currNegSplitPrimePointX = this.zeroCoordX - (currSplitPrime * this.pixelsPerUnitInterval);
+                            currSplitPrimePointX = this.zeroCoordX + ((int) currSplitPrime * this.pixelsPerUnitInterval);
+                            currNegSplitPrimePointX = this.zeroCoordX - ((int) currSplitPrime * this.pixelsPerUnitInterval);
                             graphicsForPoints.setColor(this.splitPrimeColor);
                             graphicsForPoints.fillOval(currSplitPrimePointX - this.dotRadius, this.zeroCoordY - this.dotRadius, dotDiameter, dotDiameter);
                             graphicsForPoints.fillOval(currNegSplitPrimePointX - this.dotRadius, this.zeroCoordY - this.dotRadius, dotDiameter, dotDiameter);
@@ -746,7 +746,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     /**
-     * Paints the canvas, by delegating to drawGrids() and drawPoints().
+     * Paints the canvas, by delegating to private functions to draw the grids 
+     * and the points.
      * @param gr The graphics object supplied by the caller.
      */
     @Override
@@ -789,8 +790,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                 stringForAlgIntReadOut = mouseIQI.toString();
             }
             algIntReadOut.setText(stringForAlgIntReadOut);
-            algIntTraceReadOut.setText(Integer.toString(mouseIQI.trace()));
-            algIntNormReadOut.setText(Integer.toString(mouseIQI.norm()));
+            algIntTraceReadOut.setText(Long.toString(mouseIQI.trace()));
+            algIntNormReadOut.setText(Long.toString(mouseIQI.norm()));
             algIntPolReadOut.setText(mouseIQI.minPolynomialString());
         }
     }
@@ -1225,7 +1226,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      * Show the About box, a simple MessageDialog from JOptionPage.
      */
     public void showAboutBox() {
-        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.94\n\u00A9 2018 Alonso del Arte");
+        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.941\n\u00A9 2018 Alonso del Arte");
     }
     
     /**

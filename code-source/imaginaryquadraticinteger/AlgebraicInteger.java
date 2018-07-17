@@ -38,29 +38,34 @@ public interface AlgebraicInteger {
     int algebraicDegree();
     
     /**
-     * Gives the trace of the algebraic integer.
+     * Gives the trace of the algebraic integer. In the original version, this 
+     * was an int, but due to many overflow problems, I'm changing this to a 
+     * long. Overflow problems can still occur, but they're hopefully less 
+     * frequent now.
      * @return The trace. For example, given 5/2 + sqrt(-7)/2, the trace would 
      * be 5.
      */
-    int trace();
+    long trace();
     
     /**
      * Gives the norm of the algebraic integer, useful for comparing integers in 
-     * the Euclidean GCD algorithm.
+     * the Euclidean GCD algorithm. In the original version, this was an int, 
+     * but due to many overflow problems, I'm changing this to a long. Overflow 
+     * problems can still occur, but they're hopefully less frequent now.
      * @return The norm. For example, given 5/2 + sqrt(-7)/2, the norm would be 
      * 8.
      */
-    int norm();
+    long norm();
     
     /**
      * Gives the coefficients for the minimal polynomial of the algebraic 
      * integer.
-     * @return An array of integers, in total one more than the algebraic 
+     * @return An array of 64-bit integers, in total one more than the algebraic 
      * degree. The element at position length - 1 in the array ought to be 1.
      * For example, if the algebraic integer is cuberoot(2) + 1, the result 
      * would be {3, 3, 3, 1}.
      */
-    int[] minPolynomial();
+    long[] minPolynomial();
     
     /**
      * Gives the minimal polynomial formatted as a String. Spaces in the 

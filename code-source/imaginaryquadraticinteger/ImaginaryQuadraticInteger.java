@@ -16,6 +16,7 @@
  */
 package imaginaryquadraticinteger;
 
+import java.text.DecimalFormatSymbols;
 import java.util.Objects;
 
 /**
@@ -80,7 +81,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
      * trace would be 5.
      */
     @Override
-    public int trace() {
+    public long trace() {
         if (imagQuadRing.d1mod4 && denominator == 2) {
             return realPartMult;
         } else {
@@ -102,7 +103,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
      * imaginary parts have to be to 0 to avoid overflows.
      */
     @Override
-    public int norm() {
+    public long norm() {
         long N;
         if (imagQuadRing.d1mod4 && denominator == 2) {
             N = (realPartMult * realPartMult + imagQuadRing.absNegRad * imagPartMult * imagPartMult)/4;
@@ -124,8 +125,8 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
      * the result would be {8, -5, 1}.
      */
     @Override
-    public int[] minPolynomial() {
-        int[] coeffs = {0, 0, 0};
+    public long[] minPolynomial() {
+        long[] coeffs = {0, 0, 0};
         switch (algebraicDegree()) {
             case 0:
                 coeffs[1] = 1;
@@ -152,7 +153,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     @Override
     public String minPolynomialString() {
         String polString = "";
-        int[] polCoeffs = minPolynomial();
+        long[] polCoeffs = minPolynomial();
         switch (algebraicDegree()) {
             case 0:
                 polString = "x";
@@ -641,6 +642,12 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
 //    private static String preprocessNumberString(String stringToPreprocess) {
 //        String str = stringToPreprocess;
 //        str = str.replace(" ", "");
+//        DecimalFormatSymbols dfs = new DecimalFormatSymbols(); // Get decimal formaat symbols for the current locale
+//        str = str.replace(Character.toString(dfs.getGroupingSeparator()), ""); // Strip out the thousands grouping separator
+//        String halfStr = Character.toString(dfs.getDecimalSeparator()) + "5";
+//        str = str.replace(halfStr, "+(1/2)");
+//        // Mark string as non-numeric if decimal separator is encountered
+//        str = str.replace(Character.toString(dfs.getDecimalSeparator()), "W"); 
 //        str = str.replace("&minus;", "-");
 //        str = str.replace("\\frac{", "");
 //        str = str.replace("}{", "/");
@@ -705,16 +712,26 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
      * @param summand The imaginary quadratic integer to be added to this 
      * quadratic integer.
      * @return A new ImaginaryQuadraticInteger object with the result of the 
-     * operation.
+     * operation. If both summands are from the same ring, the result will also 
+     * be from that ring. However, if the summand parameter is from a different 
+     * ring and this this algebraic integer is purely real, the result will be 
+     * given in the ring of the summand parameter.
      * @throws AlgebraicDegreeOverflowException If the algebraic integers come 
-     * from different quadratic rings, the result of the sum will be an 
-     * algebraic integer of degree 4 and this runtime exception will be thrown.
+     * from different quadratic rings and both have nonzero imaginary parts, the 
+     * result of the sum will be an algebraic integer of degree 4 and this 
+     * runtime exception will be thrown.
      * @throws ArithmeticException A runtime exception thrown if either the real 
      * part or the imaginary part of the sum exceeds the range of the int data 
      * type. You may need long or even BigInteger for the calculation.
      */
     public ImaginaryQuadraticInteger plus(ImaginaryQuadraticInteger summand) {
-        if (((this.imagPartMult != 0) && (summand.imagPartMult != 0)) && (this.imagQuadRing.negRad != summand.imagQuadRing.negRad)) {
+        if (this.imagPartMult == 0) {
+            return summand.plus(this.realPartMult);
+        }
+        if (summand.imagPartMult == 0) {
+            return this.plus(summand.realPartMult);
+        }
+        if (this.imagQuadRing.negRad != summand.imagQuadRing.negRad) {
             throw new AlgebraicDegreeOverflowException("This operation would result in an algebraic integer of degree 4.", 2, 4);
         }
         long sumRealPart = 0;
@@ -784,16 +801,27 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
      * @param subtrahend The imaginary quadratic integer to be subtracted from 
      * this quadratic integer.
      * @return A new ImaginaryQuadraticInteger object with the result of the 
-     * operation.
+     * operation. If both operands are from the same ring, the result will also 
+     * be from that ring. However, if the subtrahend parameter is from a 
+     * different ring and this this algebraic integer is purely real, the result 
+     * will be given in the ring of the subtrahend parameter.
      * @throws AlgebraicDegreeOverflowException If the algebraic integers come 
-     * from different quadratic rings, the result of the subtraction will be an 
-     * algebraic integer of degree 4 and this runtime exception will be thrown.
+     * from different quadratic rings and they both have nonzero imaginary 
+     * parts, the result of the subtraction will be an algebraic integer of 
+     * degree 4 and this runtime exception will be thrown.
      * @throws ArithmeticException A runtime exception thrown if either the real 
      * part or the imaginary part of the subtraction exceeds the range of the 
      * int data type. You may need long or even BigInteger for the calculation.
      */
     public ImaginaryQuadraticInteger minus(ImaginaryQuadraticInteger subtrahend) {
-        if (((this.imagPartMult != 0) && (subtrahend.imagPartMult != 0)) && (this.imagQuadRing.negRad != subtrahend.imagQuadRing.negRad)) {
+        if (this.imagPartMult == 0) {
+            ImaginaryQuadraticInteger temp = subtrahend.times(-1);
+            return temp.plus(this.realPartMult);
+        }
+        if (subtrahend.imagPartMult == 0) {
+            return this.minus(subtrahend.realPartMult);
+        }
+        if (this.imagQuadRing.negRad != subtrahend.imagQuadRing.negRad) {
             throw new AlgebraicDegreeOverflowException("This operation would result in an algebraic integer of degree 4.", 2, 4);
         }
         long subtractionRealPart = 0;
@@ -874,7 +902,13 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
      * data type. You may need long or even BigInteger for the calculation.
      */
     public ImaginaryQuadraticInteger times(ImaginaryQuadraticInteger multiplicand) {
-        if (((this.imagPartMult != 0) && (multiplicand.imagPartMult != 0)) && (this.imagQuadRing.negRad != multiplicand.imagQuadRing.negRad)) {
+        if (this.imagPartMult == 0) {
+            return multiplicand.times(this.realPartMult);
+        }
+        if (multiplicand.imagPartMult == 0) {
+            return this.times(multiplicand.realPartMult);
+        }
+        if (this.imagQuadRing.negRad != multiplicand.imagQuadRing.negRad) {
             throw new AlgebraicDegreeOverflowException("This operation would result in an algebraic integer of degree 4.", 2, 4);
         }
         long intermediateRealPart = this.realPartMult * multiplicand.realPartMult - this.imagPartMult * multiplicand.imagPartMult * this.imagQuadRing.absNegRad;
@@ -1135,7 +1169,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         RingWindowDisplay.startRingWindowDisplay(-1);
 //        switch (args.length) {
 //            case 0:
-//                RingWindowDisplay.startRingWindowDisplay(RingWindowDisplay.DEFAULT_RING_D);
+                RingWindowDisplay.startRingWindowDisplay(RingWindowDisplay.DEFAULT_RING_D);
 //                break;
 //            case 1:
 //                switch (args[0]) {
@@ -1145,7 +1179,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
 //                    case "v":
 //                    case "vers":
 //                    case "version":
-//                        System.out.println("Imaginary Quadratic Integer package\nVersion 0.9\n\u00A9 2018 Alonso del Arte");
+//                        System.out.println("Imaginary Quadratic Integer package\nVersion 0.95\n\u00A9 2018 Alonso del Arte");
 //                        break;
 //                    default:
 //                        int ringChoice = RingWindowDisplay.DEFAULT_RING_D;
@@ -1218,7 +1252,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
 //                System.out.println("Norm is " + number.norm());
 //                System.out.println("Minimal polynomial is " + number.minPolynomialString());
 //        }
-//    
+    
     } 
     
 }

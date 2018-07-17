@@ -16,6 +16,9 @@
  */
 package imaginaryquadraticinteger;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This checked exception is to be thrown when a prime factorization function is 
  * called on a number that is not from a unique factorization domain.
@@ -31,12 +34,34 @@ public class NonUniqueFactorizationDomainException extends Exception {
         return this.unfactorizedNumber;
     }
     
-    // PLACEHOLDER for tryToFactorizeAnyway()
+    
+    
+    /* 
+     
+     REMINDER: UPDATE serialVersionUID
+     
+     ****************************************/
+    
+    
+    
+    /**
+     * Attempts to
+     * @return A list
+     */
+    public List<ImaginaryQuadraticInteger> tryToFactorizeAnyway() {
+        List<ImaginaryQuadraticInteger> potentialFactors = new ArrayList<>();
+        potentialFactors.add(this.unfactorizedNumber);
+        return potentialFactors;
+    }
     
     /**
      * This is an exception to be potentially thrown by a prime factorization 
-     * function if called upon to operate on a number from a domain other than 
-     * those listed in UNIQUE_FACTORIZATON_QUADRATIC_IMAGINARY_RINGS_D.
+     * function if called upon to operate on a number from a domain that is not 
+     * a unique factorization domain (UFD), such as those adjoining the square 
+     * root of a negative number other than those listed in {@link 
+     * NumberTheoreticFunctionsCalculator#HEEGNER_NUMBERS}. There are many more 
+     * real quadratic integer rings that are UFDs, but that's outside the scope 
+     * of this documentation.
      * @param message Should probably just be something like 
      * number.getRing().toString() + " is not a unique factorizaton domain." 
      * This message is just passed on to the superclass.

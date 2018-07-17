@@ -31,14 +31,25 @@ public class NumberTheoreticFunctionsCalculator {
      * The only five values d such that new ImaginaryQuadraticRing(d) represents 
      * a norm-Euclidean domain. These numbers, -11, -7, -3, -2, -1, are the 
      * first five terms listed in <a href="http://oeis.org/A048981">Sloane's 
-     * A048981</a>.
+     * A048981</a>.  numbers correspond to <b>Z</b>[i], <b>Z</b>[&radic;-2], 
+     * <b>Z</b>[&omega;], <i>O</i><sub><b>Q</b>(&radic;-7)</sub> and 
+     * <i>O</i><sub><b>Q</b>(&radic;-11)</sub>.
      */
     public static final int[] NORM_EUCLIDEAN_QUADRATIC_IMAGINARY_RINGS_D = {-11, -7, -3, -2, -1};
     
     /**
      * There are the only nine negative numbers d such that the ring of 
-     * algebraic integers of Q(sqrt(d)) is a unique factorization domain (though 
-     * not necessarily Euclidean).
+     * algebraic integers of <b>Q</b>(&radic;d) is a unique factorization domain 
+     * (though not necessarily Euclidean). These numbers are, in descending 
+     * order: -1, -2, -3, -7, -11, -19, -43, -67, -163 (in this constant array, 
+     * they are in the reverse order). These correspond to <b>Z</b>[i], 
+     * <b>Z</b>[&radic;-2], <b>Z</b>[&omega;], 
+     * <i>O</i><sub><b>Q</b>(&radic;-7)</sub>, 
+     * <i>O</i><sub><b>Q</b>(&radic;-11)</sub>, 
+     * <i>O</i><sub><b>Q</b>(&radic;-19)</sub>, 
+     * <i>O</i><sub><b>Q</b>(&radic;-43)</sub>, 
+     * <i>O</i><sub><b>Q</b>(&radic;-67)</sub> and 
+     * <i>O</i><sub><b>Q</b>(&radic;-163)</sub>.
      */
     public static final int[] HEEGNER_NUMBERS = {-163, -67, -43, -19, -11, -7, -3, -2, -1};
     
@@ -121,6 +132,32 @@ public class NumberTheoreticFunctionsCalculator {
         }
     }
     
+    /**
+     * Determines whether a given purely real number is prime or not.
+     * @param num The number to be tested for primality.
+     * @return True if the number is prime, false otherwise.
+     */
+    public static boolean isPrime(long num) {
+        if (num == -1 || num == 0 || num == 1) {
+            return false;
+        }
+        if (num == -2 || num == 2) {
+            return true;
+        }
+        if (num % 2 == 0) {
+            return false;
+        } else {
+            boolean primeFlag = true;
+            long potentialFactor = 3;
+            double numSqrt = Math.sqrt(Math.abs(num));
+            while (primeFlag && potentialFactor <= numSqrt) {
+                primeFlag = (num % potentialFactor != 0);
+                potentialFactor += 2;
+            }
+            return primeFlag;
+        }
+    }
+        
     /**
      * The Legendre symbol, a number theoretic function which tells if a given 
      * number is a quadratic residue modulo an odd prime. There is no overflow 
@@ -301,6 +338,20 @@ public class NumberTheoreticFunctionsCalculator {
             if (num.imagQuadRing.negRad == -1 && num.realPartMult == 0) {
                 return ((Math.abs(num.imagPartMult)) % 4 == 3);
             }
+            if (num.imagQuadRing.negRad == -3 && num.imagPartMult != 0) {
+                ImaginaryQuadraticInteger pureReal = num.times(COMPLEX_CUBIC_ROOT_OF_UNITY);
+                if (pureReal.imagPartMult != 0) {
+                    pureReal = pureReal.times(COMPLEX_CUBIC_ROOT_OF_UNITY);
+                }
+                if (pureReal.imagPartMult == 0) {
+                    if (pureReal.realPartMult < 0) {
+                        pureReal = pureReal.times(-1);
+                    }
+                    if (pureReal.realPartMult % 3 == 2) {
+                        return true;
+                    }
+                }
+            }
             if (num.imagPartMult == 0) {
                 int absRealPartMult = Math.abs(num.realPartMult);
                 if (absRealPartMult == 2) {
@@ -333,26 +384,64 @@ public class NumberTheoreticFunctionsCalculator {
         }
     }
     
-    private static void sortListIQIByNorm(List<ImaginaryQuadraticInteger> listIQI) {
+    /**
+     * Sorts a list of imaginary quadratic integers in ascending order by norm. 
+     * Do note that integers of the same might come back in the same order 
+     * relative to each other that they were originally in. The sorting is done 
+     * with a rudimentary bubble sort algorithm, so do not use this if speed or 
+     * efficiency are required.
+     * @param listIQI A list of imaginary quadratic integers, which may be in 
+     * any order whatsoever. For example: -1 + i, 4 + i, -i, 1 - i.
+     * @return A list of the imaginary quadratic integers sorted by norm. For 
+     * example: -i, -1 + i, 1 - i, 4 + i. Note that there is no checking of norm 
+     * overflows, so imaginary quadratic integer objects with erroneously 
+     * negative norms would be erroneously sorted before units.
+     */
+    static List<ImaginaryQuadraticInteger> sortListIQIByNorm(List<ImaginaryQuadraticInteger> listIQI) {
         boolean swapFlag;
         ImaginaryQuadraticInteger a, b;
-        int counter = 0;
+        List<ImaginaryQuadraticInteger> nums = new ArrayList<>();
+        for (ImaginaryQuadraticInteger iqi : listIQI) {
+            nums.add(iqi);
+        }
         int opLen = listIQI.size() - 1;
         if (opLen > 0) {
             do {
                 swapFlag = false;
-                a = listIQI.get(counter);
-                b = listIQI.get(counter + 1);
+                for (int counter = 0; counter < opLen; counter++) {
+                    a = nums.get(counter);
+                    b = nums.get(counter + 1);
+                    if (a.norm() > b.norm()) {
+                        nums.set(counter, b);
+                        nums.set(counter + 1, a);
+                        swapFlag = true;
+                    }
+                }
+                a = nums.get(opLen);
+                b = nums.get(0);
                 if (a.norm() < b.norm()) {
-                    listIQI.set(counter, b);
-                    listIQI.set(counter + 1, a);
+                    nums.set(opLen, b);
+                    nums.set(0, a);
                     swapFlag = true;
                 }
-                counter++;
-            } while (swapFlag && counter < opLen);
+            } while (swapFlag);
         }
+        return nums;
     }
     
+    /**
+     * Computes the prime factors, and unit factors when applicable, of an 
+     * imaginary quadratic integer from a unique factorization domain (UFD).
+     * @param num The imaginary quadratic integer to find the factors of. For 
+     * example, -4 + 3sqrt(-19).
+     * @return A list of imaginary quadratic integers, with the first possibly 
+     * being a unit, the rest should be primes. For example, -1, 5/2 - 
+     * sqrt(-19)/2, 7/2 - sqrt(-19)/2, which multiply to -4 + 3sqrt(-19).
+     * @throws NonUniqueFactorizationDomainException If called upon to compute 
+     * the prime factors of a number from a non-UFD, even if a complete 
+     * factorization into primes is possible in the given domain, e.g., 5 and 41 
+     * in Z[sqrt(-5)].
+     */
     public static List<ImaginaryQuadraticInteger> primeFactors(ImaginaryQuadraticInteger num) throws NonUniqueFactorizationDomainException {
         int d = num.getRing().getNegRad();
         boolean notUFDFlag = true;
@@ -367,12 +456,19 @@ public class NumberTheoreticFunctionsCalculator {
             String exceptionMessage = num.getRing().toASCIIString() + " is not a unique factorization domain.";
             throw new NonUniqueFactorizationDomainException(exceptionMessage, num);
         }
+        if (num.norm() < 0) {
+            String exceptionMessage = "A norm computation error occurred for " + num.toASCIIString() + ", which should not have norm " + num.norm();
+            throw new ArithmeticException(exceptionMessage);
+        }
         ImaginaryQuadraticInteger n = num;
         List<ImaginaryQuadraticInteger> factors = new ArrayList<>();
-        boolean unitFlagNeedAdd = true;
-        if ((n.norm() < 2) || isPrime(n)) {
+        if (n.norm() < 2) {
             factors.add(n);
-            unitFlagNeedAdd = false;
+            return factors;
+        }
+        if (isPrime(n)) {
+            factors.add(new ImaginaryQuadraticInteger(1, 0, num.getRing()));
+            factors.add(n);
         } else {
             ImaginaryQuadraticInteger testDivisor = new ImaginaryQuadraticInteger(2, 0, n.getRing());
             boolean keepGoing = true;
@@ -409,23 +505,23 @@ public class NumberTheoreticFunctionsCalculator {
             boolean withinRange;
             while (n.norm() > 1) {
                 testDivisor = new ImaginaryQuadraticInteger(testDivRealPartMult, testDivImagPartMult, n.getRing(), 2);
+                withinRange = (testDivisor.norm() < n.norm());
                 if (isPrime(testDivisor)) {
                     while (n.norm() % testDivisor.norm() == 0) {
                         try {
                             n = n.divides(testDivisor.conjugate());
                             factors.add(testDivisor.conjugate());
                         } catch (NotDivisibleException nde) {
-                            // withinRange = ((Math.abs(nde.getNumericRealPart()) > 1) || (Math.abs(nde.getNumericImagPart()) > 1));
+                            // withinRange = withinRange && ((Math.abs(nde.getNumericRealPart()) > 1) || (Math.abs(nde.getNumericImagPart()) > 1));
                         }
                         try {
                             n = n.divides(testDivisor);
                             factors.add(testDivisor);
                         } catch (NotDivisibleException nde) {
-                            // withinRange = ((Math.abs(nde.getNumericRealPart()) > 1) || (Math.abs(nde.getNumericImagPart()) > 1));
+                            // withinRange = withinRange && ((Math.abs(nde.getNumericRealPart()) > 1) || (Math.abs(nde.getNumericImagPart()) > 1));
                         }
                     }
                 }
-                withinRange = (testDivisor.norm() < n.norm());
                 if (withinRange) {
                     testDivRealPartMult += 2;
                 } else {
@@ -442,11 +538,18 @@ public class NumberTheoreticFunctionsCalculator {
                     }
                 }
             }
+            factors.add(n); // This should be a unit, most likely -1 or 1
         }
-        if ((!n.equalsInt(1)) && unitFlagNeedAdd) {
-            factors.add(0, n);
+        factors = sortListIQIByNorm(factors);
+        for (int i = 1; i < factors.size(); i++) {
+            if (factors.get(i).getRealPartMult() < 0 || (factors.get(i).getRealPartMult() == 0 && factors.get(i).getImagPartMult() < 0)) {
+                factors.set(i, factors.get(i).times(-1));
+                factors.set(0, factors.get(0).times(-1));
+            }
         }
-        sortListIQIByNorm(factors);
+        if (factors.get(0).equalsInt(1)) {
+            factors.remove(0);
+        }
         return factors;
     }
     

@@ -358,11 +358,24 @@ public class NumberTheoreticFunctionsCalculatorTest {
                 assertTrue(NumberTheoreticFunctionsCalculator.isPrime(m));
             }
         }
+        /* One more thing before moving on to complex UFDs: testing 
+           isPrime(long) */
+        long longNum = Integer.MAX_VALUE;
+        String assertionMessage = "2^31 - 1 should be found to be prime.";
+        assertTrue(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(longNum));
+        longNum++;
+        assertionMessage = "2^31 should not be found to be prime.";
+        assertFalse(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(longNum));
+        longNum += 11;
+        assertionMessage = "2^31 + 11 should be found to be prime.";
+        assertTrue(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(longNum));
+        int castNum = (int) longNum;
+        assertionMessage = "-(2^31) + 11 should not be found to be prime.";
+        assertFalse(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(castNum));
         // That does it for testing isPrime in the context of Z.
         System.out.println("isPrime(ImaginaryQuadraticInteger)");
         ImaginaryQuadraticRing ufdRing;
         ImaginaryQuadraticInteger numberFromUFD;
-        String assertionMessage;
         for (int d = 0; d < NumberTheoreticFunctionsCalculator.HEEGNER_NUMBERS.length; d++) {
             ufdRing = new ImaginaryQuadraticRing(NumberTheoreticFunctionsCalculator.HEEGNER_NUMBERS[d]);
             // d should not be prime in the ring of Q(sqrt(d))
@@ -886,7 +899,7 @@ public class NumberTheoreticFunctionsCalculatorTest {
         for (int iterDiscrOQ = 0; iterDiscrOQ < NumberTheoreticFunctionsCalculator.NORM_EUCLIDEAN_QUADRATIC_IMAGINARY_RINGS_D.length - 3; iterDiscrOQ++) {
             r = new ImaginaryQuadraticRing(NumberTheoreticFunctionsCalculator.NORM_EUCLIDEAN_QUADRATIC_IMAGINARY_RINGS_D[iterDiscrOQ]);
             iqia = new ImaginaryQuadraticInteger(1, 1, r, 2);
-            b = iqia.norm() * HEEGNER_COMPANION_PRIMES[iterDiscrOQ + 4];
+            b = (int) iqia.norm() * HEEGNER_COMPANION_PRIMES[iterDiscrOQ + 4];
             expResultIQI = iqia;
             iqia = iqia.times(iqia);
             try {

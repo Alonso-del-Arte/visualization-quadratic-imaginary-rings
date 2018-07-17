@@ -190,8 +190,8 @@ public class ImaginaryQuadraticIntegerTest {
     @Test
     public void testTrace() {
         System.out.println("trace");
-        int expResult = 2 * randomRealPart;
-        int result;
+        long expResult = 2 * randomRealPart;
+        long result;
         for (int i = 0; i < totalTestIntegers; i++) {
             result = testIntegers.get(i).trace();
             if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
@@ -208,7 +208,7 @@ public class ImaginaryQuadraticIntegerTest {
     @Test
     public void testNorm() {
         System.out.println("norm");
-        int expResult, result;
+        long expResult, result;
         for (int i = 0; i < totalTestIntegers; i++) {
             if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
                 expResult = (randomRealForHalfInts * randomRealForHalfInts + testIntegers.get(i).imagQuadRing.getAbsNegRad() * randomImagForHalfInts * randomImagForHalfInts)/4;
@@ -226,8 +226,8 @@ public class ImaginaryQuadraticIntegerTest {
     @Test
     public void testMinPolynomial() {
         System.out.println("minPolynomial");
-        int[] expResult = {0, 0, 1};
-        int[] result;
+        long[] expResult = {0, 0, 1};
+        long[] result;
         ImaginaryQuadraticInteger baseImagDist, purelyRealInt;
         for (int i = 0; i < totalTestIntegers; i++) {
             if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {

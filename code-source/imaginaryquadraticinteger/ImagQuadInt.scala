@@ -22,6 +22,19 @@ class ImagQuadInt(a: Int, b: Int, R: ImaginaryQuadraticRing, denom: Int = 1)
     */
   override def toString: String = super.toString.replace("\u221A", "sqrt")
 
+  /** Computes the conjugate of the given imaginary quadratic integer.
+    *
+    * @return The conjugate. For example, given 5/2 + sqrt(-7)/2, the conjugate would be 5/2 - sqrt(-7)/2.
+    */
+  override def conjugate: ImagQuadInt = new ImagQuadInt(this.a, -this.b, this.R, this.denom)
+
+  /** Gets the imaginary quadratic ring which this imaginary quadratic integer belongs to.
+    *
+    * @return An ImagQuadRing object, which can then be queried for its negRad, absNegRad and absNegRadSqrt
+    *         values, and a couple other properties.
+    */
+  override def getRing: ImagQuadRing = new ImagQuadRing(this.R.negRad)
+
   /** Adds an ImagQuadInt to this one (overloaded operator for ImaginaryQuadraticInteger.plus().
     *
     * @param summand The ImagQuadInt to add.

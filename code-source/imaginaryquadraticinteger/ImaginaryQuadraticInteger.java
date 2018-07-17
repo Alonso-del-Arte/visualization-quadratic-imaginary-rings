@@ -262,10 +262,24 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         return twiceImagPartMult;
     }
     
+    /**
+     * Gets the real part of the imaginary quadratic integer, multiplied by 2 
+     * when necessary.
+     * @return The real part as an int, multiplied by 2 if the denominator is 2. 
+     * For example, for 3/2 + sqrt(-7)/2, this would be 3; for 3 + sqrt(-7) this 
+     * would also be 3.
+     */
     public int getRealPartMult() {
         return this.realPartMult;
     }
     
+    /**
+     * Gets the imaginary part of the imaginary quadratic integer, divided by 
+     * sqrt(d), and multiplied by 2 when necessary.
+     * @return The imaginary part as an int, multiplied by 2 if the denominator 
+     * is 2. For example, for 3/2 + sqrt(-7)/2, this would be 1; for 3 + 
+     * sqrt(-7) this would also be 1.
+     */
     public int getImagPartMult() {
         return this.imagPartMult;
     }
@@ -281,6 +295,18 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         return this.imagQuadRing;
     }
     
+    /**
+     * Gets the denominator of the imaginary quadratic integer when represented 
+     * as a fraction in lowest terms.
+     * @return 2 only in the case of so-called "half-integers," always 1 
+     * otherwise. So, if {@link #getRing()}{@link 
+     * ImaginaryQuadraticRing#hasHalfIntegers() .hasHalfIntegers()} is false, 
+     * this getter should always return 1. For example, for 3/2 + sqrt(-7)/2, 
+     * this would be 2, for 3 + sqrt(-7) this would be 1. In the ring of the 
+     * Gaussian integers, this getter should always return 1. Even if -1 or -2 
+     * was successfully used as a denominator in the constructor, this getter 
+     * will still return 1 or 2.
+     */
     public int getDenominator() {
         return this.denominator;
     }
@@ -1169,7 +1195,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         RingWindowDisplay.startRingWindowDisplay(-1);
 //        switch (args.length) {
 //            case 0:
-                RingWindowDisplay.startRingWindowDisplay(RingWindowDisplay.DEFAULT_RING_D);
+//                RingWindowDisplay.startRingWindowDisplay(RingWindowDisplay.DEFAULT_RING_D);
 //                break;
 //            case 1:
 //                switch (args[0]) {

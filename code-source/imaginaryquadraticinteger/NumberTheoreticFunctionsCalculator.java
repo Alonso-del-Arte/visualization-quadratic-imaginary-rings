@@ -632,7 +632,12 @@ public class NumberTheoreticFunctionsCalculator {
     }
     
     /**
-     * Determines whether a given number is squarefree or not.
+     * Determines whether a given number is squarefree or not. The original 
+     * implementation depended on {@link #primeFactors(int)}. For version 0.95, 
+     * this was optimized to try the number modulo 4, and if it's not divisible 
+     * by 4, to try dividing it by odd squares. Although this includes odd 
+     * squares like 9 and 81, it still makes for a performance improvement over 
+     * relying on primeFactors(int).
      * @param num The number to be tested for being squarefree.
      * @return true if the number is squarefree, false otherwise.
      * For example, -3 and 7 should each return true, -4, 0 and 25 should each 
@@ -648,15 +653,18 @@ public class NumberTheoreticFunctionsCalculator {
             case 0:
                 return false;
             default:
-                boolean dupFactorFound = false;
-                List<Integer> prFacts = primeFactors(num);
-                int lastToCheck = prFacts.size() - 1;
-                int curr = 0;
-                while (!dupFactorFound && (curr < lastToCheck)) {
-                    dupFactorFound = prFacts.get(curr).equals(prFacts.get(curr + 1));
-                    curr++;
+                boolean noDupFactorFound = (num % 4 != 0);
+                if (noDupFactorFound) {
+                    double threshold = Math.sqrt(Math.abs(num));
+                    int currRoot = 3;
+                    int currSquare;
+                    do {
+                        currSquare = currRoot * currRoot;
+                        noDupFactorFound = (num % currSquare != 0);
+                        currRoot += 2;
+                    } while (noDupFactorFound && currRoot <= threshold);
                 }
-                return !dupFactorFound;
+                return noDupFactorFound;
         }
     }
     
@@ -781,11 +789,13 @@ public class NumberTheoreticFunctionsCalculator {
      * exception has (will have) the method tryEuclideanGCDAnyway().
      */
     public static ImaginaryQuadraticInteger euclideanGCD(ImaginaryQuadraticInteger a, ImaginaryQuadraticInteger b) throws NonEuclideanDomainException {
-        if (((a.imagPartMult != 0) && (b.imagPartMult != 0)) && (a.imagQuadRing.negRad != b.imagQuadRing.negRad)) {
-            throw new AlgebraicDegreeOverflowException("This operation would result in an algebraic integer of degree 4.", 2, 4);
+        int d = a.getRing().getNegRad();
+        if (((a.getImagPartMult() != 0) && (b.getImagPartMult() != 0)) && (d != b.getRing().getNegRad())) {
+            String exceptionMessage = "This operation would result in an algebraic integer of degree 4.";
+            throw new AlgebraicDegreeOverflowException(exceptionMessage, 2, 4);
         }
-        if (a.imagQuadRing.negRad < -11 || a.imagQuadRing.negRad == -10 || a.imagQuadRing.negRad == -6 || a.imagQuadRing.negRad == -5) {
-            String exceptionMessage = a.toASCIIString() + " and " + b.toASCIIString() + " are in non-Euclidean domain " + a.imagQuadRing.toFilenameString() + ".";
+        if (d < -11 || d == -10 || d == -6 || d == -5) {
+            String exceptionMessage = a.toASCIIString() + " and " + b.toASCIIString() + " are in non-Euclidean domain " + a.getRing().toASCIIString() + ".";
             throw new NonEuclideanDomainException(exceptionMessage, a, b);
         }
         ImaginaryQuadraticInteger currA, currB, tempMultiple, currRemainder;
@@ -816,10 +826,10 @@ public class NumberTheoreticFunctionsCalculator {
             currA = currB;
             currB = currRemainder;
         }
-        if (currA.imagQuadRing.negRad == -1 && currA.realPartMult == 0) {
+        if (d == -1 && currA.getRealPartMult() == 0) {
             currA = currA.times(IMAG_UNIT_NEG_I);
         }
-        if (currA.realPartMult < 0) {
+        if (currA.getRealPartMult() < 0) {
             currA = currA.times(-1);
         }
         return currA;

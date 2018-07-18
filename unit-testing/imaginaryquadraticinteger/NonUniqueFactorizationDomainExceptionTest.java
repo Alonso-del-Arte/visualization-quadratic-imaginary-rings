@@ -1,18 +1,18 @@
 /*
- * Copyright (C) 2018 AL
+ * Copyright (C) 2018 Alonso del Arte
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under 
+ * the terms of the GNU General Public License as published by the Free Software 
+ * Foundation, either version 3 of the License, or (at your option) any later 
+ * version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
+ * details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with 
+ * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package imaginaryquadraticinteger;
 
@@ -126,9 +126,9 @@ public class NonUniqueFactorizationDomainExceptionTest {
      * number in a non-UFD can be properly factorized into primes, 
      * tryToFactorizeAnyway() will return a list of those primes. But when a 
      * number is the product of irreducible numbers that are not prime, 
-     * tryToFactorizeAnyway() will return a list of factors that starts out 1, 
-     * 1. The numbers in the list may or may not multiply to the original 
-     * number.
+     * tryToFactorizeAnyway() will return a list of factors that includes -1 as 
+     * a factor at least twice, so as to alert the recipient of the information 
+     * that another factorization might be possible.
      */
     @Test
     public void testTryToFactorizeAnyway() {
@@ -136,38 +136,37 @@ public class NonUniqueFactorizationDomainExceptionTest {
         List<ImaginaryQuadraticInteger> expResult = new ArrayList<>();
         ImaginaryQuadraticInteger number = new ImaginaryQuadraticInteger(0, 1, RING_ZI5);
         expResult.add(number); // Add sqrt(-5) to the list of expected factors
+        System.out.println("Try to factorize " + nufdeSqrti5.getUnfactorizedNumber().toASCIIString());
         List<ImaginaryQuadraticInteger> result = nufdeSqrti5.tryToFactorizeAnyway();
         assertEquals(expResult, result);
         expResult.add(number); // Add sqrt(-5) to the list of expected factors again
         number = new ImaginaryQuadraticInteger(-1, 0, RING_ZI5); // Good old -1, a unit
         expResult.add(0, number);
+        System.out.println("Try to factorize " + nufde05.getUnfactorizedNumber().toASCIIString());
         result = nufde05.tryToFactorizeAnyway();
         assertEquals(expResult, result);
         expResult.clear();
-        number = number.times(-1); // Good old 1, a unit
         expResult.add(number);
-        expResult.add(number); // Add 1 to the list twice
-        number = number.plus(1); // This is now 2
-        expResult.add(number);
-        number = number.plus(1); // This is now 3
-        expResult.add(number);
-        number = new ImaginaryQuadraticInteger(1, -1, RING_ZI5); // 1 - sqrt(-5)
-        expResult.add(number);
-        expResult.add(number.conjugate()); // 1 + sqrt(-5)
+        expResult.add(number); // Add -1 to the list twice
+        System.out.println("Try to factorize " + nufde06.getUnfactorizedNumber().toASCIIString());
         result = nufde06.tryToFactorizeAnyway();
-        String assertionMessage = "Factorization of " + nufde06.getUnfactorizedNumber().toASCIIString() + " should contain ";
-        for (ImaginaryQuadraticInteger iqi : expResult) {
-            assertionMessage = assertionMessage + iqi.toASCIIString() + ", ";
-        }
-        assertionMessage = assertionMessage + "...";
+        String assertionMessage = "Factorization of " + nufde06.getUnfactorizedNumber().toASCIIString() + " should include -1 twice.";
         assertTrue(assertionMessage, result.containsAll(expResult));
+        number = number.times(-1); // Number is now 1
+        for (ImaginaryQuadraticInteger iqi : result) {
+            number = number.times(iqi);
+        }
+        assertionMessage = "Numbers in factorization of " + nufde06.getUnfactorizedNumber().toASCIIString() + " should multiply to said number.";
+        assertTrue(assertionMessage, number.equals(nufde06.getUnfactorizedNumber()));
         expResult.clear();
         number = new ImaginaryQuadraticInteger(6, -1, RING_ZI5); // 6 - sqrt(-5)
         expResult.add(number);
         expResult.add(number.conjugate()); // 6 + sqrt(-5)
+        System.out.println("Try to factorize " + nufde41.getUnfactorizedNumber().toASCIIString());
         result = nufde41.tryToFactorizeAnyway();
         assertEquals(expResult, result);
         expResult.remove(number);
+        System.out.println("Try to factorize " + nufde41PF.getUnfactorizedNumber().toASCIIString());
         result = nufde41PF.tryToFactorizeAnyway();
         assertEquals(expResult, result);
     }

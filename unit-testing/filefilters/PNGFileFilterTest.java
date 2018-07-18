@@ -19,12 +19,20 @@ package filefilters;
 import java.io.File;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.BeforeClass;
 
 /**
  * Just a straightforward test of the PNGFileFilter for the JFileChooser.
  * @author Alonso del Arte
  */
 public class PNGFileFilterTest {
+    
+    private static PNGFileFilter filter;
+
+    @BeforeClass
+    public static void setUpClass() {
+        filter = new PNGFileFilter();
+    }
     
     /**
      * Test of accept method, of class PNGFileFilter.
@@ -33,15 +41,26 @@ public class PNGFileFilterTest {
     public void testAccept() {
         System.out.println("accept");
         File file = new File("image.png");
-        PNGFileFilter filter = new PNGFileFilter();
-        String assertionMessage = "PNGFileFilter should accept image.png";
+        String assertionMessage = "PNGFileFilter should accept " + file.getName();
+        System.out.println(assertionMessage);
         assertTrue(assertionMessage, filter.accept(file));
-        file = new File("document.doc");
-        assertionMessage = "PNGFileFilter should reject document.doc";
+        file = new File("image.PNG");
+        assertionMessage = "PNGFileFilter should accept " + file.getName();
+        System.out.println(assertionMessage);
+        assertTrue(assertionMessage, filter.accept(file));
+        file = new File("image.jpeg");
+        assertionMessage = "PNGFileFilter should reject " + file.getName();
+        System.out.println(assertionMessage);
         assertFalse(assertionMessage, filter.accept(file));
-//        File dir = file.getParentFile();
-//        assertionMessage = "PNGFileFilter should accept directory " + dir.getAbsolutePath();
-//        assertTrue(assertionMessage, filter.accept(file));
+        file = new File("document.doc");
+        assertionMessage = "PNGFileFilter should reject " + file.getName();
+        System.out.println(assertionMessage);
+        assertFalse(assertionMessage, filter.accept(file));
+        String homeDir = System.getProperty("user.home");
+        File dir = new File(homeDir);
+        assertionMessage = "PNGFileFilter should accept directory " + homeDir;
+        System.out.println(assertionMessage);
+        assertTrue(assertionMessage, filter.accept(dir));
     }
 
     /**
@@ -50,12 +69,12 @@ public class PNGFileFilterTest {
     @Test
     public void testGetDescription() {
         System.out.println("getDescription");
-        PNGFileFilter filter = new PNGFileFilter();
         String description = filter.getDescription();
+        System.out.println("PNGFileFilter description is \"" + description + "\"");
         String assertionMessage = "Filter description should include \"Portable Network Graphics\"";
         assertTrue(assertionMessage, description.contains("Portable Network Graphics"));
         assertionMessage = "Filter description should include \"png\" or \"PNG\"";
-        assertTrue(assertionMessage, description.contains("png") || description.contains("PNG"));
+        assertTrue(assertionMessage, description.toLowerCase().contains("png"));
     }
     
 }

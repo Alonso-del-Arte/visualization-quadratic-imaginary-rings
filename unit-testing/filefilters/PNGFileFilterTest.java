@@ -17,9 +17,9 @@
 package filefilters;
 
 import java.io.File;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.junit.BeforeClass;
 
 /**
  * Just a straightforward test of the PNGFileFilter for the JFileChooser.
@@ -35,7 +35,9 @@ public class PNGFileFilterTest {
     }
     
     /**
-     * Test of accept method, of class PNGFileFilter.
+     * Test of accept method, of class PNGFileFilter. The file filter should 
+     * accept PNG files and reject all other files, even if they are graphics 
+     * files like JPEG.
      */
     @Test
     public void testAccept() {
@@ -64,7 +66,9 @@ public class PNGFileFilterTest {
     }
 
     /**
-     * Test of getDescription method, of class PNGFileFilter.
+     * Test of getDescription method, of class PNGFileFilter. The description 
+     * provided to JFileChooser should include the file extension *.png or 
+     *.PNG.
      */
     @Test
     public void testGetDescription() {

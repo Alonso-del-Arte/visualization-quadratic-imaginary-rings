@@ -27,6 +27,12 @@ import javax.swing.filechooser.FileFilter;
  */
 public class JPEGFileFilter extends FileFilter {
     
+    /**
+     * Tells JFileChooser whether it should accept or reject a given file.
+     * @param file The file to accept or reject.
+     * @return True if the finename has any of these four extensions: ".jpg", 
+     * ".jpeg", ".JPG", ".JPEG"; false otherwise.
+     */
     @Override
     public boolean accept(File file) {
         if (file.isDirectory()) {
@@ -37,7 +43,8 @@ public class JPEGFileFilter extends FileFilter {
     
     /**
      * The description of this filter.
-     * @return The String "Joint Photographic Experts Group image files (*.jpg or *.jpeg)"
+     * @return The String "Joint Photographic Experts Group image files (*.jpg 
+     * or *.jpeg)"
      */
     @Override
     public String getDescription() {

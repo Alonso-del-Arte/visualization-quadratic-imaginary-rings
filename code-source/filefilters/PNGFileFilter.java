@@ -27,6 +27,12 @@ import javax.swing.filechooser.FileFilter;
  */
 public class PNGFileFilter extends FileFilter {
     
+    /**
+     * Tells JFileChooser whether it should accept or reject a given file.
+     * @param file The file to accept or reject.
+     * @return True if the filename has the file extension ".png" or ".PNG", 
+     * false otherwise.
+     */
     @Override
     public boolean accept(File file) {
         if (file.isDirectory()) {

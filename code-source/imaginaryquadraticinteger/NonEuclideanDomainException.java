@@ -25,23 +25,26 @@ package imaginaryquadraticinteger;
  */
 public class NonEuclideanDomainException extends Exception {
     
-    private static final long serialVersionUID = 1058246932;
+    private static final long serialVersionUID = 1058267512;
         
     private final ImaginaryQuadraticInteger attemptedA, attemptedB;
     
     public ImaginaryQuadraticInteger[] getEuclideanGCDAttemptedNumbers() {
         return (new ImaginaryQuadraticInteger[]{attemptedA, attemptedB});
     }
-    /*
-    public ImaginaryQuadraticInteger tryEuclideanGCDAnyway() {
-        //   (* This is going to be a function that tries to take the Euclidean GCD algorithm as far as possible.
-        //      Sometimes there will be a result, other times not. *)
-        int negRad = this.attemptedA.getRing().getNegRad();
-        if (negRad != this.attemptedB.getRing().getNegRad()) {
-            throw new RuntimeException("euclideanGCD should have thrown AlgebraicDegreeOverflowException, not NonEuclideanDomainException.");
-        }
-        ImaginaryQuadraticInteger attemptedEuclideanGCD;
-    } */
+    
+//    public ImaginaryQuadraticInteger tryEuclideanGCDAnyway() {
+//        //   (* This is going to be a function that tries to take the Euclidean GCD algorithm as far as possible.
+//        //      Sometimes there will be a result, other times not. *)
+//        int negRad = this.attemptedA.getRing().getNegRad();
+//        if (negRad != this.attemptedB.getRing().getNegRad()) {
+//            throw new AlgebraicDegreeOverflowException("euclideanGCD should have thrown AlgebraicDegreeOverflowException, not NonEuclideanDomainException.", 2, this.attemptedA, this.attemptedB);
+//        }
+//        ImaginaryQuadraticInteger attemptedEuclideanGCD;
+//        attemptedEuclideanGCD = this.attemptedA;
+//        //   (* The actual logic of attempting the Euclidean algorithm will go here *)
+//        return attemptedEuclideanGCD;
+//    }
 
     /**
      * This is an exception to be thrown by an Euclidean GCD function if called 

@@ -26,7 +26,7 @@ import java.util.List;
  */
 public class NonUniqueFactorizationDomainException extends Exception {
     
-    private static final long serialVersionUID = 1058262425;
+    private static final long serialVersionUID = 1058267088;
     
     private final ImaginaryQuadraticInteger unfactorizedNumber;
     
@@ -72,7 +72,7 @@ public class NonUniqueFactorizationDomainException extends Exception {
         } else {
             ImaginaryQuadraticInteger testDivisor = new ImaginaryQuadraticInteger(2, 0, n.getRing());
             if (NumberTheoreticFunctionsCalculator.isIrreducible(testDivisor)) {
-                while (n.norm() % 4 == 0) {
+                while (n.norm() % 4 == 0 && keepGoing) {
                     try {
                         n = n.divides(testDivisor);
                         factors.add(testDivisor);
@@ -81,11 +81,12 @@ public class NonUniqueFactorizationDomainException extends Exception {
                             factors.add(negativeOne);
                         }
                     } catch (NotDivisibleException nde) {
-                        // keepGoing = ((Math.abs(nde.getNumericRealPart()) > 1) || (Math.abs(nde.getNumericImagPart()) > 1));
+                        keepGoing = false;
                     }
                 }
             }
             testDivisor = testDivisor.plus(1);
+            keepGoing = true;
             while ((n.norm() >= testDivisor.norm()) && keepGoing) {
                 if (NumberTheoreticFunctionsCalculator.isIrreducible(testDivisor)) {
                     while (n.norm() % testDivisor.norm() == 0 && keepGoing) {
@@ -93,11 +94,11 @@ public class NonUniqueFactorizationDomainException extends Exception {
                             n = n.divides(testDivisor);
                             factors.add(testDivisor);
                             if (!NumberTheoreticFunctionsCalculator.isPrime(testDivisor)) {
-                                factors.add(unity.times(-1));
-                                factors.add(unity.times(-1));
+                                factors.add(negativeOne);
+                                factors.add(negativeOne);
                             }
                         } catch (NotDivisibleException nde) {
-                            keepGoing = ((Math.abs(nde.getNumericRealPart()) > 1) || (Math.abs(nde.getNumericImagPart()) > 1));
+                            keepGoing = false;
                         }
                     }
                 }
@@ -112,7 +113,7 @@ public class NonUniqueFactorizationDomainException extends Exception {
             boolean withinRange;
             while (n.norm() > 1) {
                 testDivisor = new ImaginaryQuadraticInteger(testDivRealPartMult, testDivImagPartMult, n.getRing(), 2);
-                withinRange = (testDivisor.norm() < n.norm());
+                withinRange = (testDivisor.norm() <= n.norm());
                 if (NumberTheoreticFunctionsCalculator.isIrreducible(testDivisor)) {
                     keepGoing = true;
                     while (n.norm() % testDivisor.norm() == 0 && keepGoing) {
@@ -120,20 +121,22 @@ public class NonUniqueFactorizationDomainException extends Exception {
                             n = n.divides(testDivisor.conjugate());
                             factors.add(testDivisor.conjugate());
                             if (!NumberTheoreticFunctionsCalculator.isPrime(testDivisor)) {
-                                factors.add(unity.times(-1));
-                                factors.add(unity.times(-1));
+                                factors.add(negativeOne);
+                                factors.add(negativeOne);
                             }
                         } catch (NotDivisibleException nde) {
-                            keepGoing = false;
+                            /* We just ignore the exception when it pertains to 
+                               the conjugate */
                         }
                         try {
                             n = n.divides(testDivisor);
                             factors.add(testDivisor);
                             if (!NumberTheoreticFunctionsCalculator.isPrime(testDivisor)) {
-                                factors.add(unity.times(-1));
-                                factors.add(unity.times(-1));
+                                factors.add(negativeOne);
+                                factors.add(negativeOne);
                             }
                         } catch (NotDivisibleException nde) {
+                            withinRange = ((Math.abs(nde.getNumericRealPart()) >= 1) || (Math.abs(nde.getNumericImagPart()) >= 1));
                             keepGoing = false;
                         }
                     }
@@ -158,6 +161,7 @@ public class NonUniqueFactorizationDomainException extends Exception {
         }
         factors = NumberTheoreticFunctionsCalculator.sortListIQIByNorm(factors);
         int quadrantAdjustStart = 1;
+        keepGoing = true;
         while (quadrantAdjustStart < factors.size() && keepGoing) {
             if (factors.get(quadrantAdjustStart).norm() == 1) {
                 quadrantAdjustStart++;
@@ -166,13 +170,17 @@ public class NonUniqueFactorizationDomainException extends Exception {
             }
         }
         for (int i = quadrantAdjustStart; i < factors.size(); i++) {
-            if (factors.get(i).getRealPartMult() < 0 || (factors.get(i).getRealPartMult() == 0 && factors.get(i).getImagPartMult() < 0)) {
+            if (factors.get(i).getRealPartMult() < 0 || ((factors.get(i).getRealPartMult()) == 0 && (factors.get(i).getImagPartMult() < 0))) {
                 factors.set(i, factors.get(i).times(-1));
                 factors.set(0, factors.get(0).times(-1));
             }
         }
-        if (factors.get(0).equalsInt(1)) {
-            factors.remove(0);
+        int removalIndex = 0;
+        while (removalIndex < factors.size()) {
+            if (factors.get(removalIndex).equalsInt(1)) {
+                factors.remove(removalIndex);
+            }
+            removalIndex++;
         }
         return factors;
     }

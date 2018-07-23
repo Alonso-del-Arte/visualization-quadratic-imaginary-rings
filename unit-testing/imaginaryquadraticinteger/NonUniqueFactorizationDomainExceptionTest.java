@@ -26,13 +26,18 @@ import static org.junit.Assert.*;
  * Tests for the NonUniqueFactorizationDomainException class. The purpose of 
  * this test class is only to make sure the exception object works as it should. 
  * Testing whether this exception is thrown for the right reasons or not is the 
- * responsibility of other test classes. All the tests in this test class use 
- * the famous domain <b>Z</b>[&radic;-5], which is not a unique factorization 
- * domain.
+ * responsibility of other test classes. With one exception, all the tests in 
+ * this test class use the famous domain <b>Z</b>[&radic;-5], which is not a 
+ * unique factorization domain.
  * @author Alonso del Arte
  */
 public class NonUniqueFactorizationDomainExceptionTest {
     
+    /**
+     * The famous ring <b>Z</b>[&radic;-5], consisting of numbers of the form a 
+     * + b&radic;-5. It does not have unique factorization, since, for example, 
+     * 21 = 3 &times; 7 = (4 - &radic;-5)(4 + &radic;-5).
+     */
     public static final ImaginaryQuadraticRing RING_ZI5 = new ImaginaryQuadraticRing(-5);
     
     private static NonUniqueFactorizationDomainException nufdeSqrti5;
@@ -119,7 +124,7 @@ public class NonUniqueFactorizationDomainExceptionTest {
         result = nufde41.getUnfactorizedNumber();
         assertEquals(expResult, result);
     }
-
+    
     /**
      * Test of tryToFactorizeAnyway method, of class 
      * NonUniqueFactorizationDomainException. The expectation is that when a 
@@ -169,6 +174,94 @@ public class NonUniqueFactorizationDomainExceptionTest {
         System.out.println("Try to factorize " + nufde41PF.getUnfactorizedNumber().toASCIIString());
         result = nufde41PF.tryToFactorizeAnyway();
         assertEquals(expResult, result);
+    }
+    
+    /**
+     * Another test of tryToFactorizeAnyway method, of class 
+     * NonUniqueFactorizationDomainException. The previous test (in source code 
+     * order, not necessarily running order) operated on just five numbers in 
+     * <b>Z</b>[&radic;-5]. This test operates on several numbers in several 
+     * rings, from <b>Z</b>[&radic;-5] to <b>Z</b>[&radic;-97]. A few of those 
+     * are UFDs, but almost all of them are not, so this provides a good workout 
+     * of tryToFactorizeAnyway().
+     */
+    @Test
+    public void testTryToFactorizeAnywayInSeveralRings() {
+        System.out.println("tryToFactorizeAnyway in several different rings");
+        ImaginaryQuadraticRing ring;
+        ImaginaryQuadraticInteger number = new ImaginaryQuadraticInteger(1, 0, NumberTheoreticFunctionsCalculator.RING_GAUSSIAN);
+        ImaginaryQuadraticInteger zero, facProd;
+        String assertionMessage;
+        int negOneCount, irrNotPrCount;
+        List<ImaginaryQuadraticInteger> factorsList = new ArrayList<>();
+        factorsList.add(number); // This and previous line just to avoid might not have been initialized errors
+        for (int r = -5; r > -100; r--) {
+            if (NumberTheoreticFunctionsCalculator.isSquareFree(r)) {
+                ring = new ImaginaryQuadraticRing(r);
+                zero = new ImaginaryQuadraticInteger(0, 0, ring);
+                if (ring.hasHalfIntegers()) {
+                    for (int a = -9; a < 10; a += 2) {
+                        number = new ImaginaryQuadraticInteger(a, 3, ring, 2);
+                        try {
+                            factorsList = NumberTheoreticFunctionsCalculator.primeFactors(number);
+                        } catch (NonUniqueFactorizationDomainException nufde) {
+                            factorsList = nufde.tryToFactorizeAnyway();
+                        }
+                        negOneCount = 0;
+                        irrNotPrCount = 0;
+                        facProd = zero.plus(1); // Reset facProd to 1
+                        for (ImaginaryQuadraticInteger factor : factorsList) {
+                            if (factor.equalsInt(-1)) {
+                                negOneCount++;
+                            }
+                            if ((factor.norm() > 1) && (NumberTheoreticFunctionsCalculator.isIrreducible(factor) && !NumberTheoreticFunctionsCalculator.isPrime(factor))) {
+                                irrNotPrCount++;
+                            }
+                            facProd = facProd.times(factor);
+                        }
+                        assertionMessage = "Product of factors of " + facProd.toString() + " should match " + number.toString();
+                        assertEquals(assertionMessage, number, facProd);
+                        if (irrNotPrCount > 0) {
+                            assertionMessage = "Since " + number.toString() + " is the product of at least one irreducible but not prime number, its attempted factorization should include at least two instances of -1";
+                            assertTrue(assertionMessage, negOneCount > 1);
+                        }
+                    }
+                    System.out.println(number.toASCIIString() + " has " + factorsList.get(factorsList.size() - 1).toASCIIString() + " as one factor.");
+                }
+                for (int m = -5; m < 5; m++) {
+                    number = new ImaginaryQuadraticInteger(m, 1, ring);
+                    try {
+                        factorsList = NumberTheoreticFunctionsCalculator.primeFactors(number);
+                    } catch (NonUniqueFactorizationDomainException nufde) {
+                        factorsList = nufde.tryToFactorizeAnyway();
+                    }
+                    negOneCount = 0;
+                    irrNotPrCount = 0;
+                    facProd = zero.plus(1); // Reset facProd to 1
+                    for (ImaginaryQuadraticInteger factor : factorsList) {
+                        if (factor.equalsInt(-1)) {
+                            negOneCount++;
+                        }
+                        if ((factor.norm() > 1) && (NumberTheoreticFunctionsCalculator.isIrreducible(factor) && !NumberTheoreticFunctionsCalculator.isPrime(factor))) {
+                            irrNotPrCount++;
+                        }
+                        facProd = facProd.times(factor);
+                    }
+                    assertionMessage = "Product of factors of " + facProd.toString() + " should match " + number.toString();
+                    assertEquals(assertionMessage, number, facProd);
+                    if (irrNotPrCount > 0) {
+                        assertionMessage = "Since " + number.toString() + " is the product of at least one irreducible but not prime number, its attempted factorization should include at least two instances of -1";
+                        assertTrue(assertionMessage, negOneCount > 1);
+                    }
+                }
+                System.out.print(number.toASCIIString() + " has " + factorsList.get(factorsList.size() - 1).toASCIIString() + " as one factor");
+                if (!NumberTheoreticFunctionsCalculator.isPrime(factorsList.get(factorsList.size() - 1))) {
+                    System.out.println(", which is irreducible but not prime.");
+                } else {
+                    System.out.println(".");
+                }
+            }
+        }
     }
     
 }

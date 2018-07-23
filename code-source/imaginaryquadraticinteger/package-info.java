@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Alonso del Arte
+ * Copyright (C) 2018 Alonso del Arte
  *
  * This program is free software: you can redistribute it and/or modify it under 
  * the terms of the GNU General Public License as published by the Free Software 
@@ -26,6 +26,11 @@
  * classes it currently has but perhaps RingWindowDisplay would be shipped out 
  * to a view package and NumberTheoreticFunctionsCalculator would go to a 
  * calculators package. The exceptions would stay in this package.</p>
+ * 
+ * <p>In late May 2018, I did decide to make a separate package for the file 
+ * filters which RingWindowDisplay.saveDiagramAs() uses (or might use) to get 
+ * the user to select a place where to save diagrams produced by the program. 
+ * That package is called, appropriately enough, filefilters.</p>
  * 
  * <p>Copyright &copy; 2018 Alonso del Arte.</p>
  */

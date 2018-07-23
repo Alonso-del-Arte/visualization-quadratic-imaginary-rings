@@ -430,21 +430,22 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * A text representation of the integer using only ASCII characters. I wrote 
-     * this function only because the font used in the test suite output 
-     * (NetBeans on Windows) lacks the square root character "&radic;".
-     * All this function does is replace "&radic;" with "sqrt".
+     * A text representation of the imaginary quadratic integer using only ASCII 
+     * characters. I wrote this function only because the font used in the test 
+     * suite output (NetBeans on Windows) lacks the square root character 
+     * "&radic;". All this function does is replace "&radic;" with "sqrt".
      * @return A String using only ASCII characters. For example, for 
      * "&radic;(-2)", the result will be "sqrt(-2)".
      */
+    @Override
     public String toASCIIString() {
         return this.toString().replace("\u221A", "sqrt");
     }
     
     /**
-     * A text representation of the integer with theta notation when applicable, 
-     * but using only ASCII characters. After writing toASCIIString, it only 
-     * made sense to write this one as well.
+     * A text representation of the imaginary quadratic integer with theta 
+     * notation when applicable, but using only ASCII characters. After writing 
+     * toASCIIString, it only made sense to write this one as well.
      * @return A String using only ASCII characters. For instance, for "-1 + 
      * &theta;", the result will be "-1 + theta". If {@link #getRing()}{@link 
      * ImaginaryQuadraticRing#hasHalfIntegers() .hasHalfIntegers()} is false, 
@@ -465,14 +466,16 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * A text representation of the integer suitable for use in a TeX document. 
-     * If you prefer a single denominator instead of a separate denominator for 
-     * the real and imaginary parts, use {@link #toTeXStringSingleDenom()}.
-     * Although I have a unit test for this function, I have not tested 
-     * inserting the output of this function into an actual TeX document.
+     * A text representation of the imaginary quadratic integer suitable for use 
+     * in a TeX document. If you prefer a single denominator instead of a 
+     * separate denominator for the real and imaginary parts, use {@link 
+     * #toTeXStringSingleDenom()}. Although I have a unit test for this 
+     * function, I have not tested inserting the output of this function into an 
+     * actual TeX document.
      * @return A String. For example, for 1/2 + sqrt(-7)/2, the result should be 
      * "\frac{1}{2} + \frac{\sqrt{-7}}{2}".
      */
+    @Override
     public String toTeXString() {
         if (this.imagQuadRing.negRad == -1) {
             return this.toString();
@@ -508,11 +511,11 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * A text representation of the integer suitable for use in a TeX document, 
-     * but only with a single denominator for both the real and imaginary parts, 
-     * as opposed to {@link #toTeXString()}.
-     * Although I have a unit test for this function, I have not tested 
-     * inserting the output of this function into an actual TeX document.
+     * A text representation of the imaginary quadratic integer suitable for use 
+     * in a TeX document, but only with a single denominator for both the real 
+     * and imaginary parts, as opposed to {@link #toTeXString()}. Although I 
+     * have a unit test for this function, I have not tested inserting the 
+     * output of this function into an actual TeX document.
      * @return A String. For example, for 1/2 + sqrt(-7)/2, the result should be 
      * "\frac{1 + \sqrt{-7}}{2}".
      */
@@ -529,8 +532,8 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
 
     /**
-     * A text representation of the integer suitable for use in a TeX document, 
-     * with theta notation when applicable.
+     * A text representation of the imaginary quadratic integer suitable for use 
+     * in a TeX document, with theta notation when applicable.
      * @return A String. For example, for "-1 + &theta;", the result will be "-1 + 
      * \theta". If {@link #getRing()}{@link 
      * ImaginaryQuadraticRing#hasHalfIntegers() .hasHalfIntegers()} is false, 
@@ -548,14 +551,16 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
     
     /**
-     * A text representation of the integer suitable for use in an HTML 
-     * document. Although I have a unit test for this function, I have not 
-     * tested inserting the output of this function into an actual HTML 
+     * A text representation of the imaginary quadratic integer suitable for use 
+     * in an HTML document. Although I have a unit test for this function, I 
+     * have not tested inserting the output of this function into an actual HTML 
      * document.
      * @return  A String. For example, for 1/2 + sqrt(-7)/2, the result should 
-     * be "1/2 + &radic;(-7)/2". Note that a character entity is used for the 
-     * square root symbol.
+     * be "1/2 + &amp;radic;(-7)/2". Note that a character entity is used for 
+     * the square root symbol, so in a Web browser, the foregoing should render 
+     * as "1/2 + &radic;(-7)/2".
      */
+    @Override
     public String toHTMLString() {
         String IQIString = this.toString();
         IQIString = IQIString.replace("i", "<i>i</i>");
@@ -565,8 +570,8 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
     }
 
     /**
-     * A text representation of the integer suitable for use in a TeX document, 
-     * with theta notation when applicable.
+     * A text representation of the imaginary quadratic integer suitable for use 
+     * in an HTML document, with theta notation when applicable.
      * @return  A String. For example, for "-1 + &theta;", the result will be 
      * "-1 + &theta;". If {@link #getRing()}{@link 
      * ImaginaryQuadraticRing#hasHalfIntegers() .hasHalfIntegers()} is false, 
@@ -758,7 +763,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
             return this.plus(summand.realPartMult);
         }
         if (this.imagQuadRing.negRad != summand.imagQuadRing.negRad) {
-            throw new AlgebraicDegreeOverflowException("This operation would result in an algebraic integer of degree 4.", 2, 4);
+            throw new AlgebraicDegreeOverflowException("This operation would result in an algebraic integer of degree 4.", 2, this, summand);
         }
         long sumRealPart = 0;
         long sumImagPart = 0;
@@ -848,7 +853,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
             return this.minus(subtrahend.realPartMult);
         }
         if (this.imagQuadRing.negRad != subtrahend.imagQuadRing.negRad) {
-            throw new AlgebraicDegreeOverflowException("This operation would result in an algebraic integer of degree 4.", 2, 4);
+            throw new AlgebraicDegreeOverflowException("This operation would result in an algebraic integer of degree 4.", 2, this, subtrahend);
         }
         long subtractionRealPart = 0;
         long subtractionImagPart = 0;
@@ -935,7 +940,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
             return this.times(multiplicand.realPartMult);
         }
         if (this.imagQuadRing.negRad != multiplicand.imagQuadRing.negRad) {
-            throw new AlgebraicDegreeOverflowException("This operation would result in an algebraic integer of degree 4.", 2, 4);
+            throw new AlgebraicDegreeOverflowException("This operation would result in an algebraic integer of degree 4.", 2, this, multiplicand);
         }
         long intermediateRealPart = this.realPartMult * multiplicand.realPartMult - this.imagPartMult * multiplicand.imagPartMult * this.imagQuadRing.absNegRad;
         long intermediateImagPart = this.realPartMult * multiplicand.imagPartMult + this.imagPartMult * multiplicand.realPartMult;
@@ -1005,7 +1010,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
      */
     public ImaginaryQuadraticInteger divides(ImaginaryQuadraticInteger divisor) throws NotDivisibleException {
         if (((this.imagPartMult != 0) && (divisor.imagPartMult != 0)) && (this.imagQuadRing.negRad != divisor.imagQuadRing.negRad)) {
-            throw new AlgebraicDegreeOverflowException("This operation would result in an algebraic integer of degree 4.", 2, 4);
+            throw new AlgebraicDegreeOverflowException("This operation would result in an algebraic integer of degree 4.", 2, this, divisor);
         }
         if (divisor.realPartMult == 0 && divisor.imagPartMult == 0) {
             throw new IllegalArgumentException("Division by 0 is not allowed.");

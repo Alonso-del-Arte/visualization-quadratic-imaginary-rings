@@ -774,25 +774,28 @@ public class NumberTheoreticFunctionsCalculator {
      * @param b One of the two imaginary quadratic integers. Need not have 
      * smaller norm than the other.
      * @return The GCD.
-     * @throws AlgebraicDegreeOverflowException If the algebraic integers come 
-     * from different quadratic rings, the GCD might be a number from a ring of 
-     * degree 4 or higher. This may or may not be the case (quite likely the two 
-     * algebraic integers will be coprime and so the answer is just good old 1); 
-     * the function assumes that the GCD can't be calculated using the Euclidean 
-     * algorithm and throws this runtime exception.
-     * @throws NonEuclideanDomainException If the algebraic integers come from 
-     * any imaginary quadratic ring other than Z[i], Z[&radic;-2], Z[\u03C9], 
-     * O_Q(&radic;-7) or O_Q(&radic;-11), the function assumes the Euclidean GCD 
-     * algorithm will fail without even trying, and throws this checked 
-     * exception. However, for some pairs drawn from a non-Euclidean domain, the 
-     * Euclidean GCD algorithm might nevertheless work. For this reason, the 
-     * exception has (will have) the method tryEuclideanGCDAnyway().
+     * @throws AlgebraicDegreeOverflowException If the imaginary quadratic 
+     * integers come from different quadratic rings, the GCD might be a number 
+     * from a ring of degree 4 or higher. This may or may not be the case (quite 
+     * likely the two imaginary quadratic integers will be coprime and so the 
+     * answer is just good old 1); the function assumes that the GCD can't be 
+     * calculated using the Euclidean algorithm and throws this runtime 
+     * exception.
+     * @throws NonEuclideanDomainException If the imaginary quadratic integers 
+     * come from any imaginary quadratic ring other than <b>Z</b>[<i>i</i>], 
+     * <b>Z</b>[&radic;-2], <b>Z</b>[&omega;], 
+     * <i>O</i><sub><b>Q</b>(&radic;-7)</sub> or 
+     * <i>O</i><sub><b>Q</b>(&radic;-11)</sub>, the function assumes the 
+     * Euclidean GCD algorithm will fail without even trying, and throws this 
+     * checked exception. However, for some pairs drawn from a non-Euclidean 
+     * domain, the Euclidean GCD algorithm might nevertheless work. For this 
+     * reason, the exception has (will have) the method tryEuclideanGCDAnyway().
      */
     public static ImaginaryQuadraticInteger euclideanGCD(ImaginaryQuadraticInteger a, ImaginaryQuadraticInteger b) throws NonEuclideanDomainException {
         int d = a.getRing().getNegRad();
         if (((a.getImagPartMult() != 0) && (b.getImagPartMult() != 0)) && (d != b.getRing().getNegRad())) {
             String exceptionMessage = "This operation would result in an algebraic integer of degree 4.";
-            throw new AlgebraicDegreeOverflowException(exceptionMessage, 2, 4);
+            throw new AlgebraicDegreeOverflowException(exceptionMessage, 2, a, b);
         }
         if (d < -11 || d == -10 || d == -6 || d == -5) {
             String exceptionMessage = a.toASCIIString() + " and " + b.toASCIIString() + " are in non-Euclidean domain " + a.getRing().toASCIIString() + ".";

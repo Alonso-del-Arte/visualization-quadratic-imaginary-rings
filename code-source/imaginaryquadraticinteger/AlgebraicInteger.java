@@ -20,11 +20,17 @@ package imaginaryquadraticinteger;
  * This interface sets the basic requirements for objects representing algebraic 
  * integers. The implementing classes should provide an algebraic degree 
  * function, trace and norm functions, and the minimal polynomial formatted 
- * either as an integer array of coefficients or as a String. Basic arithmetic 
- * functions (addition, subtraction, multiplication and division) would be nice 
- * but are not explicitly required by this interface. It is then up to the 
- * implementer to define basic arithmetic methods as static or instance methods, 
- * or both, or not at all. Other specifics are also left to the implementer.
+ * both as an integer array of coefficients and as a String.
+ * <p>Almost from the beginning, {@link ImaginaryQuadraticInteger}, an 
+ * implementation of AlgebraicInteger, had some variants of {@link 
+ * Object#toString()} specifically for ASCII plaintext, TeX documents and HTML 
+ * pages, but it wasn't until July 2018 that I decided that some of those should 
+ * be required by this interface.</p>
+ * <p>Basic arithmetic functions (addition, subtraction, multiplication and 
+ * division) would be nice but are not explicitly required by this interface. It 
+ * is then up to the implementer to define basic arithmetic methods as static or 
+ * instance methods, or both, or not at all. Other specifics are also left to 
+ * the implementer.</p>
  * @author Alonso del Arte
  */
 public interface AlgebraicInteger {
@@ -73,9 +79,41 @@ public interface AlgebraicInteger {
      * operator is preferably tacit, for easy transfer to TeX.
      * @return A String in which the variable x appears as many times as 
      * dictated by the algebraic degree. For example, if the algebraic integer 
-     * is cuberoot(2) + 1, the result should be preferably "x^3 - 3x^2 + 3x - 
+     * is 1 + \u221B2, the result should be preferably "x^3 - 3x^2 + 3x - 
      * 3", but "x^3-3x^2+3x-3" and "x^3-3*x^2+3*x-3" are also acceptable.
      */
     String minPolynomialString();
+    
+    /**
+     * A text representation of the algebraic integer using only ASCII 
+     * characters. It is strongly recommended that any implementations of 
+     * AlgebraicInteger also override {@link Object#toString}.
+     * @return A String using only ASCII characters. For example, for 
+     * &omega;\u221B2, this might be "omega cbrt(2)". Spaces are very desirable 
+     * but not strictly required. However, if spaces are omitted in certain 
+     * cases, such as this example, it might be necessary to make the previously 
+     * tacit multiplication operator explicit as an ASCII character, e.g., 
+     * "omega*cbrt(2)".
+     */
+    String toASCIIString();
+    
+    /**
+     * A text representation of the algebraic integer suitable for use in a TeX 
+     * document. It is strongly recommended that any implementations of 
+     * AlgebraicInteger also override {@link Object#toString}.
+     * @return A String suitable for use in a TeX document. For example, for 1 + 
+     * \u221B2, the result might be "1 + \root 3 \of 2".
+     */
+    String toTeXString();
+    
+    /**
+     * A text representation of the algebraic integer suitable for use in an 
+     * HTML page. It is strongly recommended that any implementations of 
+     * AlgebraicInteger also override {@link Object#toString}.
+     * @return A String suitable for use in an HTML page. For example, for 1 + 
+     * \u221B2, the result might be "1 + &amp;#8731;2", which should then render 
+     * as "1 + &#8731;2".
+     */
+    String toHTMLString();
     
 }

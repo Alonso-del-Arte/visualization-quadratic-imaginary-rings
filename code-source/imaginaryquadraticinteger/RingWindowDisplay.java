@@ -513,7 +513,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                 currPointY = this.zeroCoordY + (y * verticalGridDistance);
                 currNegPointY = this.zeroCoordY - (y * verticalGridDistance);
                 currIQI = new ImaginaryQuadraticInteger(x, y, this.imagQuadRing, 1);
-                if (NumberTheoreticFunctionsCalculator.isPrime(currIQI.norm())) {
+                if (NumberTheoreticFunctionsCalculator.isPrime(currIQI)) {
                     graphicsForPoints.setColor(this.inertPrimeColor);
                     graphicsForPoints.fillOval(currPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
                     graphicsForPoints.fillOval(currPointX - this.dotRadius, currNegPointY - this.dotRadius, dotDiameter, dotDiameter);
@@ -567,7 +567,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                     currPointY = this.zeroCoordY + (y * this.pixelsPerBasicImaginaryInterval);
                     currNegPointY = this.zeroCoordY - (y * this.pixelsPerBasicImaginaryInterval);
                     currIQI = new ImaginaryQuadraticInteger(x, y, this.imagQuadRing, 2);
-                    if (NumberTheoreticFunctionsCalculator.isPrime(currIQI.norm())) {
+                    if (NumberTheoreticFunctionsCalculator.isPrime(currIQI)) {
                         graphicsForPoints.setColor(this.inertPrimeColor);
                         graphicsForPoints.fillOval(currPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
                         graphicsForPoints.fillOval(currPointX - this.dotRadius, currNegPointY - this.dotRadius, dotDiameter, dotDiameter);

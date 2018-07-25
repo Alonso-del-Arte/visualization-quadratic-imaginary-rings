@@ -336,7 +336,11 @@ public class NumberTheoreticFunctionsCalculator {
             return true;
         } else {
             if (num.imagQuadRing.negRad == -1 && num.realPartMult == 0) {
-                return ((Math.abs(num.imagPartMult)) % 4 == 3);
+                if (isPrime(num.imagPartMult)) {
+                    return ((Math.abs(num.imagPartMult)) % 4 == 3);
+                } else {
+                    return false;
+                }
             }
             if (num.imagQuadRing.negRad == -3 && num.imagPartMult != 0) {
                 ImaginaryQuadraticInteger pureReal = num.times(COMPLEX_CUBIC_ROOT_OF_UNITY);
@@ -347,8 +351,10 @@ public class NumberTheoreticFunctionsCalculator {
                     if (pureReal.realPartMult < 0) {
                         pureReal = pureReal.times(-1);
                     }
-                    if (pureReal.realPartMult % 3 == 2) {
-                        return true;
+                    if (isPrime(pureReal.realPartMult)) {
+                        return (pureReal.realPartMult % 3 == 2);
+                    } else {
+                        return false;
                     }
                 }
             }

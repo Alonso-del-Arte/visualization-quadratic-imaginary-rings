@@ -421,6 +421,9 @@ public class NumberTheoreticFunctionsCalculatorTest {
                 assertFalse(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(gaussianInteger));
             }
         }
+        gaussianInteger = new ImaginaryQuadraticInteger(0, 15, NumberTheoreticFunctionsCalculator.RING_GAUSSIAN);
+        assertionMessage = gaussianInteger.toString() + " should not have been identified as prime in Z[i]";
+        assertFalse(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(gaussianInteger));
         /* There are also special cases in the Eisenstein integers, thanks to 
            the units. If p is a purely real integer that is prime among the 
            Eisenstein integers, then omega * p, omega^2 * p, -omega * p and 
@@ -447,6 +450,9 @@ public class NumberTheoreticFunctionsCalculatorTest {
                 assertTrue(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(eisensteinInteger));
             }
         }
+        eisensteinInteger = new ImaginaryQuadraticInteger(-4, 4, NumberTheoreticFunctionsCalculator.RING_EISENSTEIN);
+        assertionMessage = eisensteinInteger.toStringAlt() + " should not have been found to be prime.";
+        assertFalse(assertionMessage, NumberTheoreticFunctionsCalculator.isPrime(eisensteinInteger));
         // Now to test some complex numbers in Z[sqrt(-5)] and O_Q(sqrt(-31))
         ImaginaryQuadraticRing Zi5 = new ImaginaryQuadraticRing(-5);
         ImaginaryQuadraticRing OQi31 = new ImaginaryQuadraticRing(-31);

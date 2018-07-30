@@ -20,17 +20,21 @@ package imaginaryquadraticinteger;
  * An exception to indicate when the division of one algebraic integer by 
  * another algebraic integer results in an algebraic number that is in the 
  * relevant field but not the relevant ring. For example, sqrt(-2)/3 is in 
- * Q(sqrt(-2)) but not Z[sqrt(-2)]. This is the wrong exception to throw for 
- * division by 0. Throwing this exception implies the result of a division is an 
- * algebraic number but not an algebraic integer. Whatever we think an algebraic 
- * integer divided by 0 is, it is neither an algebraic number nor an algebraic 
- * integer. Also, throwing this exception implies the result of a division can 
- * be rounded to an algebraic integer nearby in the relevant ring.
+ * Q(sqrt(-2)) but not Z[sqrt(-2)].
+ * <p>This is the wrong exception to throw for division by 0. Throwing this 
+ * exception implies the result of a division is an algebraic number but not an 
+ * algebraic integer. Whatever we think an algebraic integer divided by 0 is, it 
+ * is neither an algebraic number nor an algebraic integer. Also, throwing this 
+ * exception implies the result of a division can be rounded to an algebraic 
+ * integer nearby in the relevant ring.</p>
+ * <p>At some point in the future I want to make this exception usable for any 
+ * implementation of {@link AlgebraicInteger}, not just {@link 
+ * ImaginaryQuadraticInteger}.</p>
  * @author Alonso del Arte
  */
 public class NotDivisibleException extends Exception {
     
-    private static final long serialVersionUID = 1058247852;
+    private static final long serialVersionUID = 1058274357;
     
     private final long resultingFractionRealPartNumerator;
     private final long resultingFractionImagPartNumerator;
@@ -123,14 +127,15 @@ public class NotDivisibleException extends Exception {
      * Gets the algebraic integers which surround the algebraic number 
      * represented by ({@link #getResReFractNumer()} + 
      * {@link getResImFractNumer()} * sqrt({@link getResFractNegRad()})) / 
-     * {@link getResFractDenom()}.
+     * {@link getResFractDenom()}. WARNING: There is no overflow checking.
      * @return An array of ImaginaryQuadraticInteger. Do not expect the integers 
      * to be in any particular order: I or anyone else working on this project 
      * in the future is free to change the implementation in the interest of 
      * efficiency. If you need the bounding integers in a specific order, sort 
      * the array returned by this function prior to the point where you need the 
-     * contents to be in a specific order. For example, for 1/2 + i/2, this 
-     * function should return {0, i, 1 + i, 1}, not necessarily in that order.
+     * contents to be in a specific order. For example, for 1/2 + <i>i</i>/2, 
+     * this function should return {0, <i>i</i>, 1 + <i>i</i>, 1}, not 
+     * necessarily in that order.
      */
     public ImaginaryQuadraticInteger[] getBoundingIntegers() {
         ImaginaryQuadraticInteger zeroIQI = new ImaginaryQuadraticInteger(0, 0, workingRing);
@@ -160,60 +165,104 @@ public class NotDivisibleException extends Exception {
         return algIntArray;
     }
     
-    // TODO: FINE-TUNE FUNCTION FOR DOMAINS WITH "HALF-INTEGERS"
-    // I think this will pass tests that don't involve domains with "half-integers", but more thorough tests may be necessary...
-    // TODO: WRITE JAVADOC, making sure to mention ArithmeticException
+    /**
+     * Rounds the imaginary quadratic number to the imaginary quadratic integer 
+     * in the relevant ring that is closest to 0. However, no guarantee is made 
+     * as to which result will be returned if two potential results are the same 
+     * distance from 0.
+     * @return An ImaginaryQuadraticInteger object representing the imaginary 
+     * quadratic integer that is as close if not closer to 0 than the other 
+     * integers bounding the imaginary quadratic number. For example, for 7/3 + 
+     * 4 * sqrt(-5)/3 this would be 2 + sqrt(-5). Now, given, for example, 7/8 + 
+     * 7i/8, no guarantee is made as to whether this function would return i or 
+     * 1.
+     */
     public ImaginaryQuadraticInteger roundTowardsZero() {
-        double intermediateRealPart = (double) resultingFractionRealPartNumerator / (double) resultingFractionDenominator;
-        double intermediateImagPart = (double) resultingFractionImagPartNumerator / (double) resultingFractionDenominator;
-        if (intermediateRealPart < 0) {
-            intermediateRealPart = Math.ceil(intermediateRealPart);
+        if (workingRing.hasHalfIntegers()) {
+            ImaginaryQuadraticInteger[] bounds = this.getBoundingIntegers();
+            double currAbs = bounds[0].abs();
+            double closestSoFar = currAbs;
+            int currIndex = 1;
+            int bestIndex = 0;
+            while (currIndex < bounds.length) {
+                currAbs = bounds[currIndex].abs();
+                if (currAbs < closestSoFar) {
+                    closestSoFar = currAbs;
+                    bestIndex = currIndex;
+                }
+                currIndex++;
+            }
+            return bounds[bestIndex];
         } else {
-            intermediateRealPart = Math.floor(intermediateRealPart);
+            double intermediateRealPart = (double) resultingFractionRealPartNumerator / (double) resultingFractionDenominator;
+            double intermediateImagPart = (double) resultingFractionImagPartNumerator / (double) resultingFractionDenominator;
+            if (intermediateRealPart < 0) {
+                intermediateRealPart = Math.ceil(intermediateRealPart);
+            } else {
+                intermediateRealPart = Math.floor(intermediateRealPart);
+            }
+            if (intermediateImagPart < 0) {
+                intermediateImagPart = Math.ceil(intermediateImagPart);
+            } else {
+                intermediateImagPart = Math.floor(intermediateImagPart);
+            }
+            boolean overflowFlag = (intermediateRealPart < Integer.MIN_VALUE) || (intermediateRealPart > Integer.MAX_VALUE);
+            overflowFlag = overflowFlag || ((intermediateImagPart < Integer.MIN_VALUE) || (intermediateImagPart > Integer.MAX_VALUE));
+            if (overflowFlag) {
+                throw new ArithmeticException("Real part " + intermediateRealPart + ", imaginary part " + intermediateImagPart + " times sqrt" + resultingFractionNegRad + " is outside the range of this implmentation of ImaginaryQuadraticInteger, which uses 32-bit signed integers.");
+            }
+            return new ImaginaryQuadraticInteger((int) intermediateRealPart, (int) intermediateImagPart, workingRing);
         }
-        if (intermediateImagPart < 0) {
-            intermediateImagPart = Math.ceil(intermediateImagPart);
-        } else {
-            intermediateImagPart = Math.floor(intermediateImagPart);
-        }
-        boolean overflowFlag = (intermediateRealPart < Integer.MIN_VALUE) || (intermediateRealPart > Integer.MAX_VALUE);
-        overflowFlag = overflowFlag || ((intermediateImagPart < Integer.MIN_VALUE) || (intermediateImagPart > Integer.MAX_VALUE));
-        if (overflowFlag) {
-            throw new ArithmeticException("Real part " + intermediateRealPart + ", imaginary part " + intermediateImagPart + " times sqrt" + resultingFractionNegRad + " is outside the range of this implmentation of ImaginaryQuadraticInteger, which uses 32-bit signed ints.");
-        }
-        ImaginaryQuadraticInteger result = new ImaginaryQuadraticInteger((int) intermediateRealPart, (int) intermediateImagPart, workingRing);
-        return result;
     }
     
-    // TODO: FINE-TUNE FUNCTION FOR DOMAINS WITH "HALF-INTEGERS"
-    // I think this will pass tests that don't involve domains with "half-integers", but more thorough tests may be necessary...
-    // TODO: WRITE JAVADOC, making sure to mention ArithmeticException
+    /**
+     * Rounds the imaginary quadratic number to the imaginary quadratic integer 
+     * in the relevant ring that is farthest from 0. However, no guarantee is 
+     * made as to which result will be returned if two potential results are the 
+     * same distance from 0.
+     * @return An ImaginaryQuadraticInteger object representing the imaginary 
+     * quadratic integer that is as far if not farther from 0 than the other 
+     * integers bounding the imaginary quadratic number. For example, for 7/3 + 
+     * 4 * sqrt(-5)/3 this would be 3 + 2 * sqrt(-5).
+     */
     public ImaginaryQuadraticInteger roundAwayFromZero() {
-        double intermediateRealPart = (double) resultingFractionRealPartNumerator / (double) resultingFractionDenominator;
-        double intermediateImagPart = (double) resultingFractionImagPartNumerator / (double) resultingFractionDenominator;
-        if (intermediateRealPart < 0) {
-            intermediateRealPart = Math.floor(intermediateRealPart);
+        if (workingRing.hasHalfIntegers()) {
+            ImaginaryQuadraticInteger[] bounds = this.getBoundingIntegers();
+            double currAbs = bounds[0].abs();
+            double farthestSoFar = currAbs;
+            int currIndex = 1;
+            int bestIndex = 0;
+            while (currIndex < bounds.length) {
+                currAbs = bounds[currIndex].abs();
+                if (currAbs > farthestSoFar) {
+                    farthestSoFar = currAbs;
+                    bestIndex = currIndex;
+                }
+                currIndex++;
+            }
+            return bounds[bestIndex];
         } else {
-            intermediateRealPart = Math.ceil(intermediateRealPart);
+            double intermediateRealPart = (double) resultingFractionRealPartNumerator / (double) resultingFractionDenominator;
+            double intermediateImagPart = (double) resultingFractionImagPartNumerator / (double) resultingFractionDenominator;
+            if (intermediateRealPart < 0) {
+                intermediateRealPart = Math.floor(intermediateRealPart);
+            } else {
+                intermediateRealPart = Math.ceil(intermediateRealPart);
+            }
+            if (intermediateImagPart < 0) {
+                intermediateImagPart = Math.floor(intermediateImagPart);
+            } else {
+                intermediateImagPart = Math.ceil(intermediateImagPart);
+            }
+            boolean overflowFlag = (intermediateRealPart < Integer.MIN_VALUE) || (intermediateRealPart > Integer.MAX_VALUE);
+            overflowFlag = overflowFlag || ((intermediateImagPart < Integer.MIN_VALUE) || (intermediateImagPart > Integer.MAX_VALUE));
+            if (overflowFlag) {
+                throw new ArithmeticException("Real part " + intermediateRealPart + ", imaginary part " + intermediateImagPart + " times sqrt" + resultingFractionNegRad + " is outside the range of this implmentation of ImaginaryQuadraticInteger, which uses 32-bit signed integers.");
+            }
+            return new ImaginaryQuadraticInteger((int) intermediateRealPart, (int) intermediateImagPart, workingRing);
         }
-        if (intermediateImagPart < 0) {
-            intermediateImagPart = Math.floor(intermediateImagPart);
-        } else {
-            intermediateImagPart = Math.ceil(intermediateImagPart);
-        }
-        boolean overflowFlag = (intermediateRealPart < Integer.MIN_VALUE) || (intermediateRealPart > Integer.MAX_VALUE);
-        overflowFlag = overflowFlag || ((intermediateImagPart < Integer.MIN_VALUE) || (intermediateImagPart > Integer.MAX_VALUE));
-        if (overflowFlag) {
-            throw new ArithmeticException("Real part " + intermediateRealPart + ", imaginary part " + intermediateImagPart + " times sqrt" + resultingFractionNegRad + " is outside the range of this implmentation of ImaginaryQuadraticInteger, which uses 32-bit signed ints.");
-        }
-        ImaginaryQuadraticInteger result = new ImaginaryQuadraticInteger((int) intermediateRealPart, (int) intermediateImagPart, workingRing);
-        return result;
     }
     
-    // I'M THINKING OF INCLUDING ANOTHER TWO OR THREE ROUNDING FUNCTIONS.
-    // Part of what is holding me back is figuring out what to call these functions.
-    // Also, how to order the results?
-
     /**
      * This exception should be thrown when a division operation takes the 
      * resulting number out of the ring, to the larger field. If the result is 

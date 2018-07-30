@@ -26,9 +26,13 @@ import static org.junit.Assert.*;
  * Tests for the NonUniqueFactorizationDomainException class. The purpose of 
  * this test class is only to make sure the exception object works as it should. 
  * Testing whether this exception is thrown for the right reasons or not is the 
- * responsibility of other test classes. With one exception, all the tests in 
- * this test class use the famous domain <b>Z</b>[&radic;-5], which is not a 
- * unique factorization domain.
+ * responsibility of other test classes. However, proper setup of this test 
+ * class requires that {@link 
+ * NumberTheoreticFunctionsCalculator#primeFactors(imaginaryquadraticinteger.ImaginaryQuadraticInteger)}
+ * throws this exception when called upon numbers from imaginary quadratic rings 
+ * that are not unique factorization domains (UFDs). With one exception, all the 
+ * tests in this test class use the famous domain <b>Z</b>[&radic;-5], which is 
+ * a non-UFD.
  * @author Alonso del Arte
  */
 public class NonUniqueFactorizationDomainExceptionTest {
@@ -40,12 +44,41 @@ public class NonUniqueFactorizationDomainExceptionTest {
      */
     public static final ImaginaryQuadraticRing RING_ZI5 = new ImaginaryQuadraticRing(-5);
     
+    /**
+     * This is for the example of &radic;-5, a ramifying prime.
+     */
     private static NonUniqueFactorizationDomainException nufdeSqrti5;
+    
+    /**
+     * This is for the example of 5, a ramified prime, (&radic;-5)<sup>2</sup>.
+     */
     private static NonUniqueFactorizationDomainException nufde05;
+    
+    /**
+     * This is for the example of 6, famously 2 &times; 3 = (1 - &radic;-5)(1 + 
+     * &radic;-5).
+     */
     private static NonUniqueFactorizationDomainException nufde06;
+    
+    /**
+     * This is for the example of 6 + &radic;-5, a prime with norm 41.
+     */
     private static NonUniqueFactorizationDomainException nufde41PF;
+    
+    /**
+     * This is for the example of 41, a split prime, (6 - &radic;-5)(6 + 
+     * &radic;-5).
+     */
     private static NonUniqueFactorizationDomainException nufde41;
     
+    /**
+     * Sets up five NonUniqueFactorizationDomainException objects. First they 
+     * are initialized with 1, then exceptions are tried to be caught for the 
+     * factorizations of five specific numbers in <b>Z</b>[&radic;-5]. If that 
+     * happens as expected, five messages will be printed to the console reading 
+     * "NonUniqueFactorizationDomainException for ..." rather than 
+     * "Initialization state, not the result of an actually thrown exception."
+     */
     @BeforeClass
     public static void setUpClass() {
         ImaginaryQuadraticInteger init = new ImaginaryQuadraticInteger(1, 0, RING_ZI5);

@@ -206,7 +206,7 @@ public class NotDivisibleExceptionTest {
         ImaginaryQuadraticInteger expResult = new ImaginaryQuadraticInteger(1, 0, NumberTheoreticFunctionsCalculator.RING_GAUSSIAN);
         ImaginaryQuadraticInteger result = notDivGaussian.roundTowardsZero();
         assertEquals(expResult, result);
-        expResult = new ImaginaryQuadraticInteger(1, 3, NumberTheoreticFunctionsCalculator.RING_EISENSTEIN, 2);
+        expResult = new ImaginaryQuadraticInteger(0, -2, NumberTheoreticFunctionsCalculator.RING_EISENSTEIN);
         result = notDivEisenstein.roundTowardsZero();
         assertEquals(expResult, result);
         ImaginaryQuadraticRing currRing;
@@ -232,7 +232,6 @@ public class NotDivisibleExceptionTest {
                     fail("AlgebraicDegreeOverflowException should not have happened. " + adoe.getMessage());
                 } catch (NotDivisibleException nde) {
                     result = nde.roundTowardsZero();
-                    System.out.println(dividend.toASCIIString() + " divided by " + divisor.toASCIIString() + " rounds to " + result.toASCIIString());
                     assertEquals(expResult, result);
                 }
                 /* Now to try it with conjugates, results should be the same as 
@@ -244,7 +243,6 @@ public class NotDivisibleExceptionTest {
                     fail("AlgebraicDegreeOverflowException should not have happened. " + adoe.getMessage());
                 } catch (NotDivisibleException nde) {
                     result = nde.roundTowardsZero();
-                    System.out.println(dividend.conjugate().toASCIIString() + " divided by " + divisor.conjugate().toASCIIString() + " rounds to " + result.toASCIIString());
                     assertEquals(expResult, result);
                 }
             }
@@ -262,7 +260,7 @@ public class NotDivisibleExceptionTest {
         ImaginaryQuadraticInteger expResult = new ImaginaryQuadraticInteger(2, -1, NumberTheoreticFunctionsCalculator.RING_GAUSSIAN);
         ImaginaryQuadraticInteger result = notDivGaussian.roundAwayFromZero();
         assertEquals(expResult, result);
-        expResult = new ImaginaryQuadraticInteger(2, 0, NumberTheoreticFunctionsCalculator.RING_EISENSTEIN);
+        expResult = new ImaginaryQuadraticInteger(0, -3, NumberTheoreticFunctionsCalculator.RING_EISENSTEIN);
         result = notDivEisenstein.roundAwayFromZero();
         assertEquals(expResult, result);
     }

@@ -1320,6 +1320,60 @@ public class ImaginaryQuadraticIntegerTest {
             System.out.println("Attempting to call parseImaginaryQuadraticInteger on \"" + numberString + "\" correctly triggered NumberFormatException: " + nfe.getMessage());
         }
     }
+    
+    /**
+     * Test of optional behaviors of parseImaginaryQuadraticInteger, of class 
+     * ImaginaryQuadraticInteger. This includes recognizing "j" as an 
+     * alternative notation for &radic;-1.
+     */
+    @Test
+    public void testParseImaginaryQuadraticIntegerOptions() {
+        System.out.println("parseImaginaryQuadraticInteger, optional behaviors");
+        String numberString = "j";
+        ImaginaryQuadraticInteger expResult = new ImaginaryQuadraticInteger(0, 1, ringGaussian);
+        ImaginaryQuadraticInteger result;
+        try {
+            result = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString);
+            assertEquals(expResult, result);
+        } catch (NumberFormatException nfe) {
+            System.out.println("Testing an optional behavior triggered " + nfe.getMessage());
+            System.out.println("This is an acceptable but not preferable response for dealing with \"" + numberString + "\".");
+        }
+        numberString = "j + 1";
+        expResult = expResult.plus(1);
+        try {
+            result = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString);
+            assertEquals(expResult, result);
+        } catch (NumberFormatException nfe) {
+            System.out.println("Testing an optional behavior triggered " + nfe.getMessage());
+            System.out.println("This is an acceptable but not preferable response for dealing with \"" + numberString + "\".");
+        }
+        numberString = "\u221A-7 - 1";
+        expResult = new ImaginaryQuadraticInteger(1, 1, ringOQi7);
+        try {
+            result = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString);
+            assertEquals(expResult, result);
+        } catch (NumberFormatException nfe) {
+            System.out.println("Testing an optional behavior triggered " + nfe.getMessage());
+            System.out.println("This is an acceptable but not preferable response for dealing with \"" + numberString + "\".");
+        }
+    }
+    
+    /**
+     * Test of parseQuaterImaginary of class ImaginaryQuadraticInteger.
+     */
+    @Test
+    public void testParseQuaterImaginary() {
+        System.out.println("parseQuaterImaginary");
+        String numberString = "10";
+        ImaginaryQuadraticInteger expResult = new ImaginaryQuadraticInteger(0, 2, ringGaussian);
+        ImaginaryQuadraticInteger result = ImaginaryQuadraticInteger.parseQuaterImaginary(numberString);
+        assertEquals(expResult, result);
+        numberString = "3211";
+        expResult = new ImaginaryQuadraticInteger(-7, -22, ringGaussian);
+        result = ImaginaryQuadraticInteger.parseQuaterImaginary(numberString);
+        assertEquals(expResult, result);
+    }
 
     /**
      * Test of plus method, of class ImaginaryQuadraticInteger.

@@ -16,6 +16,7 @@
  */
 package imaginaryquadraticinteger;
 
+import java.text.DecimalFormatSymbols;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Random;
@@ -30,18 +31,59 @@ import static org.junit.Assert.*;
  */
 public class ImaginaryQuadraticIntegerTest {
     
+    /**
+     * The ring of Gaussian integers, <b>Z</b>[<i>i</i>], numbers of the form 
+     * <i>a</i> + <i>bi</i>. This is one of the rings in which 
+     * ImaginaryQuadraticInteger will be tested.
+     */
     private static ImaginaryQuadraticRing ringGaussian;
+    
+    /**
+     * The ring <b>Z</b>[&radic;-2], numbers of the form  <i>a</i> + 
+     * <i>b</i>&radic;-2. This is one of the rings in which 
+     * ImaginaryQuadraticInteger will be tested.
+     */
     private static ImaginaryQuadraticRing ringZi2;
+    
+    /**
+     * The ring of Eisenstein integers, <b>Z</b>[&omega;], numbers of the form 
+     * <i>a</i> + <i>b</i>&omega;, where &omega; = -1/2 + (&radic;-3)/2. This is 
+     * one of the rings in which ImaginaryQuadraticInteger will be tested.
+     */
     private static ImaginaryQuadraticRing ringEisenstein;
+    
+    /**
+     * The ring <i>O</i><sub><b>Q</b>(&radic;-7)</sub>, numbers of the form 
+     * <i>a</i>/2 + (<i>b</i>&radic;-7)/2, where <i>a</i> and <i>b</i> are of 
+     * the same parity (both odd or both even). This is one of the rings in 
+     * which ImaginaryQuadraticInteger will be tested.
+     */
     private static ImaginaryQuadraticRing ringOQi7;
+    
+    /**
+     * A ring that will be randomly chosen during setUpClass().
+     */
     private static ImaginaryQuadraticRing ringRandom;
+    
+    /**
+     * A ring <i>O</i><sub><b>Q</b>(&radic;<i>d</i>)</sub> specifically for 
+     * testing {@link ImaginaryQuadraticInteger#toStringAlt()}, 
+     * {@link ImaginaryQuadraticInteger#toASCIIStringAlt()}, 
+     * {@link ImaginaryQuadraticInteger#toTeXStringAlt()} and 
+     * {@link ImaginaryQuadraticInteger#toHTMLStringAlt}. This will be the same 
+     * as ringRandom if the parameter <i>d</i> of that one is of the form 
+     * 4<i>k</i> + 1. Otherwise, its parameter <i>d</i> will be the next higher 
+     * squarefree number of the form 4<i>k</i> + 1.
+     */
     private static ImaginaryQuadraticRing ringRandomForAltTesting;
     
     private static List<ImaginaryQuadraticInteger> testIntegers, testAdditiveInverses, testConjugates, testNorms;
     private static List<Integer> testNormsRealParts;
     
     /**
-     * The value of 0 as an ImaginaryQuadraticInteger.
+     * The value of 0 as an ImaginaryQuadraticInteger. Which 
+     * ImaginaryQuadraticRing this zero is in will depend on the needs of the 
+     * tests.
      */
     private static ImaginaryQuadraticInteger zeroIQI;
     
@@ -85,31 +127,31 @@ public class ImaginaryQuadraticIntegerTest {
         }
         randomRealForHalfInts = 2 * randomRealPart + 1;
         randomImagForHalfInts = 2 * randomImagPart + 1;
-        zeroIQI = new ImaginaryQuadraticInteger(0, 0, ringGaussian, 1);
+        zeroIQI = new ImaginaryQuadraticInteger(0, 0, ringGaussian);
         testIntegers = new ArrayList<>();
         testAdditiveInverses = new ArrayList<>();
         testConjugates = new ArrayList<>();
         testNorms = new ArrayList<>();
         testNormsRealParts = new ArrayList<>();
         int currNorm;
-        ImaginaryQuadraticInteger currIQI = new ImaginaryQuadraticInteger(randomRealPart, randomImagPart, ringGaussian, 1);
+        ImaginaryQuadraticInteger currIQI = new ImaginaryQuadraticInteger(randomRealPart, randomImagPart, ringGaussian);
         testIntegers.add(currIQI);
-        currIQI = new ImaginaryQuadraticInteger(-randomRealPart, -randomImagPart, ringGaussian, 1);
+        currIQI = new ImaginaryQuadraticInteger(-randomRealPart, -randomImagPart, ringGaussian);
         testAdditiveInverses.add(currIQI);
-        currIQI = new ImaginaryQuadraticInteger(randomRealPart, -randomImagPart, ringGaussian, 1);
+        currIQI = new ImaginaryQuadraticInteger(randomRealPart, -randomImagPart, ringGaussian);
         testConjugates.add(currIQI);
         currNorm = randomRealPart * randomRealPart + randomImagPart * randomImagPart;
         currIQI = new ImaginaryQuadraticInteger(currNorm, 0, ringGaussian, 1);
         testNorms.add(currIQI);
         testNormsRealParts.add(currNorm);
-        currIQI = new ImaginaryQuadraticInteger(randomRealPart, randomImagPart, ringZi2, 1);
+        currIQI = new ImaginaryQuadraticInteger(randomRealPart, randomImagPart, ringZi2);
         testIntegers.add(currIQI);
-        currIQI = new ImaginaryQuadraticInteger(-randomRealPart, -randomImagPart, ringZi2, 1);
+        currIQI = new ImaginaryQuadraticInteger(-randomRealPart, -randomImagPart, ringZi2);
         testAdditiveInverses.add(currIQI);
-        currIQI = new ImaginaryQuadraticInteger(randomRealPart, -randomImagPart, ringZi2, 1);
+        currIQI = new ImaginaryQuadraticInteger(randomRealPart, -randomImagPart, ringZi2);
         testConjugates.add(currIQI);
         currNorm = randomRealPart * randomRealPart + 2 * randomImagPart * randomImagPart;
-        currIQI = new ImaginaryQuadraticInteger(currNorm, 0, ringZi2, 1);
+        currIQI = new ImaginaryQuadraticInteger(currNorm, 0, ringZi2);
         testNorms.add(currIQI);
         testNormsRealParts.add(currNorm);
         currIQI = new ImaginaryQuadraticInteger(randomRealForHalfInts, randomImagForHalfInts, ringEisenstein, 2);
@@ -119,7 +161,7 @@ public class ImaginaryQuadraticIntegerTest {
         currIQI = new ImaginaryQuadraticInteger(randomRealForHalfInts, -randomImagForHalfInts, ringEisenstein, 2);
         testConjugates.add(currIQI);
         currNorm = (randomRealForHalfInts * randomRealForHalfInts + 3 * randomImagForHalfInts * randomImagForHalfInts)/4;
-        currIQI = new ImaginaryQuadraticInteger(currNorm, 0, ringEisenstein, 1);
+        currIQI = new ImaginaryQuadraticInteger(currNorm, 0, ringEisenstein);
         testNorms.add(currIQI);
         testNormsRealParts.add(currNorm);
         currIQI = new ImaginaryQuadraticInteger(randomRealForHalfInts, randomImagForHalfInts, ringOQi7, 2);
@@ -140,18 +182,18 @@ public class ImaginaryQuadraticIntegerTest {
             currIQI = new ImaginaryQuadraticInteger(randomRealForHalfInts, -randomImagForHalfInts, ringRandom, 2);
             testConjugates.add(currIQI);
             currNorm = (randomRealForHalfInts * randomRealForHalfInts + (-randomDiscr) * randomImagForHalfInts * randomImagForHalfInts)/4;
-            currIQI = new ImaginaryQuadraticInteger(currNorm, 0, ringRandom, 1);
+            currIQI = new ImaginaryQuadraticInteger(currNorm, 0, ringRandom);
             testNorms.add(currIQI);
             testNormsRealParts.add(currNorm);
         } else {
-            currIQI = new ImaginaryQuadraticInteger(randomRealPart, randomImagPart, ringRandom, 1);
+            currIQI = new ImaginaryQuadraticInteger(randomRealPart, randomImagPart, ringRandom);
             testIntegers.add(currIQI);
-            currIQI = new ImaginaryQuadraticInteger(-randomRealPart, -randomImagPart, ringRandom, 1);
+            currIQI = new ImaginaryQuadraticInteger(-randomRealPart, -randomImagPart, ringRandom);
             testAdditiveInverses.add(currIQI);
-            currIQI = new ImaginaryQuadraticInteger(randomRealPart, -randomImagPart, ringRandom, 1);
+            currIQI = new ImaginaryQuadraticInteger(randomRealPart, -randomImagPart, ringRandom);
             testConjugates.add(currIQI);
             currNorm = randomRealPart * randomRealPart + (-randomDiscr) * randomImagPart * randomImagPart;
-            currIQI = new ImaginaryQuadraticInteger(currNorm, 0, ringRandom, 1);
+            currIQI = new ImaginaryQuadraticInteger(currNorm, 0, ringRandom);
             testNorms.add(currIQI);
             testNormsRealParts.add(currNorm);
         }
@@ -179,7 +221,12 @@ public class ImaginaryQuadraticIntegerTest {
             result = normIQI.algebraicDegree();
             assertEquals(expResult, result);
         }
-        expResult = 0; // And last but not least, 0 should have algebraic degree 0
+        /* And last but not least, 0 should have algebraic degree 0 regardless 
+           of which ring it comes from. */
+        expResult = 0;
+        result = zeroIQI.algebraicDegree();
+        assertEquals(expResult, result);
+        zeroIQI = new ImaginaryQuadraticInteger(0, 0, ringEisenstein);
         result = zeroIQI.algebraicDegree();
         assertEquals(expResult, result);
     }
@@ -194,7 +241,7 @@ public class ImaginaryQuadraticIntegerTest {
         long result;
         for (int i = 0; i < totalTestIntegers; i++) {
             result = testIntegers.get(i).trace();
-            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+            if (testIntegers.get(i).getRing().hasHalfIntegers()) {
                 assertEquals(randomRealForHalfInts, result);
             } else {
                 assertEquals(expResult, result);
@@ -210,10 +257,10 @@ public class ImaginaryQuadraticIntegerTest {
         System.out.println("norm");
         long expResult, result;
         for (int i = 0; i < totalTestIntegers; i++) {
-            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
-                expResult = (randomRealForHalfInts * randomRealForHalfInts + testIntegers.get(i).imagQuadRing.getAbsNegRad() * randomImagForHalfInts * randomImagForHalfInts)/4;
+            if (testIntegers.get(i).getRing().hasHalfIntegers()) {
+                expResult = (randomRealForHalfInts * randomRealForHalfInts + testIntegers.get(i).getRing().getAbsNegRad() * randomImagForHalfInts * randomImagForHalfInts)/4;
             } else {
-                expResult = randomRealPart * randomRealPart + testIntegers.get(i).imagQuadRing.getAbsNegRad() * randomImagPart * randomImagPart;
+                expResult = randomRealPart * randomRealPart + testIntegers.get(i).getRing().getAbsNegRad() * randomImagPart * randomImagPart;
             }
             result = testIntegers.get(i).norm();
             assertEquals(expResult, result);
@@ -230,20 +277,20 @@ public class ImaginaryQuadraticIntegerTest {
         long[] result;
         ImaginaryQuadraticInteger baseImagDist, purelyRealInt;
         for (int i = 0; i < totalTestIntegers; i++) {
-            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+            if (testIntegers.get(i).getRing().hasHalfIntegers()) {
                 expResult[1] = -randomRealForHalfInts;
-                expResult[0] = (randomRealForHalfInts * randomRealForHalfInts + randomImagForHalfInts * randomImagForHalfInts * testIntegers.get(i).imagQuadRing.getAbsNegRad())/4;
+                expResult[0] = (randomRealForHalfInts * randomRealForHalfInts + randomImagForHalfInts * randomImagForHalfInts * testIntegers.get(i).getRing().getAbsNegRad())/4;
             } else {
                 expResult[1] = (-2) * randomRealPart;
-                expResult[0] = randomRealPart * randomRealPart + randomImagPart * randomImagPart * testIntegers.get(i).imagQuadRing.getAbsNegRad();
+                expResult[0] = randomRealPart * randomRealPart + randomImagPart * randomImagPart * testIntegers.get(i).getRing().getAbsNegRad();
             }
             result = testIntegers.get(i).minPolynomial();
             assertArrayEquals(expResult, result);
             /* Now to test the mimimal polymomial of the purely imaginary 
                integer sqrt(d) */
             expResult[1] = 0;
-            expResult[0] = testIntegers.get(i).imagQuadRing.getAbsNegRad();
-            baseImagDist = new ImaginaryQuadraticInteger(0, 1, testIntegers.get(i).imagQuadRing, 1);
+            expResult[0] = testIntegers.get(i).getRing().getAbsNegRad();
+            baseImagDist = new ImaginaryQuadraticInteger(0, 1, testIntegers.get(i).getRing());
             result = baseImagDist.minPolynomial();
             assertArrayEquals(expResult, result);
         }
@@ -252,12 +299,15 @@ public class ImaginaryQuadraticIntegerTest {
         expResult[1] = 1;
         for (int i = 1; i < 10; i++) {
             expResult[0] = -i;
-            purelyRealInt = new ImaginaryQuadraticInteger(i, 0, ringRandom, 1);
+            purelyRealInt = new ImaginaryQuadraticInteger(i, 0, ringRandom);
             result = purelyRealInt.minPolynomial();
             assertArrayEquals(expResult, result);
         }
         // And last but not least, 0
         expResult[0] = 0;
+        result = zeroIQI.minPolynomial();
+        assertArrayEquals(expResult, result);
+        zeroIQI = new ImaginaryQuadraticInteger(0, 0, ringRandom);
         result = zeroIQI.minPolynomial();
         assertArrayEquals(expResult, result);
     }
@@ -276,20 +326,20 @@ public class ImaginaryQuadraticIntegerTest {
         String expResult, result;
         for (int i = 0; i < totalTestIntegers; i++) {
             expResult = "x^2";
-            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+            if (testIntegers.get(i).getRing().hasHalfIntegers()) {
                 if (randomRealForHalfInts < 0) {
                     expResult = expResult + "+" + ((-1) * randomRealForHalfInts);
                 } else {
                     expResult = expResult + "-" + randomRealForHalfInts;
                 }
-                expResult = expResult + "x+" + ((randomRealForHalfInts * randomRealForHalfInts + randomImagForHalfInts * randomImagForHalfInts * testIntegers.get(i).imagQuadRing.getAbsNegRad())/4);
+                expResult = expResult + "x+" + ((randomRealForHalfInts * randomRealForHalfInts + randomImagForHalfInts * randomImagForHalfInts * testIntegers.get(i).getRing().getAbsNegRad())/4);
             } else {
                 if (randomRealPart < 0) {
                     expResult = expResult + "+" + ((-2) * randomRealPart);
                 } else {
                     expResult = expResult + "-" + (2 * randomRealPart);
                 }
-                expResult = expResult + "x+" + (randomRealPart * randomRealPart + randomImagPart * randomImagPart * testIntegers.get(i).imagQuadRing.getAbsNegRad());
+                expResult = expResult + "x+" + (randomRealPart * randomRealPart + randomImagPart * randomImagPart * testIntegers.get(i).getRing().getAbsNegRad());
             }
             expResult = expResult.replace("+1x", "+x");
             expResult = expResult.replace("-1x", "-x");
@@ -301,11 +351,11 @@ public class ImaginaryQuadraticIntegerTest {
         // Now to test the polynomial strings of a few purely real integers
         ImaginaryQuadraticInteger degreeOneInt;
         for (int j = 1; j < 8; j++) {
-            degreeOneInt = new ImaginaryQuadraticInteger(j, 0, ringRandom, 1);
+            degreeOneInt = new ImaginaryQuadraticInteger(j, 0, ringRandom);
             expResult = "x-" + j;
             result = degreeOneInt.minPolynomialString().replace(" ", "");
             assertEquals(expResult, result);
-            degreeOneInt = new ImaginaryQuadraticInteger(-j, 0, ringRandom, 1);
+            degreeOneInt = new ImaginaryQuadraticInteger(-j, 0, ringRandom);
             expResult = "x+" + j;
             result = degreeOneInt.minPolynomialString().replace(" ", "");
             assertEquals(expResult, result);
@@ -347,7 +397,10 @@ public class ImaginaryQuadraticIntegerTest {
     }
     
     /**
-     * Test of abs, of class ImaginaryQuadraticInteger.
+     * Test of abs, of class ImaginaryQuadraticInteger. Besides the algebraic 
+     * integers from setUpClass(), this test also tests some purely real and 
+     * purely imaginary Gaussian integers, and checks their real or imaginary 
+     * parts against {@link Math#abs(double)}.
      */
     @Test
     public void testAbs() {
@@ -393,15 +446,19 @@ public class ImaginaryQuadraticIntegerTest {
             eisenInt = eisenInt.plus(1); // Also purely real for now
             result = gauInt.abs();
             assertEquals(n, result, ImaginaryQuadraticRingTest.TEST_DELTA);
+            assertEquals(result, Math.abs(gauInt.getRealPartMultNumeric()), ImaginaryQuadraticRingTest.TEST_DELTA);
             gauInt = gauInt.times(NumberTheoreticFunctionsCalculator.IMAG_UNIT_I); // n * i
             result = gauInt.abs();
             assertEquals(n, result, ImaginaryQuadraticRingTest.TEST_DELTA);
+            assertEquals(result, Math.abs(gauInt.getImagPartwRadMultNumeric()), ImaginaryQuadraticRingTest.TEST_DELTA);
             gauInt = gauInt.times(NumberTheoreticFunctionsCalculator.IMAG_UNIT_I); // -n
             result = gauInt.abs();
             assertEquals(n, result, ImaginaryQuadraticRingTest.TEST_DELTA);
+            assertEquals(result, Math.abs(gauInt.getRealPartMultNumeric()), ImaginaryQuadraticRingTest.TEST_DELTA);
             gauInt = gauInt.times(NumberTheoreticFunctionsCalculator.IMAG_UNIT_I); // -n * i
             result = gauInt.abs();
             assertEquals(n, result, ImaginaryQuadraticRingTest.TEST_DELTA);
+            assertEquals(result, Math.abs(gauInt.getImagPartwRadMultNumeric()), ImaginaryQuadraticRingTest.TEST_DELTA);
             gauInt = gauInt.times(NumberTheoreticFunctionsCalculator.IMAG_UNIT_I); // Back to n
             result = eisenInt.abs();
             assertEquals(n, result, ImaginaryQuadraticRingTest.TEST_DELTA);
@@ -425,7 +482,7 @@ public class ImaginaryQuadraticIntegerTest {
             eisenInt = eisenInt.times(-1); // Back to n
         }
     }
-
+    
     /**
      * Test of getRealPartMultNumeric method, of class 
      * ImaginaryQuadraticInteger.
@@ -437,7 +494,7 @@ public class ImaginaryQuadraticIntegerTest {
         double result;
         for (int i = 0; i < totalTestIntegers; i++) {
             result = testIntegers.get(i).getRealPartMultNumeric();
-            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+            if (testIntegers.get(i).getRing().hasHalfIntegers()) {
                 assertEquals(expResult, result, ImaginaryQuadraticRingTest.TEST_DELTA);
             } else {
                 assertEquals(randomRealPart, result, ImaginaryQuadraticRingTest.TEST_DELTA);
@@ -455,10 +512,10 @@ public class ImaginaryQuadraticIntegerTest {
         double expResult, result;
         for (int i = 0; i < totalTestIntegers; i++) {
             result = testIntegers.get(i).getImagPartwRadMultNumeric();
-            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
-                expResult = ((double) randomImagForHalfInts * testIntegers.get(i).imagQuadRing.getAbsNegRadSqrt())/2;
+            if (testIntegers.get(i).getRing().hasHalfIntegers()) {
+                expResult = ((double) randomImagForHalfInts * testIntegers.get(i).getRing().getAbsNegRadSqrt())/2;
             } else {
-                expResult = (double) randomImagPart * testIntegers.get(i).imagQuadRing.getAbsNegRadSqrt();
+                expResult = (double) randomImagPart * testIntegers.get(i).getRing().getAbsNegRadSqrt();
             }
             assertEquals(expResult, result, ImaginaryQuadraticRingTest.TEST_DELTA);
         }
@@ -473,7 +530,7 @@ public class ImaginaryQuadraticIntegerTest {
         long expResult, result;
         for (int i = 0; i < totalTestIntegers; i++) {
             result = testIntegers.get(i).getTwiceRealPartMult();
-            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+            if (testIntegers.get(i).getRing().hasHalfIntegers()) {
                 expResult = randomRealForHalfInts;
             } else {
                 expResult = 2 * randomRealPart;
@@ -491,7 +548,7 @@ public class ImaginaryQuadraticIntegerTest {
         long expResult, result;
         for (int i = 0; i < totalTestIntegers; i++) {
             result = testIntegers.get(i).getTwiceImagPartMult();
-            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+            if (testIntegers.get(i).getRing().hasHalfIntegers()) {
                 expResult = randomImagForHalfInts;
             } else {
                 expResult = 2 * randomImagPart;
@@ -586,13 +643,13 @@ public class ImaginaryQuadraticIntegerTest {
         String result = testIntegers.get(0).toString().replace(" ", "");
         assertEquals(expResult, result);
         for (int i = 1; i < totalTestIntegers; i++) {
-            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
-                expResult = randomRealForHalfInts + "/2+" + randomImagForHalfInts + "\u221A(" + testIntegers.get(i).imagQuadRing.getNegRad() + ")/2";
+            if (testIntegers.get(i).getRing().hasHalfIntegers()) {
+                expResult = randomRealForHalfInts + "/2+" + randomImagForHalfInts + "\u221A(" + testIntegers.get(i).getRing().getNegRad() + ")/2";
             } else {
                 if (randomRealPart == 0) {
-                    expResult = randomImagPart + "\u221A(" + testIntegers.get(i).imagQuadRing.getNegRad() + ")";
+                    expResult = randomImagPart + "\u221A(" + testIntegers.get(i).getRing().getNegRad() + ")";
                 } else {
-                    expResult = randomRealPart + "+" + randomImagPart + "\u221A(" + testIntegers.get(i).imagQuadRing.getNegRad() + ")";
+                    expResult = randomRealPart + "+" + randomImagPart + "\u221A(" + testIntegers.get(i).getRing().getNegRad() + ")";
                 }
             }
             expResult = expResult.replace("+-", "-");
@@ -687,7 +744,7 @@ public class ImaginaryQuadraticIntegerTest {
         }
         // For integers in rings without "half-integers," we expect toString() and toStringAlt() to give the same result.
         for (int i = 0; i < totalTestIntegers; i++) {
-            if (!testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+            if (!testIntegers.get(i).getRing().hasHalfIntegers()) {
                 assertEquals(testIntegers.get(i).toString(), testIntegers.get(i).toStringAlt());
             }
         }
@@ -723,13 +780,13 @@ public class ImaginaryQuadraticIntegerTest {
         String result = testIntegers.get(0).toASCIIString().replace(" ", "");
         assertEquals(expResult, result);
         for (int i = 1; i < totalTestIntegers; i++) {
-            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
-                expResult = randomRealForHalfInts + "/2+" + randomImagForHalfInts + "sqrt(" + testIntegers.get(i).imagQuadRing.getNegRad() + ")/2";
+            if (testIntegers.get(i).getRing().hasHalfIntegers()) {
+                expResult = randomRealForHalfInts + "/2+" + randomImagForHalfInts + "sqrt(" + testIntegers.get(i).getRing().getNegRad() + ")/2";
             } else {
                 if (randomRealPart == 0) {
-                    expResult = randomImagPart + "sqrt(" + testIntegers.get(i).imagQuadRing.getNegRad() + ")";
+                    expResult = randomImagPart + "sqrt(" + testIntegers.get(i).getRing().getNegRad() + ")";
                 } else {
-                    expResult = randomRealPart + "+" + randomImagPart + "sqrt(" + testIntegers.get(i).imagQuadRing.getNegRad() + ")";
+                    expResult = randomRealPart + "+" + randomImagPart + "sqrt(" + testIntegers.get(i).getRing().getNegRad() + ")";
                 }
             }
             expResult = expResult.replace("+-", "-");
@@ -825,7 +882,7 @@ public class ImaginaryQuadraticIntegerTest {
         /* For integers in rings without "half-integers," we expect 
         toASCIIString() and toASCIIStringAlt() to give the same result. */
         for (int i = 0; i < totalTestIntegers; i++) {
-            if (!testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+            if (!testIntegers.get(i).getRing().hasHalfIntegers()) {
                 assertEquals(testIntegers.get(i).toASCIIString(), testIntegers.get(i).toASCIIStringAlt());
             }
         }
@@ -861,13 +918,13 @@ public class ImaginaryQuadraticIntegerTest {
         String result = testIntegers.get(0).toTeXString().replace(" ", "");
         assertEquals(expResult, result);
         for (int i = 1; i < totalTestIntegers; i++) {
-            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
-                expResult = "\\frac{" + randomRealForHalfInts + "}{2}+\\frac{" + randomImagForHalfInts + "\\sqrt{" + testIntegers.get(i).imagQuadRing.getNegRad() + "}}{2}";
+            if (testIntegers.get(i).getRing().hasHalfIntegers()) {
+                expResult = "\\frac{" + randomRealForHalfInts + "}{2}+\\frac{" + randomImagForHalfInts + "\\sqrt{" + testIntegers.get(i).getRing().getNegRad() + "}}{2}";
             } else {
                 if (randomRealPart == 0) {
-                    expResult = randomImagPart + "\\sqrt{" + testIntegers.get(i).imagQuadRing.getNegRad() + "}";
+                    expResult = randomImagPart + "\\sqrt{" + testIntegers.get(i).getRing().getNegRad() + "}";
                 } else {
-                    expResult = randomRealPart + "+" + randomImagPart + "\\sqrt{" + testIntegers.get(i).imagQuadRing.getNegRad() + "}";
+                    expResult = randomRealPart + "+" + randomImagPart + "\\sqrt{" + testIntegers.get(i).getRing().getNegRad() + "}";
                 }
             }
             expResult = expResult.replace("-1\\sqrt", "-\\sqrt");
@@ -907,7 +964,7 @@ public class ImaginaryQuadraticIntegerTest {
         String expResult, result;
         for (int i = 0; i < totalTestIntegers; i++) {
             if (testIntegers.get(i).getDenominator() == 2) {
-                expResult = "\\frac{" + randomRealForHalfInts + "+" + randomImagForHalfInts + "\\sqrt{" + testIntegers.get(i).imagQuadRing.getNegRad() + "}}{2}";
+                expResult = "\\frac{" + randomRealForHalfInts + "+" + randomImagForHalfInts + "\\sqrt{" + testIntegers.get(i).getRing().getNegRad() + "}}{2}";
                 expResult = expResult.replace("+-", "-");
                 result = testIntegers.get(i).toTeXStringSingleDenom().replace(" ", "");
                 assertEquals(expResult, result);
@@ -1008,7 +1065,7 @@ public class ImaginaryQuadraticIntegerTest {
         /* For integers in rings without "half-integers," we expect 
         toTeXString() and toTeXStringAlt() to give the same result. */
         for (int i = 0; i < totalTestIntegers; i++) {
-            if (!testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+            if (!testIntegers.get(i).getRing().hasHalfIntegers()) {
                 assertEquals(testIntegers.get(i).toTeXString(), testIntegers.get(i).toTeXStringAlt());
             }
         }
@@ -1045,13 +1102,13 @@ public class ImaginaryQuadraticIntegerTest {
         String result = testIntegers.get(0).toHTMLString().replace(" ", "");
         assertEquals(expResult, result);
         for (int i = 1; i < totalTestIntegers; i++) {
-            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
-                expResult = randomRealForHalfInts + "/2+" + randomImagForHalfInts + "&radic;(" + testIntegers.get(i).imagQuadRing.getNegRad() + ")/2";
+            if (testIntegers.get(i).getRing().hasHalfIntegers()) {
+                expResult = randomRealForHalfInts + "/2+" + randomImagForHalfInts + "&radic;(" + testIntegers.get(i).getRing().getNegRad() + ")/2";
             } else {
                 if (randomRealPart == 0) {
-                    expResult = randomImagPart + "&radic;(" + testIntegers.get(i).imagQuadRing.getNegRad() + ")";
+                    expResult = randomImagPart + "&radic;(" + testIntegers.get(i).getRing().getNegRad() + ")";
                 } else {
-                    expResult = randomRealPart + "+" + randomImagPart + "&radic;(" + testIntegers.get(i).imagQuadRing.getNegRad() + ")";
+                    expResult = randomRealPart + "+" + randomImagPart + "&radic;(" + testIntegers.get(i).getRing().getNegRad() + ")";
                 }
             }
             expResult = expResult.replace("+-", "-");
@@ -1155,7 +1212,7 @@ public class ImaginaryQuadraticIntegerTest {
         /* For integers in rings without "half-integers," we expect 
         toHTMLString() and toHTMLStringAlt() to give the same result. */
         for (int i = 0; i < totalTestIntegers; i++) {
-            if (!testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
+            if (!testIntegers.get(i).getRing().hasHalfIntegers()) {
                 assertEquals(testIntegers.get(i).toHTMLString(), testIntegers.get(i).toHTMLStringAlt());
             }
         }
@@ -1174,8 +1231,8 @@ public class ImaginaryQuadraticIntegerTest {
     /**
      * Test of hashCode method, of class ImaginaryQuadraticInteger. It is 
      * expected that if two ImaginaryQuadraticInteger objects are equal, their 
-     * hash codes are equal as well. It is also expected that a + b sqrt(c) and 
-     * a + b sqrt(d) will get different hash codes. But it is definitely not 
+     * hash codes are equal as well. It is also expected that a + b&radic;c and 
+     * a + b&radic;d will get different hash codes. But it is definitely not 
      * expected that hash codes will be unique among all possible 
      * ImaginaryQuadraticInteger objects.
      */
@@ -1187,10 +1244,10 @@ public class ImaginaryQuadraticIntegerTest {
         int prevHash = 0;
         for (int i = 0; i < totalTestIntegers; i++) {
             testHash = testIntegers.get(i).hashCode();
-            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
-                temporaryHold = new ImaginaryQuadraticInteger(randomRealForHalfInts, randomImagForHalfInts, testIntegers.get(i).imagQuadRing, 2);
+            if (testIntegers.get(i).getRing().hasHalfIntegers()) {
+                temporaryHold = new ImaginaryQuadraticInteger(randomRealForHalfInts, randomImagForHalfInts, testIntegers.get(i).getRing(), 2);
             } else {
-                temporaryHold = new ImaginaryQuadraticInteger(randomRealPart, randomImagPart, testIntegers.get(i).imagQuadRing, 1);
+                temporaryHold = new ImaginaryQuadraticInteger(randomRealPart, randomImagPart, testIntegers.get(i).getRing());
             }
             tempHash = temporaryHold.hashCode();
             System.out.println(testIntegers.get(i).toASCIIString() + " hashed to " + testHash);
@@ -1199,15 +1256,16 @@ public class ImaginaryQuadraticIntegerTest {
             assertFalse(testHash == prevHash);
             prevHash = testHash;
         }
-        // Now to test purely real integers register as equal regardless of what imagQuadRing might be
-        ImaginaryQuadraticInteger altZeroIQI = new ImaginaryQuadraticInteger(0, 0, testNorms.get(totalTestIntegers - 1).imagQuadRing, 1);
+        /* Now to test purely real integers register as equal regardless of what 
+           imaginary quadratic ring might be from */
+        ImaginaryQuadraticInteger altZeroIQI = new ImaginaryQuadraticInteger(0, 0, ringZi2);
         assertEquals(altZeroIQI, zeroIQI);
         for (int j = 0; j < totalTestIntegers - 1; j++) {
-            temporaryHold = new ImaginaryQuadraticInteger(testNormsRealParts.get(j), 0, testNorms.get(totalTestIntegers - 1).imagQuadRing, 1);
+            temporaryHold = new ImaginaryQuadraticInteger(testNormsRealParts.get(j), 0, testNorms.get(totalTestIntegers - 1).getRing());
             tempHash = temporaryHold.hashCode();
             testHash = testNorms.get(j).hashCode();
-            System.out.println(temporaryHold.toString() + " from " + temporaryHold.imagQuadRing.toASCIIString() + " hashed as " + tempHash);
-            System.out.println(testNorms.get(j).toString() + " from " + testNorms.get(j).imagQuadRing.toASCIIString() + " hashed as " + testHash);
+            System.out.println(temporaryHold.toString() + " from " + temporaryHold.getRing().toASCIIString() + " hashed as " + tempHash);
+            System.out.println(testNorms.get(j).toString() + " from " + testNorms.get(j).getRing().toASCIIString() + " hashed as " + testHash);
             assertEquals(tempHash, testHash);
         }
     }
@@ -1221,12 +1279,12 @@ public class ImaginaryQuadraticIntegerTest {
         ImaginaryQuadraticInteger temporaryHold, transitiveHold, kindaDiffZero;
         for (int i = 0; i < totalTestIntegers; i++) {
             assertTrue(testIntegers.get(i).equals(testIntegers.get(i))); // Reflexive test
-            if (testIntegers.get(i).imagQuadRing.hasHalfIntegers()) {
-                temporaryHold = new ImaginaryQuadraticInteger(randomRealForHalfInts, randomImagForHalfInts, testIntegers.get(i).imagQuadRing, 2);
-                transitiveHold = new ImaginaryQuadraticInteger(randomRealForHalfInts, randomImagForHalfInts, testIntegers.get(i).imagQuadRing, 2);
+            if (testIntegers.get(i).getRing().hasHalfIntegers()) {
+                temporaryHold = new ImaginaryQuadraticInteger(randomRealForHalfInts, randomImagForHalfInts, testIntegers.get(i).getRing(), 2);
+                transitiveHold = new ImaginaryQuadraticInteger(randomRealForHalfInts, randomImagForHalfInts, testIntegers.get(i).getRing(), 2);
             } else {
-                temporaryHold = new ImaginaryQuadraticInteger(randomRealPart, randomImagPart, testIntegers.get(i).imagQuadRing, 1);
-                transitiveHold = new ImaginaryQuadraticInteger(randomRealPart, randomImagPart, testIntegers.get(i).imagQuadRing, 1);
+                temporaryHold = new ImaginaryQuadraticInteger(randomRealPart, randomImagPart, testIntegers.get(i).getRing());
+                transitiveHold = new ImaginaryQuadraticInteger(randomRealPart, randomImagPart, testIntegers.get(i).getRing());
             }
             assertTrue(testIntegers.get(i).equals(testIntegers.get(i))); // First consistency test
             assertEquals(testIntegers.get(i), temporaryHold);
@@ -1234,14 +1292,14 @@ public class ImaginaryQuadraticIntegerTest {
             assertEquals(temporaryHold, transitiveHold);
             assertEquals(transitiveHold, testIntegers.get(i)); // Transitive test
             assertTrue(testIntegers.get(i).equals(testIntegers.get(i))); // Second consistency test
-            // assertFalse(testIntegers.get(i).equals(null)); Null test is apparently unnecessary
+            // assertFalse(testIntegers.get(i).equals(null)); // Null test is apparently unnecessary
         }
         for (int j = 0; j < totalTestIntegers - 1; j++) {
             assertFalse(testIntegers.get(j).equals(testIntegers.get(j + 1)));
             assertFalse(testIntegers.get(j + 1).equals(testIntegers.get(j))); // Symmetric test for not equals
-            temporaryHold = new ImaginaryQuadraticInteger(testNormsRealParts.get(j), 0, testNorms.get(j + 1).imagQuadRing, 1);
+            temporaryHold = new ImaginaryQuadraticInteger(testNormsRealParts.get(j), 0, testNorms.get(j + 1).getRing());
             assertEquals(testNorms.get(j), temporaryHold);
-            kindaDiffZero = new ImaginaryQuadraticInteger(0, 0, testIntegers.get(j + 1).imagQuadRing, 1);
+            kindaDiffZero = new ImaginaryQuadraticInteger(0, 0, testIntegers.get(j + 1).getRing());
             assertEquals(zeroIQI, kindaDiffZero); // Making sure purely real integers can register as equal
         }
     }
@@ -1307,8 +1365,12 @@ public class ImaginaryQuadraticIntegerTest {
         numberString = "i";
         numberIQI = new ImaginaryQuadraticInteger(0, 1, ringGaussian);
         assertEquals(numberIQI, ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString));
+        numberString = "0 + i";
+        assertEquals(numberIQI, ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString));
         numberString = "-sqrt(-2)";
         numberIQI = new ImaginaryQuadraticInteger(0, -1, ringZi2);
+        assertEquals(numberIQI, ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString));
+        numberString = "0 - sqrt(-2)";
         assertEquals(numberIQI, ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString));
         /* Lastly, to check the appropriate exception is thrown for non-numeric 
            strings */
@@ -1324,7 +1386,9 @@ public class ImaginaryQuadraticIntegerTest {
     /**
      * Test of optional behaviors of parseImaginaryQuadraticInteger, of class 
      * ImaginaryQuadraticInteger. This includes recognizing "j" as an 
-     * alternative notation for &radic;-1.
+     * alternative notation for &radic;-1. If the optional behaviors are 
+     * required, change the print statements under catch {@link 
+     * NumberFormatException} to fails.
      */
     @Test
     public void testParseImaginaryQuadraticIntegerOptions() {
@@ -1336,8 +1400,11 @@ public class ImaginaryQuadraticIntegerTest {
             result = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString);
             assertEquals(expResult, result);
         } catch (NumberFormatException nfe) {
-            System.out.println("Testing an optional behavior triggered " + nfe.getMessage());
+            System.out.println("Testing the option to use 'j' instead of 'i' triggered NumberFormatException \"" + nfe.getMessage() + "\"");
             System.out.println("This is an acceptable but not preferable response for dealing with \"" + numberString + "\".");
+        } catch (Exception e) {
+            String failMessage = "\"" + numberString + "\" should not have caused " + e.getClass().getName() + "\"" + e.getMessage() + "\"";
+            fail(failMessage);
         }
         numberString = "j + 1";
         expResult = expResult.plus(1);
@@ -1345,8 +1412,11 @@ public class ImaginaryQuadraticIntegerTest {
             result = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString);
             assertEquals(expResult, result);
         } catch (NumberFormatException nfe) {
-            System.out.println("Testing an optional behavior triggered " + nfe.getMessage());
+            System.out.println("Testing an optional behavior triggered NumberFormatException \"" + nfe.getMessage() + "\"");
             System.out.println("This is an acceptable but not preferable response for dealing with \"" + numberString + "\".");
+        } catch (Exception e) {
+            String failMessage = "\"" + numberString + "\" should not have caused " + e.getClass().getName() + "\"" + e.getMessage() + "\"";
+            fail(failMessage);
         }
         numberString = "\u221A-7 - 1";
         expResult = new ImaginaryQuadraticInteger(1, 1, ringOQi7);
@@ -1354,8 +1424,33 @@ public class ImaginaryQuadraticIntegerTest {
             result = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString);
             assertEquals(expResult, result);
         } catch (NumberFormatException nfe) {
-            System.out.println("Testing an optional behavior triggered " + nfe.getMessage());
+            System.out.println("Testing an optional behavior triggered NumberFormatException \"" + nfe.getMessage() + "\"");
             System.out.println("This is an acceptable but not preferable response for dealing with \"" + numberString + "\".");
+        } catch (Exception e) {
+            String failMessage = "\"" + numberString + "\" should not have caused " + e.getClass().getName() + "\"" + e.getMessage() + "\"";
+            fail(failMessage);
+        }
+        numberString = "";
+        try {
+            result = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString);
+            assertEquals(zeroIQI, result);
+        } catch (NumberFormatException nfe) {
+            System.out.println("Testing the option to have an empty String stand for 0 triggered NumberFormatException \"" + nfe.getMessage() + "\"");
+            System.out.println("This is an acceptable response for dealing with an empty String.");
+        } catch (Exception e) {
+            String failMessage = "Empty String should not have caused " + e.getClass().getName() + " \"" + e.getMessage() + "\"";
+            fail(failMessage);
+        }
+        // Try the empty String again but this time specifying Z[sqrt(-2)]
+        try {
+            result = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(ringZi2, numberString);
+            assertEquals(zeroIQI, result);
+        } catch (NumberFormatException nfe) {
+            System.out.println("Testing the option to have an empty String stand for 0 triggered NumberFormatException \"" + nfe.getMessage() + "\"");
+            System.out.println("This is an acceptable response for dealing with an empty String even if a ring is specified.");
+        } catch (Exception e) {
+            String failMessage = "Empty String should not have caused " + e.getClass().getName() + " \"" + e.getMessage() + "\"";
+            fail(failMessage);
         }
     }
     
@@ -1369,10 +1464,47 @@ public class ImaginaryQuadraticIntegerTest {
         ImaginaryQuadraticInteger expResult = new ImaginaryQuadraticInteger(0, 2, ringGaussian);
         ImaginaryQuadraticInteger result = ImaginaryQuadraticInteger.parseQuaterImaginary(numberString);
         assertEquals(expResult, result);
-        numberString = "3211";
+        numberString = " 3211 "; // Contains spaces to test these are indeed stripped out
         expResult = new ImaginaryQuadraticInteger(-7, -22, ringGaussian);
         result = ImaginaryQuadraticInteger.parseQuaterImaginary(numberString);
         assertEquals(expResult, result);
+        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+        char decimalDot = dfs.getDecimalSeparator();
+        numberString = "10" + decimalDot + "200";
+        result = ImaginaryQuadraticInteger.parseQuaterImaginary(numberString);
+        assertEquals(NumberTheoreticFunctionsCalculator.IMAG_UNIT_I, result);
+        numberString = "10" + decimalDot + "3";
+        try {
+            result = ImaginaryQuadraticInteger.parseQuaterImaginary(numberString);
+            String failMessage = "\"" + numberString + "\" should have triggered NumberFormatException, not given result " + result.toASCIIString();
+            fail(failMessage);
+        } catch (NumberFormatException nfe) {
+            System.out.println("\"" + numberString + "\" correctly triggered NumberFormatException \"" + nfe.getMessage() + "\"");
+        } catch (Exception e) {
+            String failMessage = "\"" + numberString + "\" should not have triggered " + e.getClass().getName() + " \"" + e.getMessage() + "\"";
+            fail(failMessage);
+        }
+        numberString = "not actually a number at all this time, sorry";
+        try {
+            result = ImaginaryQuadraticInteger.parseQuaterImaginary(numberString);
+            String failMessage = "\"" + numberString + "\" should have triggered NumberFormatException, not given result " + result.toASCIIString();
+            fail(failMessage);
+        } catch (NumberFormatException nfe) {
+            System.out.println("\"" + numberString + "\" correctly triggered NumberFormatException \"" + nfe.getMessage() + "\"");
+        } catch (Exception e) {
+            String failMessage = "Empty String should not have caused " + e.getClass().getName() + " \"" + e.getMessage() + "\"";
+            fail(failMessage);
+        }
+        numberString = "";
+        try {
+            result = ImaginaryQuadraticInteger.parseQuaterImaginary(numberString);
+            assertEquals(zeroIQI, result);
+        } catch (NumberFormatException nfe) {
+            System.out.println("It is acceptable for an empty String to trigger NumberFormatException \"" + nfe.getMessage() + "\"");
+        } catch (Exception e) {
+            String failMessage = "\"" + numberString + "\" should not have triggered " + e.getClass().getName() + " \"" + e.getMessage() + "\"";
+            fail(failMessage);
+        }
     }
 
     /**
@@ -1411,7 +1543,7 @@ public class ImaginaryQuadraticIntegerTest {
                             if (currRing.hasHalfIntegers()) {
                                 expResult = new ImaginaryQuadraticInteger(v + 2 * x, w, currRing, 2);
                             } else {
-                                expResult = new ImaginaryQuadraticInteger(v + x, w, currRing, 1);
+                                expResult = new ImaginaryQuadraticInteger(v + x, w, currRing);
                             }
                             result = testAddendA.plus(x);
                             assertEquals(expResult, result);
@@ -1499,7 +1631,7 @@ public class ImaginaryQuadraticIntegerTest {
                             if (currRing.hasHalfIntegers()) {
                                 expResult = new ImaginaryQuadraticInteger(v - 2 * x, w, currRing, 2);
                             } else {
-                                expResult = new ImaginaryQuadraticInteger(v - x, w, currRing, 1);
+                                expResult = new ImaginaryQuadraticInteger(v - x, w, currRing);
                             }
                             result = testMinuend.minus(x);
                             assertEquals(expResult, result);
@@ -1510,7 +1642,7 @@ public class ImaginaryQuadraticIntegerTest {
         }
         for (int i = 0; i < totalTestIntegers; i++) {
             // Testing that subtracting itself gives 0 each time
-            expResult = new ImaginaryQuadraticInteger(0, 0, testIntegers.get(i).imagQuadRing, 1);
+            expResult = new ImaginaryQuadraticInteger(0, 0, testIntegers.get(i).getRing());
             try {
                 result = testIntegers.get(i).minus(testIntegers.get(i));
             } catch (AlgebraicDegreeOverflowException adoe) {

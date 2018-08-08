@@ -19,8 +19,8 @@ package imaginaryquadraticinteger;
 /**
  * This checked exception is to be thrown when an Euclidean GCD function is 
  * called on numbers that are not from an Euclidean domain. If the numbers are 
- * from two different non-Euclidean domains, AlgebraicDegreeOverflowException 
- * should be thrown instead.
+ * from two different non-Euclidean domains, {@link 
+ * AlgebraicDegreeOverflowException} should be thrown instead.
  * @author Alonso del Arte
  */
 public class NonEuclideanDomainException extends Exception {
@@ -29,22 +29,69 @@ public class NonEuclideanDomainException extends Exception {
         
     private final ImaginaryQuadraticInteger attemptedA, attemptedB;
     
+    /**
+     * Simply returns the imaginary quadratic integers that caused this 
+     * exception.
+     * @return An array of two ImaginaryQuadraticInteger objects, in the same 
+     * order that they were passed at the time the exception was thrown.
+     */
     public ImaginaryQuadraticInteger[] getEuclideanGCDAttemptedNumbers() {
         return (new ImaginaryQuadraticInteger[]{attemptedA, attemptedB});
     }
     
-//    public ImaginaryQuadraticInteger tryEuclideanGCDAnyway() {
-//        //   (* This is going to be a function that tries to take the Euclidean GCD algorithm as far as possible.
-//        //      Sometimes there will be a result, other times not. *)
-//        int negRad = this.attemptedA.getRing().getNegRad();
-//        if (negRad != this.attemptedB.getRing().getNegRad()) {
-//            throw new AlgebraicDegreeOverflowException("euclideanGCD should have thrown AlgebraicDegreeOverflowException, not NonEuclideanDomainException.", 2, this.attemptedA, this.attemptedB);
-//        }
-//        ImaginaryQuadraticInteger attemptedEuclideanGCD;
-//        attemptedEuclideanGCD = this.attemptedA;
-//        //   (* The actual logic of attempting the Euclidean algorithm will go here *)
-//        return attemptedEuclideanGCD;
-//    }
+    /**
+     * Attempts to apply the Euclidean GCD algorithm to the imaginary quadratic 
+     * integers that triggered this exception.
+     * @return An imaginary quadratic integer with either the successful result 
+     * of the algorithm or a number that represents the farthest the algorithm 
+     * was able to get before encountering a problem; to indicate that there was 
+     * a problem in applying the algorithm, the real part will be negative. For 
+     * example, calling this function for gcd(29, 12 + 8&radic;-5) should return 
+     * 3 + 2&radic;-5, while calling it for gcd(2, 1 + &radic;-5) could return 
+     * -2 or -1 - &radic;-5 or -1 + &radic;-5 to indicate that it was unable to 
+     * apply the Euclidean algorithm to that pair of numbers.
+     */
+    public ImaginaryQuadraticInteger tryEuclideanGCDAnyway() {
+        int negRad = this.attemptedA.getRing().getNegRad();
+        if (negRad != this.attemptedB.getRing().getNegRad()) {
+            throw new AlgebraicDegreeOverflowException("euclideanGCD should have thrown AlgebraicDegreeOverflowException, not NonEuclideanDomainException.", 2, this.attemptedA, this.attemptedB);
+        }
+        ImaginaryQuadraticInteger currA, currB, tempMultiple, currRemainder;
+        ImaginaryQuadraticInteger[] bounds;
+        if (this.attemptedA.norm() < this.attemptedB.norm()) {
+            currA = this.attemptedB;
+            currB = this.attemptedA;
+        } else {
+            currA = this.attemptedA;
+            currB = this.attemptedB;
+        }
+        boolean troubleFlag = false;
+        while (!currB.equalsInt(0) && !troubleFlag) {
+            try {
+                tempMultiple = currA.divides(currB);
+                tempMultiple = tempMultiple.times(currB);
+                currRemainder = currA.minus(tempMultiple);
+            } catch (NotDivisibleException nde) {
+                bounds = nde.getBoundingIntegers();
+                currRemainder = bounds[0]; // To prevent "currRemainder may not have been initialized" error
+                boolean notFound = true;
+                int counter = 0;
+                while (notFound && counter < bounds.length) {
+                    tempMultiple = bounds[counter].times(currB);
+                    currRemainder = currA.minus(tempMultiple);
+                    notFound = currRemainder.norm() >= currB.norm();
+                    counter++;
+                }
+                troubleFlag = notFound;
+            }
+            currA = currB;
+            currB = currRemainder;
+        }
+        if ((currA.getRealPartMult() < 0 && !troubleFlag) || (currA.getRealPartMult() > 0 && troubleFlag)) {
+            currA = currA.times(-1);
+        }
+        return currA;
+    }
 
     /**
      * This is an exception to be thrown by an Euclidean GCD function if called 

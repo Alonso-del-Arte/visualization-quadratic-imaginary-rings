@@ -710,47 +710,115 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         }
     }
     
-//    private static String preprocessNumberString(String stringToPreprocess) {
-//        String str = stringToPreprocess;
-//        str = str.replace(" ", "");
-//        DecimalFormatSymbols dfs = new DecimalFormatSymbols(); // Get decimal formaat symbols for the current locale
-//        str = str.replace(Character.toString(dfs.getGroupingSeparator()), ""); // Strip out the thousands grouping separator
-//        String halfStr = Character.toString(dfs.getDecimalSeparator()) + "5";
-//        str = str.replace(halfStr, "+(1/2)");
-//        // Mark string as non-numeric if decimal separator is encountered
-//        str = str.replace(Character.toString(dfs.getDecimalSeparator()), "W"); 
-//        str = str.replace("&minus;", "-");
-//        str = str.replace("\\frac{", "");
-//        str = str.replace("}{", "/");
-//        str = str.replace("{", "");
-//        str = str.replace("}", "");
-//        str = str.replace("<i>i</i>", "\u221A(-1)");
-//        str = str.replace("<i>j</i>", "\u221A(-1)");
-//        str = str.replace("i", "\u221A(-1)");
-//        str = str.replace("j", "\u221A(-1)");
-//        str = str.replace("\\sqrt", "\u221A");
-//        str = str.replace("sqrt", "\u221A");
-//        str = str.replace("&radic;", "\u221A");
-//        str = str.replace("\\omega", "\u03C9");
-//        str = str.replace("&omega;", "\u03C9");
-//        str = str.replace("omega", "\u03C9");
-//        str = str.replace("\\theta", "\u03B8");
-//        str = str.replace("&theta;", "\u03B8");
-//        str = str.replace("theta", "\u03B8");
-//        return str;
-//    }
-//    
-//    private static ImaginaryQuadraticInteger parseIQI(ImaginaryQuadraticRing ring, String str) {
-//        return new ImaginaryQuadraticInteger(0, 0, ring);
-//    }
-//        
+    private static String preprocessNumberString(String stringToPreprocess) {
+        String str = stringToPreprocess;
+        str = str.replace(" ", "");
+        DecimalFormatSymbols dfs = new DecimalFormatSymbols(); // Get decimal formaat symbols for the current locale
+        str = str.replace(Character.toString(dfs.getGroupingSeparator()), ""); // Strip out the thousands grouping separator
+        String halfStr = Character.toString(dfs.getDecimalSeparator()) + "5";
+        str = str.replace(halfStr, "+(1/2)");
+        // Mark string as non-numeric if decimal separator is encountered
+        str = str.replace(Character.toString(dfs.getDecimalSeparator()), "W"); 
+        str = str.replace("&minus;", "-");
+        str = str.replace("\\frac{", "");
+        str = str.replace("}{", "/");
+        str = str.replace("{", "");
+        str = str.replace("}", "");
+        str = str.replace("<i>i</i>", "\u221A(-1)");
+        str = str.replace("<i>j</i>", "\u221A(-1)");
+        str = str.replace("i", "\u221A(-1)");
+        str = str.replace("j", "\u221A(-1)");
+        str = str.replace("\\sqrt", "\u221A");
+        str = str.replace("sqrt", "*\u221A");
+        str = str.replace("&radic;", "\u221A");
+        str = str.replace("\\omega", "\u03C9");
+        str = str.replace("&omega;", "\u03C9");
+        str = str.replace("omega", "\u03C9");
+        str = str.replace("\\theta", "\u03B8");
+        str = str.replace("&theta;", "\u03B8");
+        str = str.replace("theta", "\u03B8");
+        String parseBuiltStr = "";
+        char currChar = str.charAt(0);
+        if (currChar > '/' || currChar < ':') {
+            str = '(' + str;
+        }
+        boolean prevCharDigit = false;
+        boolean prevCharOper = false;
+        boolean prevCharParen = false;
+        for (int parsePos = 0; parsePos < str.length(); parsePos++) {
+            currChar = str.charAt(parsePos);
+            switch (currChar) {
+                case '(':
+                case ')':
+                    parseBuiltStr = parseBuiltStr + currChar;
+                    prevCharParen = true;
+                    prevCharDigit = false;
+                    prevCharOper = false;
+                    break;
+                case '+':
+                case '-':
+                case '*':
+                case '/':
+                    if (prevCharParen) {
+                        parseBuiltStr = parseBuiltStr + currChar;
+                    }
+                    if (prevCharDigit) {
+                        parseBuiltStr = parseBuiltStr + ')' + currChar;
+                    }
+                    if (prevCharOper) {
+                        parseBuiltStr = parseBuiltStr + 'X';
+                    }
+                    prevCharOper = true;
+                    prevCharDigit = false;
+                    prevCharParen = false;
+                    break;
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    if (prevCharParen || prevCharDigit) {
+                        parseBuiltStr = parseBuiltStr + currChar;
+                    }
+                    if (prevCharOper) {
+                        parseBuiltStr = parseBuiltStr + '(' + currChar;
+                    }
+                    break;
+                default:
+                    parseBuiltStr = parseBuiltStr + 'X';
+            }
+        }
+        while (str.contains("((")) {
+            str = str.replace("((", "(");
+        }
+        while (str.contains("))")) {
+            str = str.replace("))", ")");
+        }
+        return str;
+    }
+    
+    private static ImaginaryQuadraticInteger parseIQI(ImaginaryQuadraticRing ring, String str) {
+        return new ImaginaryQuadraticInteger(0, 0, ring);
+    }
+        
 //    public static ImaginaryQuadraticInteger parseImaginaryQuadraticInteger(ImaginaryQuadraticRing ring, String str) {
+//        if (str.length() == 0) {
+//            return new ImaginaryQuadraticInteger(0, 0, ring);
+//        }
 //        String parsingString = preprocessNumberString(str);
 //        int presumedD = ring.negRad;
 //        return parseIQI(ring, str);
 //    }
 //    
 //    public static ImaginaryQuadraticInteger parseImaginaryQuadraticInteger(String str) {
+//        if (str.length() == 0) {
+//            throw new NumberFormatException("Empty String is ambiguous, no ring specified.");
+//        }
 //        String parsingString = preprocessNumberString(str);
 //        char currToken = str.charAt(0);
 //        switch (currToken) {
@@ -775,6 +843,84 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
 //        }
 //        return new ImaginaryQuadraticInteger(0, 0, new ImaginaryQuadraticRing(-1));
 //    }
+    
+    /**
+     * Interprets a String that contains 0s, 1s, 2s and/or 3s as the 
+     * quater-imaginary representation of a Gaussian integer. Computer pioneer 
+     * Donald Knuth is the first person known to propose this system, in which 
+     * any Gaussian integer can be represented without the need for minus signs 
+     * and without the need to separate the real and imaginary parts of the 
+     * number.
+     * @param str The String to parse. May contain spaces, which will be 
+     * stripped out prior to parsing. May also contain a "decimal" dot followed 
+     * by either "2" and zero or more zeroes, or just zeroes.
+     * @return An ImaginaryQuadraticInteger object containing the Gaussian 
+     * integer represented by the quater-imaginary String.
+     * @throws NumberFormatException If str has a "decimal" dot followed by any 
+     * digit other than a single 2 or a bunch of zeroes, or if it contains 
+     * digits other than 0, 1, 2 or 3, this runtime exception will be thrown. 
+     * The problematic character mentioned in the exception message may or may 
+     * not be the only parsing obstacle.
+     */
+    public static ImaginaryQuadraticInteger parseQuaterImaginary(String str) {
+        ImaginaryQuadraticRing ringGaussian = new ImaginaryQuadraticRing(-1);
+        ImaginaryQuadraticInteger base = new ImaginaryQuadraticInteger(0, 2, ringGaussian);
+        ImaginaryQuadraticInteger currPower = new ImaginaryQuadraticInteger(1, 0, ringGaussian);
+        ImaginaryQuadraticInteger currPowerMult;
+        ImaginaryQuadraticInteger parsedSoFar = new ImaginaryQuadraticInteger(0, 0, ringGaussian);
+        ImaginaryQuadraticInteger gaussianZero = new ImaginaryQuadraticInteger(0, 0, ringGaussian);
+        str = str.replace(" ", ""); // Strip out spaces
+        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+        int dotPlace = str.indexOf(dfs.getDecimalSeparator());
+        if (dotPlace > - 1) {
+            boolean keepGoing = true;
+            int currFractPlace = dotPlace + 2;
+            while ((currFractPlace < str.length()) && keepGoing) {
+                keepGoing = (str.charAt(currFractPlace) == '0');
+                currFractPlace++;
+            }
+            if (!keepGoing) {
+                throw new NumberFormatException("'" + str.charAt(currFractPlace - 1) + "' after \"decimal\" separator is not a valid digit for the quater-imaginary representation of a Gaussian integer.");
+            }
+            if (str.length() == dotPlace + 1) {
+                str = str + "0";
+            }
+            str = str.substring(0, dotPlace + 2); // Discard trailing "decimal" zeroes
+        }
+        String dotZeroEnding = dfs.getDecimalSeparator() + "0";
+        if (str.endsWith(dotZeroEnding)) {
+            str = str.substring(0, str.length() - 2);
+        }
+        String dotTwoEnding = dfs.getDecimalSeparator() + "2";
+        if (str.endsWith(dotTwoEnding)) {
+            parsedSoFar = new ImaginaryQuadraticInteger(0, -1, ringGaussian);
+            str = str.substring(0, str.length() - 2);
+        }
+        char currDigit;
+        for (int i = str.length() - 1; i > -1; i--) {
+            currDigit = str.charAt(i);
+            switch (currDigit) {
+                case '0':
+                    currPowerMult = gaussianZero;
+                    break;
+                case '1':
+                    currPowerMult = currPower;
+                    break;
+                case '2':
+                    currPowerMult = currPower.times(2);
+                    break;
+                case '3':
+                    currPowerMult = currPower.times(3);
+                    break;
+                default:
+                    String exceptionMessage = "'" + currDigit + "' is not a valid quater-imaginary digit (should be one of 0, 1, 2, 3).";
+                    throw new NumberFormatException(exceptionMessage);
+            }
+            parsedSoFar = parsedSoFar.plus(currPowerMult);
+            currPower = currPower.times(base);
+        }
+        return parsedSoFar;
+    }
   
     /**
      * Addition operation, since operator+ (plus) can't be overloaded. 
@@ -1159,8 +1305,8 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
      * to be 1.
      * @param a The real part of the imaginary quadratic integer. For example, 
      * for 5 + &radic;-3, this parameter would be 5.
-     * @param b The part to be multiplied by sqrt(d). For example, for 5 + 
-     * &radic;-3, this parameter would be 1.
+     * @param b The part to be multiplied by &radic;<i>d</i>. For example, for 5 
+     * + &radic;-3, this parameter would be 1.
      * @param R The ring to which this algebraic integer belongs to. For 
      * example, for 5 + &radic;-3, this parameter could be <code>new 
      * ImaginaryQuadraticRing(-3)</code>.
@@ -1177,11 +1323,11 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
      * @param a The real part of the imaginary quadratic integer, multiplied by 
      * 2 when applicable. For example, for 5/2 + (&radic;-3)/2, this parameter 
      * would be 5.
-     * @param b The part to be multiplied by sqrt(d), multiplied by 2 when 
-     * applicable. For example, for 5/2 + (&radic;-3)/2, this parameter would be 
-     * 1.
+     * @param b The part to be multiplied by &radic;<i>d</i>, multiplied by 2 
+     * when applicable. For example, for 5/2 + (&radic;-3)/2, this parameter 
+     * would be 1.
      * @param R The ring to which this algebraic integer belongs to. For 
-     * example, for 5 + &radic;-3, this parameter could be <code>new 
+     * example, for 5/2 + (&radic;-3)/2, this parameter could be <code>new 
      * ImaginaryQuadraticRing(-3)</code>.
      * @param denom In most cases 1, but may be 2 if a and b have the same 
      * parity and d = 1 mod 4. In the 5/2 + (&radic;-3)/2 example, this would be 
@@ -1189,9 +1335,9 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
      * @throws IllegalArgumentException If denom is anything other than 1 or 2, 
      * or if denom is 2 but a and b don't match parity. However, if passed denom 
      * of -1 or -2, the constructor will quietly change it to 1 or 2, and 
-     * multiply a and b by -1. Also, if d is not 1 mod 4 but a and b are both 
-     * even, this constructor will quietly divide a and b by 2, otherwise this 
-     * exception will be thrown.
+     * multiply a and b by -1. Also, if d is not 1 mod 4 and denom is 2 but a 
+     * and b are both even, this constructor will quietly divide a and b by 2, 
+     * otherwise this exception will be thrown.
      */
     public ImaginaryQuadraticInteger(int a, int b, ImaginaryQuadraticRing R, int denom) {
         boolean abParityMatch;
@@ -1323,7 +1469,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
 //                System.out.println("Norm is " + number.norm());
 //                System.out.println("Minimal polynomial is " + number.minPolynomialString());
 //        }
-    
+//    
     } 
     
 }

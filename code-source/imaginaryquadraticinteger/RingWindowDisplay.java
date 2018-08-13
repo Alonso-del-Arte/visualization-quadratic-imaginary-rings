@@ -27,7 +27,8 @@ import javax.imageio.ImageIO;
 import javax.swing.filechooser.FileFilter;
 import java.util.List;
 import java.util.ArrayList;
-import filefilters.PNGFileFilter;
+import fileops.FileChooserWithOverwriteGuard;
+import fileops.PNGFileFilter;
 
 /**
  * A Swing component in which to display diagrams of prime numbers in various 
@@ -170,37 +171,45 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     public static final Color DEFAULT_INTEGER_GRID_COLOR = Color.BLACK;
     
     /**
-     * The color for 0.
+     * The default color for 0.
      */
     public static final Color DEFAULT_ZERO_COLOR = Color.BLACK;
     
     /**
-     * The color for units.
-     * In Z[i], this would include i and -i.
-     * In Z[omega], this would include omega, omega + 1, -1 - omega and -omega.
-     * In all rings, this includes 1 and -1.
+     * The default color for units. In <b>Z</b>[<i>i</i>], this would include 
+     * <i>i</i> and -<i>i</i>. In <b>Z</b>[&omega;], this would include &omega;, 
+     * 1 + &omega;, -1 - &omega; and -&omega;. In all rings, this includes 1 and 
+     * -1.
      */
     public static final Color DEFAULT_UNIT_COLOR = Color.WHITE;
     
     /**
-     * The color for primes believed to be inert. If a prime does split but its 
-     * prime factors are not in the current diagram view, the program is unaware 
-     * of them. Though I have yet to think of a single example where it might 
-     * actually be the case that the program erroneously identifies a prime as 
-     * inert.
+     * The default color for primes believed to be inert. If a prime does split 
+     * but its prime factors are not in the current diagram view, the program is 
+     * unaware of them. Though I have yet to think of a single example where it 
+     * might actually be the case that the program erroneously identifies a 
+     * prime as inert.
      */
     public static final Color DEFAULT_INERT_PRIME_COLOR = Color.CYAN;
     
     /**
-     * The primes confirmed split.
-     * If a prime's splitting factors are in the current diagram view, the 
-     * program uses this color for the split prime.
+     * The default color for primes confirmed split. If a prime's splitting 
+     * factors are in the current diagram view, the program uses this color for 
+     * the split prime. For example, if the program is displaying a diagram of 
+     * <b>Z</b>[&omega;] and -7/2 + (&radic;-3)/2 (which has norm 13) is in 
+     * view, then 13 is confirmed split and colored accordingly if it's in view. 
+     * Note, however, that, given a prime <i>p</i> &equiv; 2 mod 3, the number 
+     * -<i>p</i>/2 + (<i>p</i>&radic;-3)/2 is not a splitting factor of 
+     * <i>p</i>, since it is <i>p</i>&omega; and &omega; is a unit. Therefore 
+     * <i>p</i> should be colored with the inert prime color.
      */
     public static final Color DEFAULT_SPLIT_PRIME_COLOR = Color.BLUE;
     
     /**
-     * The primes that are ramified.
-     * Regardless of current diagram view, the program checks if gcd(p, d) > 1.
+     * The default color for primes that are ramified. Regardless of the current 
+     * diagram view, the program checks if gcd(<i>p</i>, <i>d</i>) > 1. So, for 
+     * example, if the program is displaying a diagram of <b>Z</b>[&radic;-5], 
+     * then 5 will be shown in this color if it's in view.
      */
     public static final Color DEFAULT_RAMIFIED_PRIME_COLOR = Color.GREEN;
     
@@ -230,6 +239,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      */
     protected int pixelsPerBasicImaginaryInterval;
     
+    /**
+     * The ring of the currently displayed diagram.
+     */
     protected ImaginaryQuadraticRing imagQuadRing;
     
     private ImaginaryQuadraticInteger mouseIQI;
@@ -253,7 +265,10 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     private Color zeroColor, unitColor, inertPrimeColor, splitPrimeColor, ramifiedPrimeColor;
     
     private int zeroCoordX, zeroCoordY;
-    private boolean zeroCentered, zeroInView;
+    
+    /* For when the program has the ability to display diagrams that don't 
+       necessarily have 0 in the center. */
+    // private boolean zeroCentered, zeroInView;
     
     private JFrame ringFrame;
     
@@ -289,6 +304,11 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      */
     private short currHistoryIndex;
     
+    /**
+     * Draws the grids. Should only be called if the points are spaced far apart 
+     * enough for the grids to be visible.
+     * @param graphicsForGrids The Graphics object supplied by the caller.
+     */
     private void drawGrids(Graphics graphicsForGrids) {
         
         int verticalGridDistance;
@@ -362,6 +382,19 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                 
     }
     
+    /**
+     * Draws the points. In the original implementation, this tested the 
+     * primality of the norms of the imaginary quadratic integers with nonzero 
+     * imaginary parts. However, that was not quite correct in that it skipped 
+     * over primes that are real integer multiples of &omega; in 
+     * <b>Z</b>[&omega;]. So I changed it to do primality test on the imaginary 
+     * quadratic integers themselves, but that caused a slight delay for the 
+     * <b>Z</b>[&omega;] diagram at 2 pixels per unit interval. So now the 
+     * program is back to doing primality testing on the norms of the numbers 
+     * rather than the numbers themselves, and there is a special pass for the 
+     * aforementioned primes.
+     * @param graphicsForPoints The Graphics object supplied by the caller.
+     */
     private void drawPoints(Graphics graphicsForPoints) {
         
         int currPointX, currPointY;
@@ -513,7 +546,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                 currPointY = this.zeroCoordY + (y * verticalGridDistance);
                 currNegPointY = this.zeroCoordY - (y * verticalGridDistance);
                 currIQI = new ImaginaryQuadraticInteger(x, y, this.imagQuadRing, 1);
-                if (NumberTheoreticFunctionsCalculator.isPrime(currIQI)) {
+                if (NumberTheoreticFunctionsCalculator.isPrime(currIQI.norm())) {
                     graphicsForPoints.setColor(this.inertPrimeColor);
                     graphicsForPoints.fillOval(currPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
                     graphicsForPoints.fillOval(currPointX - this.dotRadius, currNegPointY - this.dotRadius, dotDiameter, dotDiameter);
@@ -549,17 +582,43 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             int halfMaxY = (int) Math.floor((this.ringCanvasVerticMax - this.zeroCoordY)/this.pixelsPerBasicImaginaryInterval);
             currPointX = this.zeroCoordX + halfUnitInterval;
             currNegPointX = this.zeroCoordX - halfUnitInterval;
-            currPointY = this.zeroCoordY + pixelsPerBasicImaginaryInterval;
-            currNegPointY = this.zeroCoordY - pixelsPerBasicImaginaryInterval;
-            // Take care of the other units among the Eisenstein integers
+            currPointY = this.zeroCoordY + this.pixelsPerBasicImaginaryInterval;
+            currNegPointY = this.zeroCoordY - this.pixelsPerBasicImaginaryInterval;
+            /* Take care of the other units among the Eisenstein integers. Also 
+               primes of the form p * omega, where p is a purely real prime 
+               satisfying p = 2 mod 3 */
             if (this.imagQuadRing.negRad == -3) {
-                graphicsForPoints.setColor(unitColor);
+                // The complex units, like omega
+                graphicsForPoints.setColor(this.unitColor);
                 graphicsForPoints.fillOval(currPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
                 graphicsForPoints.fillOval(currPointX - this.dotRadius, currNegPointY - this.dotRadius, dotDiameter, dotDiameter);
                 graphicsForPoints.fillOval(currNegPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
-                graphicsForPoints.fillOval(currNegPointX - this.dotRadius, currNegPointY - this.dotRadius, dotDiameter, dotDiameter);        
+                graphicsForPoints.fillOval(currNegPointX - this.dotRadius, currNegPointY - this.dotRadius, dotDiameter, dotDiameter);
+                // Then 2 * omega, and complex associates
+                graphicsForPoints.setColor(this.inertPrimeColor);
+                currPointX += halfUnitInterval;
+                currNegPointX -= halfUnitInterval;
+                currPointY += this.pixelsPerBasicImaginaryInterval;
+                currNegPointY -= this.pixelsPerBasicImaginaryInterval;
+                graphicsForPoints.fillOval(currPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
+                graphicsForPoints.fillOval(currPointX - this.dotRadius, currNegPointY - this.dotRadius, dotDiameter, dotDiameter);
+                graphicsForPoints.fillOval(currNegPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
+                graphicsForPoints.fillOval(currNegPointX - this.dotRadius, currNegPointY - this.dotRadius, dotDiameter, dotDiameter);
+                // And then p * omega from p = 5 on, and complex associates 
+                for (int auxX = 5; auxX < halfMaxX; auxX += 6) {
+                    currPointX = this.zeroCoordX + (auxX * halfUnitInterval);
+                    currNegPointX = this.zeroCoordX - (auxX * halfUnitInterval);
+                    currPointY = this.zeroCoordY + (auxX * this.pixelsPerBasicImaginaryInterval);
+                    currNegPointY = this.zeroCoordY - (auxX * this.pixelsPerBasicImaginaryInterval);
+                    if (NumberTheoreticFunctionsCalculator.isPrime(auxX)) {
+                        graphicsForPoints.fillOval(currPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
+                        graphicsForPoints.fillOval(currPointX - this.dotRadius, currNegPointY - this.dotRadius, dotDiameter, dotDiameter);
+                        graphicsForPoints.fillOval(currNegPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
+                        graphicsForPoints.fillOval(currNegPointX - this.dotRadius, currNegPointY - this.dotRadius, dotDiameter, dotDiameter);
+                    }
+                }
             }
-            // And now to seek the primes
+            // And now all the other "half-integer" primes
             for (int x = 1; x < halfMaxX; x += 2) {
                 currPointX = this.zeroCoordX + (x * halfUnitInterval);
                 currNegPointX = this.zeroCoordX - (x * halfUnitInterval);
@@ -567,7 +626,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                     currPointY = this.zeroCoordY + (y * this.pixelsPerBasicImaginaryInterval);
                     currNegPointY = this.zeroCoordY - (y * this.pixelsPerBasicImaginaryInterval);
                     currIQI = new ImaginaryQuadraticInteger(x, y, this.imagQuadRing, 2);
-                    if (NumberTheoreticFunctionsCalculator.isPrime(currIQI)) {
+                    if (NumberTheoreticFunctionsCalculator.isPrime(currIQI.norm())) {
                         graphicsForPoints.setColor(this.inertPrimeColor);
                         graphicsForPoints.fillOval(currPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
                         graphicsForPoints.fillOval(currPointX - this.dotRadius, currNegPointY - this.dotRadius, dotDiameter, dotDiameter);
@@ -741,22 +800,23 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     public void changeZeroCoords(int newCoordX, int newCoordY) {
         this.zeroCoordX = newCoordX;
         this.zeroCoordY = newCoordY;
-        zeroCentered = (this.zeroCoordX == (int) Math.floor(this.ringCanvasHorizMax/2) && this.zeroCoordY == (int) Math.floor(this.ringCanvasVerticMax/2));
-        zeroInView = ((this.zeroCoordX > -1) && (this.zeroCoordY > -1) && (this.zeroCoordX <= this.ringCanvasHorizMax) && (this.zeroCoordY <= this.ringCanvasVerticMax));
+        // zeroCentered = (this.zeroCoordX == (int) Math.floor(this.ringCanvasHorizMax/2) && this.zeroCoordY == (int) Math.floor(this.ringCanvasVerticMax/2));
+        // zeroInView = ((this.zeroCoordX > -1) && (this.zeroCoordY > -1) && (this.zeroCoordX <= this.ringCanvasHorizMax) && (this.zeroCoordY <= this.ringCanvasVerticMax));
     }
     
     /**
-     * Paints the canvas, by delegating to private functions to draw the grids 
-     * and the points.
-     * @param gr The graphics object supplied by the caller.
+     * Paints the canvas, by delegating to private procedures to draw the grids 
+     * and the points. However, if the points are too close together, the grids 
+     * will not be drawn.
+     * @param g The Graphics object supplied by the caller.
      */
     @Override
-    public void paintComponent(Graphics gr) {
-        super.paintComponent(gr);
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
         if (this.pixelsPerUnitInterval > MINIMUM_PIXELS_PER_UNIT_INTERVAL_TO_DRAW_GRIDS) {
-            drawGrids(gr);
+            drawGrids(g);
         }
-        drawPoints(gr);
+        drawPoints(g);
     }
     
     /**
@@ -816,7 +876,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         this.paint(graph);
         String suggestedFilename = this.imagQuadRing.toFilenameString() + "pxui" + this.pixelsPerUnitInterval + ".png";
         File diagramFile = new File(suggestedFilename);
-        JFileChooser fileChooser = new JFileChooser();
+        FileChooserWithOverwriteGuard fileChooser = new FileChooserWithOverwriteGuard();
         FileFilter pngFilter = new PNGFileFilter();
         fileChooser.addChoosableFileFilter(pngFilter);
         if (haveSavedBefore) {
@@ -1226,7 +1286,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      * Show the About box, a simple MessageDialog from JOptionPage.
      */
     public void showAboutBox() {
-        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.941\n\u00A9 2018 Alonso del Arte");
+        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.96\n\u00A9 2018 Alonso del Arte");
     }
     
     /**
@@ -1428,22 +1488,14 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("View the diagram for the previous discriminant");
         prevDMenuItem = ringWindowMenu.add(ringWindowMenuItem);
         prevDMenuItem.setActionCommand("prevD");
-        if (macOSFlag) {
-            prevDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, maskCtrlCommand));
-        } else {
-            prevDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, maskCtrlCommand));
-        }
+        prevDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, maskCtrlCommand)); // Originally VK_LEFT for Windows, that keyboard shortcut did not work
         prevDMenuItem.addActionListener(this);
         prevDMenuItem.setEnabled(false);
         ringWindowMenuItem = new JMenuItem("Next discriminant");
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("View the diagram for the next discriminant");
         nextDMenuItem = ringWindowMenu.add(ringWindowMenuItem);
         nextDMenuItem.setActionCommand("nextD");
-        if (macOSFlag) {
-            nextDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_H, maskCtrlCommand));
-        } else {
-            nextDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, maskCtrlCommand));
-        }
+        nextDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_J, maskCtrlCommand)); // Originally VK_RIGHT for Windows, that keyboard shortcut did not work
         nextDMenuItem.addActionListener(this);
         nextDMenuItem.setEnabled(false);
         ringWindowMenu.addSeparator();
@@ -1585,9 +1637,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      * squarefree,
      */
     public RingWindowDisplay(int ringChoice) {
-        
         ImaginaryQuadraticRing imR;
-        
         this.pixelsPerUnitInterval = DEFAULT_PIXELS_PER_UNIT_INTERVAL;
         this.ringCanvasHorizMax = RING_CANVAS_DEFAULT_HORIZ_MAX;
         this.ringCanvasVerticMax = RING_CANVAS_DEFAULT_VERTIC_MAX;
@@ -1599,17 +1649,14 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         this.inertPrimeColor = DEFAULT_INERT_PRIME_COLOR;
         this.splitPrimeColor = DEFAULT_SPLIT_PRIME_COLOR;
         this.ramifiedPrimeColor = DEFAULT_RAMIFIED_PRIME_COLOR;
-        
         this.zeroCoordX = (int) Math.floor(this.ringCanvasHorizMax/2);
         this.zeroCoordY = (int) Math.floor(this.ringCanvasVerticMax/2);
-        this.zeroCentered = true;
-        this.zeroInView = true;
-        
+        // this.zeroCentered = true;
+        // this.zeroInView = true;
         this.dotRadius = DEFAULT_DOT_RADIUS;
         this.zoomInterval = DEFAULT_ZOOM_INTERVAL;
         this.preferenceForThetaNotation = false;
         this.discrHistory = new ArrayList<>();
-        
         if (ringChoice > 0) {
             ringChoice *= -1;
         }
@@ -1622,24 +1669,20 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         }
         this.currHistoryIndex = 0;
         this.setRing(imR);
-        this.mouseIQI = new ImaginaryQuadraticInteger(0, 0, imR, 1);
+        this.mouseIQI = new ImaginaryQuadraticInteger(0, 0, imR);
         this.setBackground(this.backgroundColor);
         this.setPreferredSize(new Dimension(this.ringCanvasHorizMax, this.ringCanvasVerticMax)); 
-                               
     }
     
     public static void startRingWindowDisplay(int ringChoice) {
-        
         if (ringChoice > -1) {
             ringChoice *= -1;
         }
         if (!NumberTheoreticFunctionsCalculator.isSquareFree(ringChoice)) {
             ringChoice = DEFAULT_RING_D;
         }
-        
         RingWindowDisplay rwd = new RingWindowDisplay(ringChoice);
         rwd.setUpRingFrame();
-        
     }
     
 }

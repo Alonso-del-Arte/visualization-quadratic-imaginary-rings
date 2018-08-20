@@ -1678,7 +1678,12 @@ public class ImaginaryQuadraticIntegerTest {
     }
 
     /**
-     * Test of times method, of class ImaginaryQuadraticInteger.
+     * Test of times method, of class ImaginaryQuadraticInteger. This test 
+     * includes multiplication of numbers from several imaginary quadratic 
+     * rings, including tests of numbers from different rings to make sure 
+     * {@link AlgebraicDegreeOverflowException} is thrown correctly. Of course 
+     * testing that that exception itself works correctly falls to {@link 
+     * AlgebraicDegreeOverflowExceptionTest}.
      */
     @Test
     public void testTimes() {
@@ -1686,6 +1691,7 @@ public class ImaginaryQuadraticIntegerTest {
         ImaginaryQuadraticRing currRing;
         ImaginaryQuadraticInteger expResult, result, testMultiplicandA, testMultiplicandB;
         int currDenom;
+        String failMessage;
         for (int iterDiscr = -1; iterDiscr > -200; iterDiscr--) {
             if (NumberTheoreticFunctionsCalculator.isSquareFree(iterDiscr)) {
                 currRing = new ImaginaryQuadraticRing(iterDiscr);
@@ -1707,11 +1713,11 @@ public class ImaginaryQuadraticIntegerTest {
                                 }
                                 try {
                                     result = testMultiplicandA.times(testMultiplicandB);
+                                    assertEquals(expResult, result);
                                 } catch (AlgebraicDegreeOverflowException adoe) {
-                                    result = zeroIQI; // This is just to avoid "variable result might not have been initialized" error
-                                    fail("Multiplying two integers from the same ring should not have triggered AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"");
+                                    failMessage = "Multiplying two integers from the same ring should not have triggered AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"";
+                                    fail(failMessage);
                                 }
-                                assertEquals(expResult, result);
                             }
                             // Now to test times(int)
                             expResult = new ImaginaryQuadraticInteger(v * x, w * x, currRing, currDenom);
@@ -1726,11 +1732,11 @@ public class ImaginaryQuadraticIntegerTest {
         for (int i = 0; i < totalTestIntegers; i++) {
             try {
                 result = testIntegers.get(i).times(testConjugates.get(i));
+                assertEquals(testNorms.get(i), result);
             } catch (AlgebraicDegreeOverflowException adoe) {
-                result = zeroIQI; // This is just to avoid "variable result might not have been initialized" error
-                fail("Multiplying an integer by its conjugate should not have triggered AlgebraicDegreeOverflowException \"" + adoe.getMessage());
+                failMessage = "Multiplying an integer by its conjugate should not have triggered AlgebraicDegreeOverflowException \"" + adoe.getMessage();
+                fail(failMessage);
             }
-            assertEquals(testNorms.get(i), result);
         }
         /* And now to test that multiplying algebraic integers from two 
            different quadratic integer rings triggers 
@@ -1738,8 +1744,11 @@ public class ImaginaryQuadraticIntegerTest {
         for (int j = 0; j < totalTestIntegers - 1; j++) {
             try {
                 result = testIntegers.get(j).times(testIntegers.get(j + 1));
-                fail("Multiplying " + testIntegers.get(j).toASCIIString() + " by " + testIntegers.get(j + 1).toASCIIString() + " should not have resulted in " + result.toASCIIString() + " without triggering AlgebraicDegreeOverflowException.");
+                failMessage = "Multiplying " + testIntegers.get(j).toASCIIString() + " by " + testIntegers.get(j + 1).toASCIIString() + " should not have resulted in " + result.toASCIIString() + " without triggering AlgebraicDegreeOverflowException.";
+                fail(failMessage);
             } catch (AlgebraicDegreeOverflowException adoe) {
+                failMessage = "Necessary degree should be 4, not " + adoe.getNecessaryAlgebraicDegree() + ", for multiplying " + testIntegers.get(j).toASCIIString() + " by " + testIntegers.get(j + 1).toASCIIString() + ".";
+                assertEquals(failMessage, 4, adoe.getNecessaryAlgebraicDegree());
                 System.out.println("Multiplying " + testIntegers.get(j).toASCIIString() + " by " + testIntegers.get(j + 1).toASCIIString() + " correctly triggered AlgebraicDegreeOverflowException (algebraic degree " + adoe.getNecessaryAlgebraicDegree() + " needed).");
             }
             /* However, if one of them is purely real, there should be a reuslt, 
@@ -1748,18 +1757,42 @@ public class ImaginaryQuadraticIntegerTest {
                 result = testNorms.get(j).times(testIntegers.get(j + 1));
                 System.out.println("Multiplying " + testNorms.get(j).toASCIIString() + " from " + testNorms.get(j).getRing().toASCIIString() + " by " + testIntegers.get(j + 1).toASCIIString() + " gives result " + result.toASCIIString());
             } catch (AlgebraicDegreeOverflowException adoe) {
-                fail("Multiplying " + testNorms.get(j).toASCIIString() + " from " + testNorms.get(j).getRing().toASCIIString() + " by " + testIntegers.get(j + 1).toASCIIString() + " should not have caused AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"");
+                failMessage = "Multiplying " + testNorms.get(j).toASCIIString() + " from " + testNorms.get(j).getRing().toASCIIString() + " by " + testIntegers.get(j + 1).toASCIIString() + " should not have caused AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"";
+                fail(failMessage);
             } catch (Exception e) {
-                fail("Multiplying " + testNorms.get(j).toASCIIString() + " from " + testNorms.get(j).getRing().toASCIIString() + " by " + testIntegers.get(j + 1).toASCIIString() + " should not have caused Exception \"" + e.getMessage() + "\"");
+                failMessage = "Multiplying " + testNorms.get(j).toASCIIString() + " from " + testNorms.get(j).getRing().toASCIIString() + " by " + testIntegers.get(j + 1).toASCIIString() + " should not have caused Exception \"" + e.getMessage() + "\"";
+                fail(failMessage);
             }
             try {
                 result = testIntegers.get(j).times(testNorms.get(j + 1));
                 System.out.println("Multiplying " + testNorms.get(j + 1).toASCIIString() + " from " + testNorms.get(j + 1).getRing().toASCIIString() + " by " + testIntegers.get(j).toASCIIString() + " gives result " + result.toASCIIString());
             } catch (AlgebraicDegreeOverflowException adoe) {
-                fail("Multiplying " + testNorms.get(j + 1).toASCIIString() + " from " + testNorms.get(j + 1).getRing().toASCIIString() + " by " + testIntegers.get(j).toASCIIString() + " should not have caused AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"");
+                failMessage = "Multiplying " + testNorms.get(j + 1).toASCIIString() + " from " + testNorms.get(j + 1).getRing().toASCIIString() + " by " + testIntegers.get(j).toASCIIString() + " should not have caused AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"";
+                fail(failMessage);
             } catch (Exception e) {
-                fail("Multiplying " + testNorms.get(j + 1).toASCIIString() + " from " + testNorms.get(j + 1).getRing().toASCIIString() + " by " + testIntegers.get(j).toASCIIString() + " should not have caused Exception \"" + e.getMessage() + "\"");
+                failMessage = "Multiplying " + testNorms.get(j + 1).toASCIIString() + " from " + testNorms.get(j + 1).getRing().toASCIIString() + " by " + testIntegers.get(j).toASCIIString() + " should not have caused Exception \"" + e.getMessage() + "\"";
+                fail(failMessage);
             }
+        }
+        /* And lastly, to test correct necessary algebraic degree of 2 is given 
+           when two purely imaginary numbers from distinct domains are 
+           multiplied. */
+        testMultiplicandA = new ImaginaryQuadraticInteger(0, 5, ringZi2);
+        testMultiplicandB = new ImaginaryQuadraticInteger(0, 2, ringRandom);
+        try {
+            result = testMultiplicandA.times(testMultiplicandB);
+            failMessage = "Multiplying " + testMultiplicandA.toASCIIString() + " by " + testMultiplicandB.toASCIIString() + " should not have resulted in " + result.toASCIIString() + " without triggering some sort of exception.";
+            fail(failMessage);
+        } catch (AlgebraicDegreeOverflowException adoe) {
+            int realRadicand = testMultiplicandA.getRing().getNegRad() * testMultiplicandB.getRing().getNegRad();
+            double realNumericApprox = -10 * Math.sqrt(realRadicand);
+            failMessage = "Necessary degree should be 2, not " + adoe.getNecessaryAlgebraicDegree() + ", for multiplying " + testMultiplicandA.toASCIIString() + " by " + testMultiplicandB.toASCIIString() + " to represent to represent the real number -10sqrt(" + realRadicand + "), approximately " + realNumericApprox;
+            assertEquals(failMessage, 2, adoe.getNecessaryAlgebraicDegree());
+            System.out.println("Multiplying " + testMultiplicandA.toASCIIString() + " by " + testMultiplicandB.toASCIIString() + " triggered AlgebraicDegreeOverflowException (algebraic degree " + adoe.getNecessaryAlgebraicDegree() + " needed).");
+            System.out.println("This is perhaps the best solution if the source package lacks a way to represent the real number -10sqrt(" + realRadicand + "), approximately " + realNumericApprox);
+        } catch (Exception e) {
+            System.out.println("The following is an advisory message, the thrown exception may or may not be the best one for the situation.");
+            System.out.println("Multiplying " + testMultiplicandA.toASCIIString() + " by " + testMultiplicandB.toASCIIString() + " triggered this exception: " + e.getClass().getName());
         }
     }
 

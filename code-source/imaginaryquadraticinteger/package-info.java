@@ -18,19 +18,26 @@
  * <b>ImaginaryQuadraticInteger</b>, a package for visualizing algebraic
  * integers of degree 2 in the complex plane.
  * 
- * <p>WORK IN PROGRESS. At this stage, only RingWindowDisplay has a GUI, which 
- * ImaginaryQuadraticInteger.main() calls upon starting.</p>
+ * <p>The package consists of the following classes:</p>
  * 
- * <p>Also, I have thought that perhaps this project ought to be split among two 
- * or three packages. Then this package would consist of pretty much the same 
- * classes it currently has but perhaps RingWindowDisplay would be shipped out 
- * to a view package and NumberTheoreticFunctionsCalculator would go to a 
- * calculators package. The exceptions would stay in this package.</p>
- * 
- * <p>In late May 2018, I did decide to make a separate package for the file 
- * filters which RingWindowDisplay.saveDiagramAs() uses (or might use) to get 
- * the user to select a place where to save diagrams produced by the program. 
- * That package is called, appropriately enough, filefilters.</p>
+ * <ul>
+ * <li>{@link imaginaryquadraticinteger.AlgebraicInteger}, an interface for 
+ * defining algebraic integer classes.</li>
+ * <li>{@link imaginaryquadraticinteger.ImaginaryQuadraticRing}, defines objects 
+ * to represent imaginary quadratic integer rings.</li>
+ * <li>{@link imaginaryquadraticinteger.ImaginaryQuadraticInteger} is the main 
+ * class, defines objects representing imaginary quadratic integers.</li>
+ * <li>{@link imaginaryquadraticinteger.NumberTheoreticFunctionsCalculator} is a 
+ * collection of number theoretic functions, including basic primality testing 
+ * and the Euclidean GCD algorithm.</li>
+ * <li>{@link imaginaryquadraticinteger.RingWindowDisplay} is a Swing component 
+ * in which to display diagrams of prime numbers in various quadratic integer 
+ * rings. Note that this class is final due to a leaky constructor problem.</li>
+ * <li>{@link imaginaryquadraticinteger.AlgebraicDegreeOverflowException}</li>
+ * <li>{@link imaginaryquadraticinteger.NotDivisibleException}</li>
+ * <li>{@link imaginaryquadraticinteger.NonEuclideanDomainException}</li>
+ * <li>{@link imaginaryquadraticinteger.NonUniqueFactorizationDomainException}</li>
+ * </ul>
  * 
  * <p>Copyright &copy; 2018 Alonso del Arte.</p>
  */

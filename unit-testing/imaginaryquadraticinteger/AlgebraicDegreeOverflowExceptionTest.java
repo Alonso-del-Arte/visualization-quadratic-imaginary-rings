@@ -41,11 +41,16 @@ public class AlgebraicDegreeOverflowExceptionTest {
             System.out.println(numberA.toASCIIString() + " + " + numberB.toASCIIString() + " = " + sum.toASCIIString());
         } catch (AlgebraicDegreeOverflowException adoe) {
             algDegOvflExc = adoe;
+        } catch (Exception e) {
+            System.out.println("Exception " + e.getClass().getName() + " encountered.");
+            System.out.println("\"" + e.getMessage() + "\"");
+            System.out.println("Probably all the tests will fail now.");
         }
     }
     
     /**
-     * Test of getMaxExpectedAlgebraicDegree method, of class AlgebraicDegreeOverflowException.
+     * Test of getMaxExpectedAlgebraicDegree method, of class 
+     * AlgebraicDegreeOverflowException.
      */
     @Test
     public void testGetMaxExpectedAlgebraicDegree() {
@@ -54,7 +59,8 @@ public class AlgebraicDegreeOverflowExceptionTest {
     }
 
     /**
-     * Test of getNecessaryAlgebraicDegree method, of class AlgebraicDegreeOverflowException.
+     * Test of getNecessaryAlgebraicDegree method, of class 
+     * AlgebraicDegreeOverflowException.
      */
     @Test
     public void testGetNecessaryAlgebraicDegree() {
@@ -63,7 +69,8 @@ public class AlgebraicDegreeOverflowExceptionTest {
     }
 
     /**
-     * Test of getCausingNumbers method, of class AlgebraicDegreeOverflowException.
+     * Test of getCausingNumbers method, of class 
+     * AlgebraicDegreeOverflowException.
      */
     @Test
     public void testGetCausingNumbers() {

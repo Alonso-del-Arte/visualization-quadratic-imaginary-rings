@@ -1514,6 +1514,7 @@ public class ImaginaryQuadraticIntegerTest {
         ImaginaryQuadraticRing currRing;
         ImaginaryQuadraticInteger expResult, result, testAddendA, testAddendB;
         int currDenom;
+        String failMessage;
         for (int iterDiscr = -1; iterDiscr > -200; iterDiscr--) {
             if (NumberTheoreticFunctionsCalculator.isSquareFree(iterDiscr)) {
                 currRing = new ImaginaryQuadraticRing(iterDiscr);
@@ -1529,11 +1530,13 @@ public class ImaginaryQuadraticIntegerTest {
                             for (int y = -3; y < 48; y += 2) {
                                 testAddendB = new ImaginaryQuadraticInteger(x, y, currRing, currDenom);
                                 expResult = new ImaginaryQuadraticInteger(v + x, w + y, currRing, currDenom);
+                                failMessage = "Adding two integers from the same ring should not have triggered AlgebraicDegreeOverflowException \"";
                                 try {
                                     result = testAddendA.plus(testAddendB);
                                     assertEquals(expResult, result);
                                 } catch (AlgebraicDegreeOverflowException adoe) {
-                                    fail("Adding two integers from the same ring should not have triggered AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"");
+                                    failMessage = failMessage + adoe.getMessage() + "\"";
+                                    fail(failMessage);
                                 }
                             }
                             // Now to test plus(int)
@@ -1551,11 +1554,13 @@ public class ImaginaryQuadraticIntegerTest {
         }
         for (int i = 0; i < totalTestIntegers; i++) {
             // Testing that adding additive inverses give 0 each time
+            failMessage = "Adding test integer to its additive inverse should not have triggered AlgebraicDegreeOverflowException \"";
             try {
                 result = testIntegers.get(i).plus(testAdditiveInverses.get(i));
                 assertEquals(zeroIQI, result);
             } catch (AlgebraicDegreeOverflowException adoe) {
-                fail("Adding test integer to its additive inverse should not have triggered AlgebraicDegreeOverflowException \"" + adoe.getMessage());
+                failMessage = failMessage + adoe.getMessage() + "\"";
+                fail(failMessage);
             }
             // Now testing that adding 0 does not change the number
             result = testIntegers.get(i).plus(0);
@@ -1566,27 +1571,34 @@ public class ImaginaryQuadraticIntegerTest {
         for (int j = 0; j < totalTestIntegers - 1; j++) {
             try {
                 result = testIntegers.get(j).plus(testIntegers.get(j + 1));
-                fail("Adding " + testIntegers.get(j).toASCIIString() + " to " + testIntegers.get(j + 1).toASCIIString() + " should not have resulted in " + result.toASCIIString() + " without triggering AlgebraicDegreeOverflowException.");
+                failMessage = "Adding " + testIntegers.get(j).toASCIIString() + " to " + testIntegers.get(j + 1).toASCIIString() + " should not have resulted in " + result.toASCIIString() + " without triggering AlgebraicDegreeOverflowException.";
+                fail(failMessage);
             } catch (AlgebraicDegreeOverflowException adoe) {
                 System.out.println("Adding " + testIntegers.get(j).toASCIIString() + " to " + testIntegers.get(j + 1).toASCIIString() + " correctly triggered AlgebraicDegreeOverflowException (algebraic degree " + adoe.getNecessaryAlgebraicDegree() + " needed).");
             }
-            /* However, if one of them is purely real, there should be a reuslt, 
+            /* However, if one of them is purely real, there should be a result, 
                even if it takes us to a different ring */
+            failMessage = "Adding " + testNorms.get(j).toASCIIString() + " from " + testNorms.get(j).getRing().toASCIIString() + " to " + testIntegers.get(j + 1).toASCIIString() + " should not have caused";
             try {
                 result = testNorms.get(j).plus(testIntegers.get(j + 1));
                 System.out.println("Adding " + testNorms.get(j).toASCIIString() + " from " + testNorms.get(j).getRing().toASCIIString() + " to " + testIntegers.get(j + 1).toASCIIString() + " gives result " + result.toASCIIString());
             } catch (AlgebraicDegreeOverflowException adoe) {
-                fail("Adding " + testNorms.get(j).toASCIIString() + " from " + testNorms.get(j).getRing().toASCIIString() + " to " + testIntegers.get(j + 1).toASCIIString() + " should not have caused AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"");
+                failMessage = failMessage + "AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"";
+                fail(failMessage);
             } catch (Exception e) {
-                fail("Adding " + testNorms.get(j).toASCIIString() + " from " + testNorms.get(j).getRing().toASCIIString() + " to " + testIntegers.get(j + 1).toASCIIString() + " should not have caused Exception \"" + e.getMessage() + "\"");
+                failMessage = failMessage + "Exception \"" + e.getMessage() + "\"";
+                fail(failMessage);
             }
+            failMessage = "Adding " + testNorms.get(j + 1).toASCIIString() + " from " + testNorms.get(j + 1).getRing().toASCIIString() + " to " + testIntegers.get(j).toASCIIString() + " should not have caused";
             try {
                 result = testIntegers.get(j).plus(testNorms.get(j + 1));
                 System.out.println("Adding " + testNorms.get(j + 1).toASCIIString() + " from " + testNorms.get(j + 1).getRing().toASCIIString() + " to " + testIntegers.get(j).toASCIIString() + " gives result " + result.toASCIIString());
             } catch (AlgebraicDegreeOverflowException adoe) {
-                fail("Adding " + testNorms.get(j + 1).toASCIIString() + " from " + testNorms.get(j + 1).getRing().toASCIIString() + " to " + testIntegers.get(j).toASCIIString() + " should not have caused AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"");
+                failMessage = failMessage + "AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"";
+                fail(failMessage);
             } catch (Exception e) {
-                fail("Adding " + testNorms.get(j + 1).toASCIIString() + " from " + testNorms.get(j + 1).getRing().toASCIIString() + " to " + testIntegers.get(j).toASCIIString() + " should not have caused Exception \"" + e.getMessage() + "\"");
+                failMessage = failMessage + "Exception \"" + e.getMessage() + "\"";
+                fail(failMessage);
             }
         }
     }
@@ -1620,7 +1632,7 @@ public class ImaginaryQuadraticIntegerTest {
                                     result = testMinuend.minus(testSubtrahend);
                                     assertEquals(expResult, result);
                                 } catch (AlgebraicDegreeOverflowException adoe) {
-                                    failMessage = "Adding two integers from the same ring should not have triggered AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"";
+                                    failMessage = "Subtracting two integers from the same ring should not have triggered AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"";
                                     fail(failMessage);
                                 }
                             }
@@ -1664,14 +1676,15 @@ public class ImaginaryQuadraticIntegerTest {
             }
             /* However, if one of them is purely real, there should be some kind 
                of result */
+            failMessage = "Subtracting " + testIntegers.get(j + 1).toASCIIString() + " from " + testNorms.get(j).toASCIIString() + " from " + testNorms.get(j).getRing().toASCIIString() + " should not have triggered";
             try {
                 result = testNorms.get(j).minus(testIntegers.get(j + 1));
                 System.out.println(testNorms.get(j).toASCIIString() + " from " + testNorms.get(j).getRing().toASCIIString() + " minus " + testIntegers.get(j + 1).toASCIIString() + " is " + result.toASCIIString());
             } catch (AlgebraicDegreeOverflowException adoe) {
-                failMessage = "Subtracting " + testIntegers.get(j + 1).toASCIIString() + " from " + testNorms.get(j).toASCIIString() + " from " + testNorms.get(j).getRing().toASCIIString() + " should not have triggered AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"";
+                failMessage = failMessage + " AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"";
                 fail(failMessage);
             } catch (Exception e) {
-                failMessage = "Subtracting " + testIntegers.get(j + 1).toASCIIString() + " from " + testNorms.get(j).toASCIIString() + " from " + testNorms.get(j).getRing().toASCIIString() + " should not have triggered Exception \"" + e.getMessage() + "\"";
+                failMessage = failMessage + " Exception \"" + e.getMessage() + "\"";
                 fail(failMessage);
             }
         }
@@ -1753,59 +1766,62 @@ public class ImaginaryQuadraticIntegerTest {
             }
             /* However, if one of them is purely real, there should be a result, 
                even if it takes us to a different ring */
+            failMessage = "Multiplying " + testNorms.get(j).toASCIIString() + " from " + testNorms.get(j).getRing().toASCIIString() + " by " + testIntegers.get(j + 1).toASCIIString() + " should not have caused";
             try {
                 result = testNorms.get(j).times(testIntegers.get(j + 1));
                 System.out.println("Multiplying " + testNorms.get(j).toASCIIString() + " from " + testNorms.get(j).getRing().toASCIIString() + " by " + testIntegers.get(j + 1).toASCIIString() + " gives result " + result.toASCIIString());
             } catch (AlgebraicDegreeOverflowException adoe) {
-                failMessage = "Multiplying " + testNorms.get(j).toASCIIString() + " from " + testNorms.get(j).getRing().toASCIIString() + " by " + testIntegers.get(j + 1).toASCIIString() + " should not have caused AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"";
+                failMessage = failMessage + " AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"";
                 fail(failMessage);
             } catch (Exception e) {
-                failMessage = "Multiplying " + testNorms.get(j).toASCIIString() + " from " + testNorms.get(j).getRing().toASCIIString() + " by " + testIntegers.get(j + 1).toASCIIString() + " should not have caused Exception \"" + e.getMessage() + "\"";
+                failMessage = failMessage + " Exception \"" + e.getMessage() + "\"";
                 fail(failMessage);
             }
+            failMessage = "Multiplying " + testNorms.get(j + 1).toASCIIString() + " from " + testNorms.get(j + 1).getRing().toASCIIString() + " by " + testIntegers.get(j).toASCIIString() + " should not have caused";
             try {
                 result = testIntegers.get(j).times(testNorms.get(j + 1));
                 System.out.println("Multiplying " + testNorms.get(j + 1).toASCIIString() + " from " + testNorms.get(j + 1).getRing().toASCIIString() + " by " + testIntegers.get(j).toASCIIString() + " gives result " + result.toASCIIString());
             } catch (AlgebraicDegreeOverflowException adoe) {
-                failMessage = "Multiplying " + testNorms.get(j + 1).toASCIIString() + " from " + testNorms.get(j + 1).getRing().toASCIIString() + " by " + testIntegers.get(j).toASCIIString() + " should not have caused AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"";
+                failMessage = failMessage + " AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"";
                 fail(failMessage);
             } catch (Exception e) {
-                failMessage = "Multiplying " + testNorms.get(j + 1).toASCIIString() + " from " + testNorms.get(j + 1).getRing().toASCIIString() + " by " + testIntegers.get(j).toASCIIString() + " should not have caused Exception \"" + e.getMessage() + "\"";
+                failMessage = failMessage + " Exception \"" + e.getMessage() + "\"";
                 fail(failMessage);
             }
         }
-        /* And lastly, to test correct necessary algebraic degree of 2 is given 
-           when two purely imaginary numbers from distinct domains are 
-           multiplied. */
+        /* And lastly, to test that multiplying two purely imaginary numbers 
+           from distinct domains causes UnsupportedNumberDomainException. */
         testMultiplicandA = new ImaginaryQuadraticInteger(0, 5, ringZi2);
         testMultiplicandB = new ImaginaryQuadraticInteger(0, 2, ringRandom);
+        failMessage = "Multiplying " + testMultiplicandA.toASCIIString() + " by " + testMultiplicandB.toASCIIString() + " should not have";
         try {
             result = testMultiplicandA.times(testMultiplicandB);
-            failMessage = "Multiplying " + testMultiplicandA.toASCIIString() + " by " + testMultiplicandB.toASCIIString() + " should not have resulted in " + result.toASCIIString() + " without triggering some sort of exception.";
+            failMessage = failMessage + " resulted in " + result.toASCIIString() + " without triggering some sort of exception.";
             fail(failMessage);
-        } catch (AlgebraicDegreeOverflowException adoe) {
+        } catch (UnsupportedNumberDomainException unde) {
             int realRadicand = testMultiplicandA.getRing().getNegRad() * testMultiplicandB.getRing().getNegRad();
             double realNumericApprox = -10 * Math.sqrt(realRadicand);
-            failMessage = "Necessary degree should be 2, not " + adoe.getNecessaryAlgebraicDegree() + ", for multiplying " + testMultiplicandA.toASCIIString() + " by " + testMultiplicandB.toASCIIString() + " to represent to represent the real number -10sqrt(" + realRadicand + "), approximately " + realNumericApprox;
-            assertEquals(failMessage, 2, adoe.getNecessaryAlgebraicDegree());
-            System.out.println("Multiplying " + testMultiplicandA.toASCIIString() + " by " + testMultiplicandB.toASCIIString() + " triggered AlgebraicDegreeOverflowException (algebraic degree " + adoe.getNecessaryAlgebraicDegree() + " needed).");
-            System.out.println("This is perhaps the best solution if the source package lacks a way to represent the real number -10sqrt(" + realRadicand + "), approximately " + realNumericApprox);
+            System.out.println("Multiplying " + testMultiplicandA.toASCIIString() + " by " + testMultiplicandB.toASCIIString() + " correctly triggered UnsupportedNumberDomainException \"" + unde.getMessage() + "\"");
+            System.out.println("This is perhaps the best solution if the source package lacks a way to represent the real number -10sqrt(" + realRadicand + "), approximately " + realNumericApprox + "...");
+        } catch (AlgebraicDegreeOverflowException adoe) {
+            failMessage = failMessage + " caused AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"";
+            fail(failMessage);
         } catch (Exception e) {
-            System.out.println("The following is an advisory message, the thrown exception may or may not be the best one for the situation.");
-            System.out.println("Multiplying " + testMultiplicandA.toASCIIString() + " by " + testMultiplicandB.toASCIIString() + " triggered this exception: " + e.getClass().getName());
+            failMessage = failMessage + " caused" + e.getClass().getName() + "\"" + e.getMessage() + "\"";
+            fail(failMessage);
         }
     }
 
     /**
      * Test of divides method, of class ImaginaryQuadraticInteger. This test 
-     * multiplies several algebraic integers in the rings Z[i] to Z[sqrt(-199)], 
-     * then divides to get back the first number. So if the test of the times 
-     * method fails, the result of this test is meaningless. In regards to 
-     * division by zero, this test will pass if either {@link 
-     * IllegalArgumentException} or {@link ArithmeticException} is thrown. Any 
-     * other exception will fail the test, and that includes the {@link 
-     * NotDivisibleException}. Not throwing any exception at all for division by 
-     * zero will also fail the test.
+     * multiplies several algebraic integers in the rings <b>Z</b>[<i>i</i>] to 
+     * <b>Z</b>[&radic;-199], then divides to get back the first number. So if 
+     * the test of the times method fails, the result of this test is 
+     * meaningless. In regards to division by zero, this test will pass if 
+     * either {@link IllegalArgumentException} or {@link ArithmeticException} is 
+     * thrown. Any other exception will fail the test, and that includes the 
+     * {@link NotDivisibleException}. Not throwing any exception at all for 
+     * division by zero will also fail the test.
      */
     @Test
     public void testDivides() {
@@ -1911,8 +1927,7 @@ public class ImaginaryQuadraticIntegerTest {
                 failMessage = "NotDivisibleException should not have occurred in dividing a norm by a conjugate.";
                 fail(failMessage);
             }
-            /* Last but not least, check to make sure division by zero causes a 
-               suitable exception. */
+            // Check to make sure division by zero causes a suitable exception
             try {
                 result = testIntegers.get(i).divides(zeroIQI);
                 failMessage = "Dividing " + testIntegers.get(i).toASCIIString() + " by 0 + 0i should have caused an exception, not given result " + result.toASCIIString();
@@ -1947,22 +1962,87 @@ public class ImaginaryQuadraticIntegerTest {
                 fail(failMessage);
             }
         }
-        /* Actually, just one more thing: to check that dividing an imaginary 
-           quadratic integer from one ring by a purely real integer from another 
-           ring does give the same result as if the purely real integer was 
-           presented as being from the same ring. */
+        /* Check that dividing an imaginary quadratic integer from one ring by a 
+           purely real integer from another ring does give the same result as if 
+           the purely real integer was presented as being from the same ring. */
         testDividend = new ImaginaryQuadraticInteger(3, 1, ringEisenstein);
         testDivisor = new ImaginaryQuadraticInteger(2, 0, ringGaussian);
         expResult = new ImaginaryQuadraticInteger(3, 1, ringEisenstein, 2);
+        failMessage = "Trying to divide " + testDividend.toASCIIString() + " by " + testDivisor.toASCIIString() + " from " + testDivisor.getRing().toASCIIString() + " should not have triggered";
         try {
             result = testDividend.divides(testDivisor);
             assertEquals(expResult, result);
         } catch (NotDivisibleException nde) {
-            fail("Trying to divide " + testDividend.toASCIIString() + " by " + testDivisor.toASCIIString() + " from " + testDivisor.getRing().toASCIIString() + " should not have triggered NotDivisibleException \"" + nde.getMessage() + "\"");
+            failMessage = failMessage + " NotDivisibleException \"" + nde.getMessage() + "\"";
+            fail(failMessage);
         } catch (AlgebraicDegreeOverflowException adoe) {
-            fail("Trying to divide " + testDividend.toASCIIString() + " by " + testDivisor.toASCIIString() + " from " + testDivisor.getRing().toASCIIString() + " should not have triggered AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"");
+            failMessage = failMessage + " AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"";
+            fail(failMessage);
         } catch (Exception e) {
-            fail("Trying to divide " + testDividend.toASCIIString() + " by " + testDivisor.toASCIIString() + " from " + testDivisor.getRing().toASCIIString() + " should not have triggered Exception \"" + e.getMessage() + "\"");
+            failMessage = failMessage + e.getClass().getName() + "\"" + e.getMessage() + "\"";
+            fail(failMessage);
+        }
+        /* And now to test that dividing an algebraic integer from one imaginary 
+           quadratic ring by an algebraic integer from another imaginary 
+           quadratic ring triggers AlgebraicDegreeOverflowException */
+        ImaginaryQuadraticInteger temp;
+        for (int j = 0; j < totalTestIntegers - 1; j++) {
+            failMessage = "Dividing " + testIntegers.get(j).toASCIIString() + " by " + testIntegers.get(j + 1).toASCIIString() + " should not have";
+            try {
+                result = testIntegers.get(j).divides(testIntegers.get(j + 1));
+                failMessage = failMessage + " resulted in " + result.toASCIIString() + " without triggering AlgebraicDegreeOverflowException.";
+                fail(failMessage);
+            } catch (AlgebraicDegreeOverflowException adoe) {
+                failMessage = "Necessary degree should be 4, not " + adoe.getNecessaryAlgebraicDegree() + ", for multiplying " + testIntegers.get(j).toASCIIString() + " by " + testIntegers.get(j + 1).toASCIIString() + ".";
+                assertEquals(failMessage, 4, adoe.getNecessaryAlgebraicDegree());
+                System.out.println("Dividing " + testIntegers.get(j).toASCIIString() + " by " + testIntegers.get(j + 1).toASCIIString() + " correctly triggered AlgebraicDegreeOverflowException (algebraic degree " + adoe.getNecessaryAlgebraicDegree() + " needed).");
+            } catch (NotDivisibleException nde) {
+                failMessage = failMessage + " triggered NotDivisibleException \"" + nde.getMessage() + "\"";
+                fail(failMessage);
+            }
+            /* However, if the divisor is purely real, there should be a result, 
+               even if it takes us to a different ring */
+            temp = testIntegers.get(j + 1).times(testNorms.get(j));
+            failMessage = "Dividing " + temp.toASCIIString() + " from " + temp.getRing().toASCIIString() + " by " + testNorms.get(j).toASCIIString() + " from " + testNorms.get(j).getRing().toASCIIString() + " should not have caused";
+            try {
+                result = temp.divides(testNorms.get(j));
+                System.out.println("Dividing " + temp.toASCIIString() + " from " + temp.getRing().toASCIIString() + " by " + testNorms.get(j).toASCIIString() + " from " + testNorms.get(j).getRing().toASCIIString() + " gives result " + result.toASCIIString());
+            } catch (AlgebraicDegreeOverflowException adoe) {
+                failMessage = failMessage + " AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"";
+                fail(failMessage);
+            } catch (NotDivisibleException nde) {
+                failMessage = failMessage + " NotDivisibleException \"" + nde.getMessage() + "\"";
+                fail(failMessage);
+            } catch (Exception e) {
+                failMessage = failMessage + " Exception \"" + e.getMessage() + "\"";
+                fail(failMessage);
+            }
+        }
+        /* And lastly, to test that dividing a purely imaginary number from one 
+           domain is divided by a purely imaginary number from another domain 
+           triggers UnsupportedNumberDomainException. It will be enough to check 
+           sqrt(-10)/sqrt(-2), which would give sqrt(5) only if there was a way 
+           for this to give a real quadratic integer. */
+        testDividend = new ImaginaryQuadraticInteger(0, 1, new ImaginaryQuadraticRing(-10));
+        testDivisor = new ImaginaryQuadraticInteger(0, 1, ringZi2);
+        failMessage = "Dividing " + testDividend.toASCIIString() + " by " + testDivisor.toASCIIString() + " should not have";
+        try {
+            result = testDividend.divides(testDivisor);
+            failMessage = failMessage + " resulted in " + result.toASCIIString() + " without triggering some sort of exception.";
+            fail(failMessage);
+        } catch (UnsupportedNumberDomainException unde) {
+            double realNumericApprox = Math.sqrt(5);
+            System.out.println("Dividing " + testDividend.toASCIIString() + " by " + testDivisor.toASCIIString() + " correctly triggered UnsupportedNumberDomainException \"" + unde.getMessage() + "\"");
+            System.out.println("This is perhaps the best solution if the source package lacks a way to represent the real number sqrt(5), approximately " + realNumericApprox + "...");
+        } catch (AlgebraicDegreeOverflowException adoe) {
+            failMessage = failMessage + " triggered AlgebraicDegreeOverflowException \"" + adoe.getMessage() + "\"";
+            fail(failMessage);
+        } catch(NotDivisibleException nde) {
+            failMessage = failMessage + " triggered NotDivisibleException \"" + nde.getMessage() + "\"";
+            fail(failMessage);
+        } catch (Exception e) {
+            failMessage = failMessage + " caused" + e.getClass().getName() + "\"" + e.getMessage() + "\"";
+            fail(failMessage);
         }
     }
 

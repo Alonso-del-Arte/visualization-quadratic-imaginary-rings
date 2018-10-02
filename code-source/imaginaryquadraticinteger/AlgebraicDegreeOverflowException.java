@@ -17,7 +17,7 @@
 package imaginaryquadraticinteger;
 
 /**
- * A runtime exception to indicate when the result of an arithmetical operation 
+ * A runtime exception to indicate when the result of an arithmetic operation 
  * results in an algebraic integer of higher algebraic degree than the 
  * implementation of AlgebraicInteger was designed for. For example, the square 
  * root of 2 times the fifth root of 3 is an algebraic integer with minimal 
@@ -26,7 +26,12 @@ package imaginaryquadraticinteger;
  * as would an implementation that can handle algebraic integers up to algebraic 
  * degree 5. In such a case, it is appropriate to throw this exception. Note 
  * that this was originally a checked exception; later on I decided it made more 
- * sense as a runtime exception.
+ * sense as a runtime exception. If the result of an arithmetic operation is an 
+ * algebraic integer of the same degree as the implementation can handle but the 
+ * implementation can't represent that result for some other reason, {@link 
+ * UnsupportedNumberDomainException} should be used instead; for example, in a 
+ * package that can handle imaginary quadratic integers but not real quadratic 
+ * integers.
  * @author Alonso del Arte
  */
 public class AlgebraicDegreeOverflowException extends RuntimeException {

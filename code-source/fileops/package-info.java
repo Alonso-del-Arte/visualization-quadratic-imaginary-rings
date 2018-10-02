@@ -18,8 +18,17 @@
  * A helper package to move some file operations out of the 
  * imaginaryquadraticinteger package.
  * 
- * {@link fileops.FileChooserWithOverwriteGuard} extends {@link javax.swing.JFileChooser},
- * {@link fileops.JPEGFileFilter},
- * {@link fileops.PNGFileFilter},
+ * <ul>
+ * <li>{@link fileops.FileChooserWithOverwriteGuard} extends 
+ * {@link javax.swing.JFileChooser} in order to prevent the user from 
+ * accidentally overwriting an existing file.</li>
+ * <li>{@link fileops.JPEGFileFilter} filters out files that are not JPEG files 
+ * from a FileChooser dialog. This filter does not recognize *.jfif as a valid 
+ * JPEG file extension.</li>
+ * <li>{@link fileops.PNGFileFilter} filters out files that are not PNG files 
+ * from a FileChooser dialog.</li>
+ * </ul>
+ * 
+ * <p>Copyright &copy; 2018 Alonso del Arte.</p>
  */
 package fileops;

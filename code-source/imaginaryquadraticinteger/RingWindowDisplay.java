@@ -16,6 +16,10 @@
  */
 package imaginaryquadraticinteger;
 
+import clipboardops.ImageSelection;
+import fileops.FileChooserWithOverwriteGuard;
+import fileops.PNGFileFilter;
+
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
@@ -27,8 +31,6 @@ import javax.imageio.ImageIO;
 import javax.swing.filechooser.FileFilter;
 import java.util.List;
 import java.util.ArrayList;
-import fileops.FileChooserWithOverwriteGuard;
-import fileops.PNGFileFilter;
 
 /**
  * A Swing component in which to display diagrams of prime numbers in various 
@@ -242,23 +244,34 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     /**
      * The ring of the currently displayed diagram.
      */
-    protected ImaginaryQuadraticRing imagQuadRing;
+    protected ImaginaryQuadraticRing diagramRing;
     
+    /**
+     * The imaginary quadratic integer corresponding to the current mouse 
+     * position, if readouts are enabled.
+     */
     private ImaginaryQuadraticInteger mouseIQI;
         
     /**
-     * When imagQuadRing.d1mod4 is true, some users may prefer to see 
-     * "half-integers" notated with theta notation rather than fractions with 2s 
-     * for denominators. With this preference turned on and d = -3, omega will 
-     * be used rather than theta. Remember that omega = -1/2 + sqrt(-3)/2 and 
-     * theta = 1/2 + sqrt(d)/2.
+     * When diagramRing.d1mod4 is true, some users may prefer to see 
+     * "half-integers" notated with "theta" notation rather than fractions with 
+     * 2s for denominators. With this preference turned on and <i>d</i> = 
+     * &minus;3, &omega; will be used rather than &theta;. Remember that &omega; 
+     * = &minus;1/2 + (&radic;&minus;3)/2 and &theta; = 1/2 + (&radic;d)/2.
      */
     private boolean preferenceForThetaNotation;
     
     private int ringCanvasHorizMax;
     private int ringCanvasVerticMax;
     
+    /**
+     * The radius of the dots in the diagram. This is initialized to {@link 
+     * #DEFAULT_DOT_RADIUS}. The dot radius must be at least {@link 
+     * #MINIMUM_DOT_RADIUS} but may not be more than {@link 
+     * #MAXIMUM_DOT_RADIUS}.
+     */
     private int dotRadius;
+    
     private int zoomInterval;
     
     private Color backgroundColor, halfIntegerGridColor, integerGridColor;
@@ -310,13 +323,11 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      * @param graphicsForGrids The Graphics object supplied by the caller.
      */
     private void drawGrids(Graphics graphicsForGrids) {
-        
         int verticalGridDistance;
         int currPixelPos, currReflectPixelPos;
         boolean withinBoundaries = true;
-        
         verticalGridDistance = this.pixelsPerBasicImaginaryInterval;
-        if (this.imagQuadRing.d1mod4) {
+        if (this.diagramRing.d1mod4) {
             // Draw horizontal lines of half integer grid
             currPixelPos = this.zeroCoordY + verticalGridDistance;
             currReflectPixelPos = this.zeroCoordY - verticalGridDistance;
@@ -352,7 +363,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         } 
         // Draw horizontal lines of integer grid
         withinBoundaries = true;
-        graphicsForGrids.setColor(integerGridColor);
+        graphicsForGrids.setColor(this.integerGridColor);
         graphicsForGrids.drawLine(0, this.zeroCoordY, this.ringCanvasHorizMax, this.zeroCoordY);
         currPixelPos = this.zeroCoordY;
         currReflectPixelPos = currPixelPos;
@@ -379,7 +390,6 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                 graphicsForGrids.drawLine(currReflectPixelPos, 0, currReflectPixelPos, this.ringCanvasVerticMax);
             }
         }
-                
     }
     
     /**
@@ -408,7 +418,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         
         ImaginaryQuadraticInteger currIQI;
         
-        if (this.imagQuadRing.d1mod4) {
+        if (this.diagramRing.d1mod4) {
             maxY = (int) Math.floor((this.ringCanvasVerticMax - this.zeroCoordY)/(2 * this.pixelsPerBasicImaginaryInterval));
             verticalGridDistance *= 2;
         } else {
@@ -431,14 +441,14 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         // The even primes, -2 and 2
         currNegPointX -= this.pixelsPerUnitInterval;
         currPointX += this.pixelsPerUnitInterval;
-        byte symbol = NumberTheoreticFunctionsCalculator.symbolKronecker(this.imagQuadRing.negRad, 2);
-        if (this.imagQuadRing.negRad % 4 == -1) {
+        byte symbol = NumberTheoreticFunctionsCalculator.symbolKronecker(this.diagramRing.negRad, 2);
+        if (this.diagramRing.negRad % 4 == -1) {
             symbol = 0;
         }
-        if (this.imagQuadRing.negRad == -3) {
+        if (this.diagramRing.negRad == -3) {
             symbol = -1;
         }
-        if (this.imagQuadRing.negRad == -1) {
+        if (this.diagramRing.negRad == -1) {
             symbol = 1;
         }
         switch (symbol) {
@@ -458,7 +468,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                 graphicsForPoints.drawOval(currNegPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
                 break;
             default:
-                throw new RuntimeException("Unexpected problem computing symbolKronecker(" + imagQuadRing.negRad + ", " + 2 + ") = " + symbol);
+                throw new RuntimeException("Unexpected problem computing symbolKronecker(" + diagramRing.negRad + ", " + 2 + ") = " + symbol);
         }
         
         // Place "nibs" back at -1 and 1
@@ -470,7 +480,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             currPointX += (2 * this.pixelsPerUnitInterval);
             currNegPointX -= (2 * this.pixelsPerUnitInterval);
             if (NumberTheoreticFunctionsCalculator.isPrime(x)) {
-                symbol = NumberTheoreticFunctionsCalculator.symbolLegendre(imagQuadRing.negRad, x);
+                symbol = NumberTheoreticFunctionsCalculator.symbolLegendre(diagramRing.negRad, x);
                 switch (symbol) {
                     case -1:
                         graphicsForPoints.setColor(this.inertPrimeColor);
@@ -488,13 +498,13 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                         graphicsForPoints.drawOval(currNegPointX - this.dotRadius + 1, currPointY - this.dotRadius + 1, dotDiameter, dotDiameter);
                         break;
                     default:
-                        throw new RuntimeException("Unexpected problem computing symbolLegendre(" + imagQuadRing.negRad + ", " + x + ") = " + symbol);
+                        throw new RuntimeException("Unexpected problem computing symbolLegendre(" + diagramRing.negRad + ", " + x + ") = " + symbol);
                 }
             }
         }
         
         // The purely imaginary integer points other than 0
-        if (this.imagQuadRing.negRad == -1) {
+        if (this.diagramRing.negRad == -1) {
             // Take care to color the units in Z[i]
             currPointX = this.zeroCoordX;
             // currPointY = this.zeroCoordY; ???currPointY should not have changed from before, right????
@@ -519,9 +529,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             for (int y = 1; y <= maxY; y++) {
                 currPointY += verticalGridDistance;
                 currNegPointY -= verticalGridDistance;
-                currIQI = new ImaginaryQuadraticInteger(0, y, this.imagQuadRing);
+                currIQI = new ImaginaryQuadraticInteger(0, y, this.diagramRing);
                 if (NumberTheoreticFunctionsCalculator.isPrime(currIQI.norm())) {
-                    if (NumberTheoreticFunctionsCalculator.euclideanGCD(currIQI.norm(), this.imagQuadRing.negRad) > 1) {
+                    if (NumberTheoreticFunctionsCalculator.euclideanGCD(currIQI.norm(), this.diagramRing.negRad) > 1) {
                         int ramifyPoint = this.zeroCoordX + (int) currIQI.norm() * this.pixelsPerUnitInterval;
                         int negRamifyPoint = this.zeroCoordX - (int) currIQI.norm() * this.pixelsPerUnitInterval;
                         graphicsForPoints.setColor(this.ramifiedPrimeColor);
@@ -545,7 +555,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             for (int y = 1; y <= maxY; y++) {
                 currPointY = this.zeroCoordY + (y * verticalGridDistance);
                 currNegPointY = this.zeroCoordY - (y * verticalGridDistance);
-                currIQI = new ImaginaryQuadraticInteger(x, y, this.imagQuadRing, 1);
+                currIQI = new ImaginaryQuadraticInteger(x, y, this.diagramRing, 1);
                 if (NumberTheoreticFunctionsCalculator.isPrime(currIQI.norm())) {
                     graphicsForPoints.setColor(this.inertPrimeColor);
                     graphicsForPoints.fillOval(currPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
@@ -560,7 +570,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                         graphicsForPoints.fillOval(currSplitPrimePointX - this.dotRadius, this.zeroCoordY - this.dotRadius, dotDiameter, dotDiameter);
                         graphicsForPoints.fillOval(currNegSplitPrimePointX - this.dotRadius, this.zeroCoordY - this.dotRadius, dotDiameter, dotDiameter);
                     }
-                    if (currSplitPrime <= maxY && this.imagQuadRing.negRad == -1) {
+                    if (currSplitPrime <= maxY && this.diagramRing.negRad == -1) {
                         currSplitPrimePointX = this.zeroCoordY + ((int) currSplitPrime * this.pixelsPerUnitInterval);
                         currNegSplitPrimePointX = this.zeroCoordY - ((int) currSplitPrime * this.pixelsPerUnitInterval);
                         graphicsForPoints.fillOval(this.zeroCoordX - this.dotRadius, currSplitPrimePointX - this.dotRadius, dotDiameter, dotDiameter);
@@ -572,7 +582,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         }
         
         // Last but not least, the "half-integers"
-        if (this.imagQuadRing.d1mod4) {
+        if (this.diagramRing.d1mod4) {
             int halfUnitInterval = pixelsPerUnitInterval;
             if (halfUnitInterval % 2 == 1) {
                 halfUnitInterval--;
@@ -587,7 +597,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             /* Take care of the other units among the Eisenstein integers. Also 
                primes of the form p * omega, where p is a purely real prime 
                satisfying p = 2 mod 3 */
-            if (this.imagQuadRing.negRad == -3) {
+            if (this.diagramRing.negRad == -3) {
                 // The complex units, like omega
                 graphicsForPoints.setColor(this.unitColor);
                 graphicsForPoints.fillOval(currPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
@@ -625,7 +635,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                 for (int y = 1; y <= halfMaxY; y += 2) {
                     currPointY = this.zeroCoordY + (y * this.pixelsPerBasicImaginaryInterval);
                     currNegPointY = this.zeroCoordY - (y * this.pixelsPerBasicImaginaryInterval);
-                    currIQI = new ImaginaryQuadraticInteger(x, y, this.imagQuadRing, 2);
+                    currIQI = new ImaginaryQuadraticInteger(x, y, this.diagramRing, 2);
                     if (NumberTheoreticFunctionsCalculator.isPrime(currIQI.norm())) {
                         graphicsForPoints.setColor(this.inertPrimeColor);
                         graphicsForPoints.fillOval(currPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
@@ -664,8 +674,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             throw new IllegalArgumentException("Pixels per unit interval needs to be set to less than " + (MAXIMUM_PIXELS_PER_UNIT_INTERVAL + 1));
         }
         pixelsPerUnitInterval = pixelLength;
-        double imagInterval = this.pixelsPerUnitInterval * this.imagQuadRing.absNegRadSqrt;
-        if (this.imagQuadRing.d1mod4) {
+        double imagInterval = this.pixelsPerUnitInterval * this.diagramRing.absNegRadSqrt;
+        if (this.diagramRing.d1mod4) {
             imagInterval /= 2;
         }
         this.pixelsPerBasicImaginaryInterval = (int) Math.floor(imagInterval);
@@ -703,8 +713,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     /**
      * Function to change the grid colors.
      * @param newHalfIntegerGridColor Applicable only when 
-     * this.imagQuadRing.d1mod4 is true. In choosing this color, keep in mind 
-     * that, when applicable, the "half-integer" grid is drawn first.
+ this.diagramRing.d1mod4 is true. In choosing this color, keep in mind 
+ that, when applicable, the "half-integer" grid is drawn first.
      * @param newIntegerGridColor In choosing this color, keep in mind that, 
      * when applicable, the "full" integer grid is drawn second, after the 
      * "half-integer" grid.
@@ -829,18 +839,18 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         boolean algIntFound;
         int horizCoord, verticCoord;
         String stringForAlgIntReadOut;
-        if (this.imagQuadRing.d1mod4) {
+        if (this.diagramRing.d1mod4) {
             double horizIntermediate = 4 * (mauv.getX() - this.zeroCoordX)/this.pixelsPerUnitInterval;
             horizCoord = (int) Math.round(horizIntermediate/2);
             verticCoord = (int) Math.round((-mauv.getY() + this.zeroCoordY)/this.pixelsPerBasicImaginaryInterval);
             algIntFound = (Math.abs(horizCoord % 2) == Math.abs(verticCoord % 2));
             if (algIntFound) {
-                mouseIQI = new ImaginaryQuadraticInteger(horizCoord, verticCoord, this.imagQuadRing, 2);
+                mouseIQI = new ImaginaryQuadraticInteger(horizCoord, verticCoord, this.diagramRing, 2);
             }
         } else {
             horizCoord = (int) Math.round((mauv.getX() - this.zeroCoordX)/this.pixelsPerUnitInterval);
             verticCoord = (int) Math.round((-mauv.getY() + this.zeroCoordY)/this.pixelsPerBasicImaginaryInterval);
-            mouseIQI = new ImaginaryQuadraticInteger(horizCoord, verticCoord, this.imagQuadRing, 1);
+            mouseIQI = new ImaginaryQuadraticInteger(horizCoord, verticCoord, this.diagramRing, 1);
             algIntFound = true;
         }
         if (algIntFound) {
@@ -874,7 +884,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         BufferedImage diagram = new BufferedImage(this.ringCanvasHorizMax, this.ringCanvasVerticMax, BufferedImage.TYPE_INT_RGB);
         Graphics2D graph = diagram.createGraphics();
         this.paint(graph);
-        String suggestedFilename = this.imagQuadRing.toFilenameString() + "pxui" + this.pixelsPerUnitInterval + ".png";
+        String suggestedFilename = this.diagramRing.toFilenameString() + "pxui" + this.pixelsPerUnitInterval + ".png";
         File diagramFile = new File(suggestedFilename);
         FileChooserWithOverwriteGuard fileChooser = new FileChooserWithOverwriteGuard();
         FileFilter pngFilter = new PNGFileFilter();
@@ -951,14 +961,14 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      * number, taking care not to go below MINIMUM_RING_D.
      */
     public void chooseDiscriminant() {
-        String discrString = Integer.toString(this.imagQuadRing.negRad);
+        String discrString = Integer.toString(this.diagramRing.negRad);
         String userChoice = (String) JOptionPane.showInputDialog(ringFrame, "Please enter a negative, squarefree integer:", discrString);
         int discr;
         boolean repaintNeeded;
         try {
             discr = Integer.parseInt(userChoice);
         } catch (NumberFormatException nfe) {
-            discr = this.imagQuadRing.negRad;
+            discr = this.diagramRing.negRad;
         }
         if (discr > 0) {
             discr *= -1;
@@ -969,7 +979,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         while (!NumberTheoreticFunctionsCalculator.isSquareFree(discr) && discr > MINIMUM_RING_D) {
             discr--;
         }
-        repaintNeeded = (discr != this.imagQuadRing.negRad);
+        repaintNeeded = (discr != this.diagramRing.negRad);
         if (repaintNeeded) {
             if (discr == MINIMUM_RING_D) {
                 this.decreaseDMenuItem.setEnabled(false);
@@ -995,7 +1005,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      * menu item is disabled.
      */
     public void incrementDiscriminant() {
-        int discr = this.imagQuadRing.negRad + 1;
+        int discr = this.diagramRing.negRad + 1;
         while (!NumberTheoreticFunctionsCalculator.isSquareFree(discr) && discr < -1) {
             discr++;
         }
@@ -1015,7 +1025,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      * discriminant" menu item is disabled.
      */
     public void decrementDiscriminant() {
-        int discr = this.imagQuadRing.negRad - 1;
+        int discr = this.diagramRing.negRad - 1;
         while (!NumberTheoreticFunctionsCalculator.isSquareFree(discr) && discr > (Integer.MIN_VALUE + 1)) {
             discr--;
         }
@@ -1059,24 +1069,28 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     
     /**
      * Copies the readouts of the algebraic integer, trace, norm and polynomial 
-     * to the clipboard.
+     * to the system clipboard as plain text.
      */
     public void copyReadoutsToClipboard() {
         String agregReadouts = mouseIQI.toString();
-        if (this.imagQuadRing.d1mod4) {
+        if (this.diagramRing.d1mod4) {
             agregReadouts = agregReadouts + " = " + mouseIQI.toStringAlt();
         }
         agregReadouts = agregReadouts + ", Trace: " + mouseIQI.trace() + ", Norm: " + mouseIQI.norm() + ", Polynomial: " + mouseIQI.minPolynomialString();
-        StringSelection ss = new StringSelection(agregReadouts);
-        this.getToolkit().getSystemClipboard().setContents(ss, ss);
+        StringSelection strSel = new StringSelection(agregReadouts);
+        this.getToolkit().getSystemClipboard().setContents(strSel, strSel);
     }
     
     /**
-     * Copies the currently displayed diagram to the clipboard.
-     * FEATURE NOT YET IMPLEMENTED*****************************
+     * Copies the currently displayed diagram to the clipboard as a {@link 
+     * BufferedImage}, of type {@link BufferedImage#TYPE_INT_RGB}.
      */
     public void copyDiagramToClipboard() {
-        System.out.println("FEATURE NOT YET IMPLEMENTED");
+        BufferedImage diagram = new BufferedImage(this.ringCanvasHorizMax, this.ringCanvasVerticMax, BufferedImage.TYPE_INT_RGB);
+        Graphics2D graph = diagram.createGraphics();
+        this.paint(graph);
+        ImageSelection imgSel = new ImageSelection(diagram);
+        this.getToolkit().getSystemClipboard().setContents(imgSel, imgSel);
     }
     
     /**
@@ -1286,7 +1300,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      * Show the About box, a simple MessageDialog from JOptionPage.
      */
     public void showAboutBox() {
-        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.96\n\u00A9 2018 Alonso del Arte");
+        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.97\n\u00A9 2018 Alonso del Arte");
     }
     
     /**
@@ -1371,9 +1385,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      */
     private void setRing(ImaginaryQuadraticRing iR) {
         double imagInterval;
-        this.imagQuadRing = iR;
-        imagInterval = this.pixelsPerUnitInterval * this.imagQuadRing.absNegRadSqrt;
-        if (imagQuadRing.d1mod4) {
+        this.diagramRing = iR;
+        imagInterval = this.pixelsPerUnitInterval * this.diagramRing.absNegRadSqrt;
+        if (diagramRing.d1mod4) {
             imagInterval /= 2;
         }
         this.pixelsPerBasicImaginaryInterval = (int) Math.floor(imagInterval);
@@ -1383,14 +1397,13 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      * Sets up the JFrame in which the various ring diagrams will be drawn.
      */
     private void setUpRingFrame() {
-        
-        ringFrame = new JFrame("Ring Diagram for " + this.imagQuadRing.toString());
+        ringFrame = new JFrame("Ring Diagram for " + this.diagramRing.toString());
         haveSavedBefore = false;
         JMenuBar ringWindowMenuBar;
         JMenu ringWindowMenu;
         JMenuItem ringWindowMenuItem, saveFileMenuItem, quitMenuItem;
         JMenuItem chooseDMenuItem, copyReadOutsToClipboardMenuItem, copyDiagramToClipboardMenuItem, resetViewDefaultsMenuItem, aboutMenuItem;
-
+        // Determine if this is a Mac OS X system, needing different keyboard shortcuts
         boolean macOSFlag;
         int maskCtrlCommand;
         String operSysName = System.getProperty("os.name");
@@ -1402,7 +1415,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             maskCtrlCommand = Event.CTRL_MASK;
             // maskCtrlAltCommandOption = Event.CTRL_MASK + Event.ALT_MASK;
         }
-        
+        // Set up the menu bar, menus and menu items
         ringWindowMenuBar = new JMenuBar();
         ringWindowMenu = new JMenu("File");
         ringWindowMenu.setMnemonic(KeyEvent.VK_F);
@@ -1442,7 +1455,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             increaseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_UP, maskCtrlCommand));
         }
         increaseDMenuItem.addActionListener(this);
-        if (this.imagQuadRing.negRad == -1) {
+        if (this.diagramRing.negRad == -1) {
             increaseDMenuItem.setEnabled(false);
         }
         ringWindowMenuItem = new JMenuItem("Decrement discriminant");
@@ -1455,7 +1468,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             decreaseDMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, maskCtrlCommand));
         }
         decreaseDMenuItem.addActionListener(this);
-        if (this.imagQuadRing.negRad == Integer.MIN_VALUE + 1) {
+        if (this.diagramRing.negRad == Integer.MIN_VALUE + 1) {
             decreaseDMenuItem.setEnabled(false);
         }
         ringWindowMenu.addSeparator();
@@ -1470,16 +1483,13 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         copyDiagramToClipboardMenuItem = ringWindowMenu.add(ringWindowMenuItem);
         copyDiagramToClipboardMenuItem.setActionCommand("copyDiagram");
         copyDiagramToClipboardMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, maskCtrlCommand + Event.ALT_MASK));
-        copyDiagramToClipboardMenuItem.setEnabled(false); // Once implmented, uncomment next line and delete this line 
-        // copyDiagramToClipboardMenuItem.addActionListener(this);
-        
+        copyDiagramToClipboardMenuItem.addActionListener(this);
     /*    ringWindowMenu.addSeparator();
         THIS IS FOR WHEN I GET AROUND TO ADDING THE CAPABILITY TO CHANGE GRID, POINT COLORS
         ringWindowMenuItem = new JMenuItem("Preferences...");
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Bring up a dialogue to adjust preferences");
         ringWindowMenu.add(ringWindowMenuItem); 
     */
-    
         ringWindowMenu = new JMenu("View");
         ringWindowMenu.setMnemonic(KeyEvent.VK_V);
         ringWindowMenu.getAccessibleContext().setAccessibleDescription("Menu to zoom in or zoom out");
@@ -1596,9 +1606,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         aboutMenuItem = ringWindowMenu.add(ringWindowMenuItem);
         aboutMenuItem.setActionCommand("about");
         aboutMenuItem.addActionListener(this);
-
         ringFrame.setJMenuBar(ringWindowMenuBar);
-                
+        // Now to add the readouts
         JPanel readOutsPane = new JPanel();
         algIntReadOut = new JTextField(DEFAULT_READOUT_FIELD_COLUMNS);
         algIntReadOut.setText("0");
@@ -1619,13 +1628,12 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         algIntPolReadOut.setText("x");
         algIntPolReadOut.setEditable(false);
         readOutsPane.add(algIntPolReadOut);
-        
+        // And lastly, to put it all onto the frame and display it
         ringFrame.add(readOutsPane, BorderLayout.PAGE_END);
         ringFrame.add(this, BorderLayout.CENTER);
         ringFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         ringFrame.pack();
         ringFrame.setVisible(true);
-
     }
     
     /**
@@ -1634,7 +1642,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      * @param ringChoice The negative squarefree number to determine which 
      * diagram will be drawn first. If positive, it will quietly be changed to 
      * its additive inverse (e.g., 163 gets turned to -163), but if it's not 
-     * squarefree,
+     * squarefree, this constructor will just substitute -1.
      */
     public RingWindowDisplay(int ringChoice) {
         ImaginaryQuadraticRing imR;

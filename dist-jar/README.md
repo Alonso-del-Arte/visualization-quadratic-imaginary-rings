@@ -1,3 +1,3 @@
-Version 0.9 of the overall program, Version 0.94 of RingWindowDisplay.
+Version 0.95 of the overall program, Version 0.97 of RingWindowDisplay.
 
-Note: this JAR does not include the Scala classes `ImagQuadInt` nor `ImagQuadRing`.
+Note: this JAR does not include the Scala classes `ImagQuadInt`, `ImagQuadRing` nor `NTFC`.

@@ -23,11 +23,20 @@ package imaginaryquadraticinteger;
  * the arithmetic operation is an algebraic integer of higher degree than any of 
  * the available implementations support, {@link 
  * AlgebraicDegreeOverflowException} should be used instead.
+ * <p>For example, the 
+ * product of two imaginary quadratic integers could be a real quadratic 
+ * integer, but if the package does not include an implementation of 
+ * AlgebraicInteger that can represent real quadratic integers, it would be 
+ * appropriate to throw this exception.</p>
+ * <p>However, if that product of two 
+ * imaginary quadratic integers is instead an algebraic integer of degree 4, 
+ * AlgebraicDegreeOverflowException should be thrown instead.</p>
  * @author Alonso del Arte
  */
 public class UnsupportedNumberDomainException extends RuntimeException {
     
-    private static final long serialVersionUID = 1058341899;
+    private static final long serialVersionUID = 1058379752;
+    
     private final AlgebraicInteger diffRingNumberA;
     private final AlgebraicInteger diffRingNumberB;
     
@@ -44,19 +53,34 @@ public class UnsupportedNumberDomainException extends RuntimeException {
     }
     
     /**
+     * This exception should be thrown when a particular class does not have the 
+     * means for handling an algebraic integer from a specific implementation of 
+     * {@link AlgebraicInteger}.
+     * @param message A message to pass on to the {@link Exception} constructor.
+     * @param numberA The number that caused the exception. Then numberB will be 
+     * set to this number as well. However, if the exception is caused by two 
+     * different numbers, you should use the 2-number constructor instead.
+     */
+    public UnsupportedNumberDomainException(String message, AlgebraicInteger numberA) {
+        super(message);
+        diffRingNumberA = numberA;
+        diffRingNumberB = numberA;
+    }
+    
+    /**
      * This exception should be thrown when the result of an arithmetic 
      * operation on two objects implementing the {@link AlgebraicInteger} 
      * results in an algebraic integer which no currently available 
-     * implementation of AlgebraicInteer can handle.
+     * implementation of AlgebraicInteger can handle.
      * @param message A message to pass on to the {@link Exception} constructor.
      * @param numberA One of the two numbers that caused the exception. It need 
      * not be smaller or larger than numberB in any sense (norm, absolute value, 
      * etc.) but it is expected to come from a different ring of algebraic 
-     * integers. For example, sqrt(-2).
+     * integers. For example, &radic;&minus;2.
      * @param numberB One of the two numbers that caused the exception. It need 
      * not be larger or smaller than numberA in any sense (norm, absolute value, 
      * etc.) but it is expected to come from a different ring of algebraic 
-     * integers. For example, sqrt(-7).
+     * integers. For example, &radic;&minus;7.
      */
     public UnsupportedNumberDomainException(String message, AlgebraicInteger numberA, AlgebraicInteger numberB) {
         super(message);

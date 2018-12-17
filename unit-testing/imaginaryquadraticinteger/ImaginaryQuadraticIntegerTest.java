@@ -265,6 +265,12 @@ public class ImaginaryQuadraticIntegerTest {
             result = testIntegers.get(i).norm();
             assertEquals(expResult, result);
         }
+        ImaginaryQuadraticRing r = new ImaginaryQuadraticRing(-Integer.MAX_VALUE);
+        ImaginaryQuadraticInteger z = new ImaginaryQuadraticInteger(1, 1, r);
+        expResult = -1L * Integer.MIN_VALUE;
+        result = z.norm();
+        String assertionMessage = "Norm computation for " + z.toString() + " should not overflow to " + Integer.MIN_VALUE + ".";
+        assertEquals(assertionMessage, expResult, result);
     }
 
     /**
@@ -1315,6 +1321,105 @@ public class ImaginaryQuadraticIntegerTest {
         }
         assertTrue(zeroIQI.equalsInt(0));
     }
+    
+    //(at)Test
+//    public void testParseIQIFromString() {
+//        System.out.print("parseImaginaryQuadraticInteger(\"");
+//        String numberString = "7+2\u221A(-10)";
+//        System.out.println(numberString + "\")");
+//        ImaginaryQuadraticRing r = new ImaginaryQuadraticRing(-10);
+//        ImaginaryQuadraticInteger expResult = new ImaginaryQuadraticInteger(7, 2, r);
+//        ImaginaryQuadraticInteger result = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString);
+//        assertEquals(expResult, result);
+//    }
+    
+    //(at)Test
+//    public void testParseIQIFromStringAlt() {
+//        System.out.print("parseImaginaryQuadraticInteger(\"");
+//        String numberString = "-\u03C9";
+//        System.out.println(numberString + "\")");
+//        ImaginaryQuadraticRing r = new ImaginaryQuadraticRing(-3);
+//        ImaginaryQuadraticInteger expResult = new ImaginaryQuadraticInteger(1, -1, r, 2);
+//        ImaginaryQuadraticInteger result = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString);
+//        assertEquals(expResult, result);
+//    }
+    
+    //(at)Test
+//    public void testParseIQIFromASCIIString() {
+//        System.out.print("parseImaginaryQuadraticInteger(\"");
+//        String numberString = "7+2sqrt(-10)";
+//        System.out.println(numberString + "\")");
+//        ImaginaryQuadraticRing r = new ImaginaryQuadraticRing(-10);
+//        ImaginaryQuadraticInteger expResult = new ImaginaryQuadraticInteger(7, 2, r);
+//        ImaginaryQuadraticInteger result = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString);
+//        assertEquals(expResult, result);
+//    }
+    
+    //(at)Test
+//    public void testParseIQIFromASCIIStringAlt() {
+//        System.out.print("parseImaginaryQuadraticInteger(\"");
+//        String numberString = "-omega";
+//        System.out.println(numberString + "\")");
+//        ImaginaryQuadraticRing r = new ImaginaryQuadraticRing(-3);
+//        ImaginaryQuadraticInteger expResult = new ImaginaryQuadraticInteger(1, -1, r, 2);
+//        ImaginaryQuadraticInteger result = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString);
+//        assertEquals(expResult, result);
+//    }
+    
+    //(at)Test
+//    public void testParseIQIFromTeXString() {
+//        System.out.print("parseImaginaryQuadraticInteger(\"");
+//        String numberString = "\\frac{1}{2}-\\frac{\\sqrt{-3}}{2}";
+//        System.out.println(numberString + "\")");
+//        ImaginaryQuadraticRing r = new ImaginaryQuadraticRing(-3);
+//        ImaginaryQuadraticInteger expResult = new ImaginaryQuadraticInteger(1, -1, r, 2);
+//        ImaginaryQuadraticInteger result = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString);
+//        assertEquals(expResult, result);
+//    }
+    
+    //(at)Test
+//    public void testParseIQIFromSingleDenomTeXString() {
+//        System.out.print("parseImaginaryQuadraticInteger(\"");
+//        String numberString = "\\frac{1-\\sqrt{-3}}{2}";
+//        System.out.println(numberString + "\")");
+//        ImaginaryQuadraticRing r = new ImaginaryQuadraticRing(-3);
+//        ImaginaryQuadraticInteger expResult = new ImaginaryQuadraticInteger(1, -1, r, 2);
+//        ImaginaryQuadraticInteger result = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString);
+//        assertEquals(expResult, result);
+//    }
+    
+    //(at)Test
+//    public void testParseIQIFromTeXStringAlt() {
+//        System.out.print("parseImaginaryQuadraticInteger(\"");
+//        String numberString = "-\\omega";
+//        System.out.println(numberString + "\")");
+//        ImaginaryQuadraticRing r = new ImaginaryQuadraticRing(-3);
+//        ImaginaryQuadraticInteger expResult = new ImaginaryQuadraticInteger(1, -1, r, 2);
+//        ImaginaryQuadraticInteger result = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString);
+//        assertEquals(expResult, result);
+//    }
+    
+    //(at)Test
+//    public void testParseIQIFromHTMLString() {
+//        System.out.print("parseImaginaryQuadraticInteger(\"");
+//        String numberString = "7+2&radic;(&minus;10)";
+//        System.out.println(numberString + "\")");
+//        ImaginaryQuadraticRing r = new ImaginaryQuadraticRing(-10);
+//        ImaginaryQuadraticInteger expResult = new ImaginaryQuadraticInteger(7, 2, r);
+//        ImaginaryQuadraticInteger result = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString);
+//        assertEquals(expResult, result);
+//    }
+    
+    //(at)Test
+//    public void testParseIQIFromHTMLStringAlt() {
+//        System.out.print("parseImaginaryQuadraticInteger(\"");
+//        String numberString = "-&omega;";
+//        System.out.println(numberString + "\")");
+//        ImaginaryQuadraticRing r = new ImaginaryQuadraticRing(-3);
+//        ImaginaryQuadraticInteger expResult = new ImaginaryQuadraticInteger(1, -1, r, 2);
+//        ImaginaryQuadraticInteger result = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(numberString);
+//        assertEquals(expResult, result);
+//    }
     
     /**
      * Test of parseImaginaryQuadraticInteger, of class 

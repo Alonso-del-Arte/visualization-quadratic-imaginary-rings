@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Alonso del Arte
+ * Copyright (C) 2019 Alonso del Arte
  *
  * This program is free software: you can redistribute it and/or modify it under 
  * the terms of the GNU General Public License as published by the Free Software 
@@ -26,6 +26,8 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import javax.swing.*;
 import javax.imageio.ImageIO;
 import javax.swing.filechooser.FileFilter;
@@ -1297,10 +1299,37 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
     
     /**
-     * Show the About box, a simple MessageDialog from JOptionPage.
+     * Uses the default Web browser to show the user manual. If the default 
+     * browser is not available for whatever reason, a message to that effect is 
+     * shown in a dialog box and/or on the console.
+     */
+    public void showUserManual() {
+        String urlStr = "https://github.com/Alonso-del-Arte/visualization-quadratic-imaginary-rings/blob/master/dist-jar/README.md";
+        if (Desktop.isDesktopSupported()) {
+            try {
+                URI url = new URI(urlStr);
+                Desktop desktop = Desktop.getDesktop();
+                desktop.browse(url);
+            } catch (URISyntaxException | IOException e) {
+                String problemMessage = "Sorry, unable to open URL\n<" + urlStr + ">\n\"" + e.getMessage() + "\"";
+                JOptionPane.showMessageDialog(this.ringFrame, problemMessage);
+                System.err.println(problemMessage);
+            }
+        } else {
+            String noDesktopMessage = "Sorry, unable to open URL\n<" + urlStr + ">\nDefault Web browser is not available from this program.";
+            JOptionPane.showMessageDialog(this.ringFrame, noDesktopMessage);
+            System.err.println(noDesktopMessage);
+        }
+    }
+    
+    /**
+     * Shows the About box, a simple MessageDialog from JOptionPage. If 
+     * available, writes the same information to the console.
      */
     public void showAboutBox() {
-        JOptionPane.showMessageDialog(ringFrame, "Imaginary Quadratic Integer Ring Viewer\nVersion 0.97\n\u00A9 2018 Alonso del Arte");
+        String aboutMessage = "Imaginary Quadratic Integer Ring Viewer\nVersion 0.98\n\u00A9 2019 Alonso del Arte";
+        JOptionPane.showMessageDialog(this.ringFrame, aboutMessage);
+        System.out.println(aboutMessage);
     }
     
     /**
@@ -1371,6 +1400,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             case "toggleReadOuts":
                 toggleReadOutsEnabled();
                 break;
+            case "showUserManual":
+                showUserManual();
+                break;
             case "about":
                 showAboutBox();
                 break;
@@ -1402,7 +1434,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         JMenuBar ringWindowMenuBar;
         JMenu ringWindowMenu;
         JMenuItem ringWindowMenuItem, saveFileMenuItem, quitMenuItem;
-        JMenuItem chooseDMenuItem, copyReadOutsToClipboardMenuItem, copyDiagramToClipboardMenuItem, resetViewDefaultsMenuItem, aboutMenuItem;
+        JMenuItem chooseDMenuItem, copyReadOutsToClipboardMenuItem, copyDiagramToClipboardMenuItem;
+        JMenuItem resetViewDefaultsMenuItem;
+        JMenuItem showManualMenuItem, aboutMenuItem;
         // Determine if this is a Mac OS X system, needing different keyboard shortcuts
         boolean macOSFlag;
         int maskCtrlCommand;
@@ -1601,6 +1635,11 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         ringWindowMenu.setMnemonic(KeyEvent.VK_H);
         ringWindowMenu.getAccessibleContext().setAccessibleDescription("Menu to provide help and documentation");
         ringWindowMenuBar.add(ringWindowMenu);
+        ringWindowMenuItem = new JMenuItem("User Manual...");
+        ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Use default Web browser to show user manual");
+        showManualMenuItem = ringWindowMenu.add(ringWindowMenuItem);
+        showManualMenuItem.setActionCommand("showUserManual");
+        showManualMenuItem.addActionListener(this);
         ringWindowMenuItem = new JMenuItem("About...");
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Information about this program");
         aboutMenuItem = ringWindowMenu.add(ringWindowMenuItem);

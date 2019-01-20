@@ -258,6 +258,8 @@ public class ImaginaryQuadraticIntegerTest {
     /**
      * Test of norm method, of class ImaginaryQuadraticInteger.
      */
+    // todo: Ideally, master should not contain any failing unit tests. For multi-step, functionality-breaking changes, creating a new branch (to be later merged into master once complete) is a better setup for pushing commits with failing unit tests.
+    // todo: Resolve failing unit test
     @Test
     public void testNorm() {
         System.out.println("norm");
@@ -1436,6 +1438,7 @@ public class ImaginaryQuadraticIntegerTest {
      * should always be understood to mean -1/2 + sqrt(-3)/2, &theta; means 1/2 
      * + sqrt(d)/2 with d = 1 mod 4, but d may be ambiguous.
      */
+    // todo: Resolve failing unit test
     @Test
     public void testParseImaginaryQuadraticInteger() {
         System.out.println("parseImaginaryQuadraticInteger");

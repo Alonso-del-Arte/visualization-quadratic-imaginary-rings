@@ -97,7 +97,7 @@ fabric.properties
 .mtj.tmp/
 
 # Package Files #
-*.jar
+# Do include *.jar from NetBeans dist folder
 *.war
 *.nar
 *.ear

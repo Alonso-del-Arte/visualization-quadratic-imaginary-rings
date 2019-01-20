@@ -61,6 +61,8 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A Swing component in which to display diagrams of prime numbers in various
@@ -93,6 +95,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         ImaginaryQuadraticInteger number = parseImaginaryQuadraticInteger(ring, argumentB);
 
         System.out.print(number.toASCIIString());
+
         if (ring.hasHalfIntegers()) {
             System.out.print(" = " + number.toASCIIStringAlt());
         }

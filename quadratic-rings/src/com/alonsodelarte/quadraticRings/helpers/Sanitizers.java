@@ -5,7 +5,12 @@ import static com.alonsodelarte.quadraticRings.constants.ImaginaryQuadraticInteg
 import static com.alonsodelarte.quadraticRings.imaginaryquadraticinteger.NumberTheoreticFunctionsCalculator.isSquareFree;
 import static java.lang.String.format;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Sanitizers {
+
+    private static final Logger log = LoggerFactory.getLogger(Sanitizers.class);
 
     private Sanitizers() {
 
@@ -19,10 +24,10 @@ public class Sanitizers {
         }
 
         if(sanitizedValue != value) {
-            System.out.print(format(
-                "%d is not negative; substituting %d",
+            log.info(
+                "{} is not negative; substituting {}",
                 value, sanitizedValue
-            ));
+            );
         }
 
         return sanitizedValue;
@@ -36,10 +41,10 @@ public class Sanitizers {
         }
 
         if(squareFreeValue != value) {
-            System.out.println(format(
-                "%d is not square-free; substituting %s",
+            log.info(
+                "{} is not square-free; substituting {}",
                 value, squareFreeValue
-            ));
+            );
         }
 
         return squareFreeValue;
@@ -53,12 +58,12 @@ public class Sanitizers {
         }
 
         if(sanitizedValue != value) {
-            System.out.print(String.format(
-                "%s is less than %s, which is the minimum for this Ring Viewer program.;\n" +
-                    "Substituting %s.",
+            log.info(
+                "{} is less than {}, which is the minimum for this Ring Viewer program.; " +
+                "Substituting {}.",
                 value, MINIMUM_RING_D,
                 DEFAULT_RING_D
-            ));
+            );
         }
 
         return sanitizedValue;

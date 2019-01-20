@@ -6,7 +6,12 @@ import static com.alonsodelarte.quadraticRings.helpers.Sanitizers.guaranteeGreat
 import static com.alonsodelarte.quadraticRings.helpers.Sanitizers.guaranteeNegative;
 import static java.lang.Integer.parseInt;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 class RingWindowDisplayOption {
+
+    private static Logger log = LoggerFactory.getLogger(RingWindowDisplay.class);
 
     static int parse(String argument) {
         int argumentValue = DEFAULT_RING_D;
@@ -14,12 +19,12 @@ class RingWindowDisplayOption {
         try {
             argumentValue = parseInt(argument);
         } catch(NumberFormatException exception) {
-            System.out.println(String.format(
-                "%s is formatted badly.\n%s\nSubstituting %s with %s.",
-                argumentValue,
+            log.info(
+                "{} is formatted badly. {}; Substituting {} with {}.",
+                argument,
                 exception.getMessage(),
-                argumentValue, DEFAULT_RING_D
-            ));
+                argument, DEFAULT_RING_D
+            );
         }
 
         return argumentValue;

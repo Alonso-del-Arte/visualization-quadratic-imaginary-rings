@@ -19,7 +19,6 @@ package com.alonsodelarte.quadraticRings.clipboardops;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
-// import java.awt.datatransfer.Transferable; Potentially necessary to test lostOwnership()
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -177,6 +176,9 @@ public class ImageSelectionTest {
     public void testLostOwnership() {
         System.out.println("lostOwnership");
         fail("Haven't written test yet.");
+
+        // Potentially necessary to test lostOwnership()
+        // import java.awt.datatransfer.Transferable;
     }
     
     /**

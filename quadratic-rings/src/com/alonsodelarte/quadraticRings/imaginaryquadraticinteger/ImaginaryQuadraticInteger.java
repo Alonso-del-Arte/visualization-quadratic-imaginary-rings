@@ -22,6 +22,25 @@ import com.alonsodelarte.quadraticRings.imaginaryquadraticinteger.Exceptions.Uns
 import java.text.DecimalFormatSymbols;
 import java.util.Objects;
 
+/*
+    Oh. My. Golly. Gosh. Goodness.
+    This file is 1400 lines long. That's way too long for any developer to want to interact with
+    the contents of this file.
+
+    A theme I'm detecting in the layout of this class is that a significant number of the methods
+    contained are operations rather than state mutations; for example:
+        The method instance.abs() could easily be expressed as abs(instance)
+
+    A way to make this content more digestible would be to extract these operations into their own
+    class or classes and expose them as public static methods. This way, those methods can be
+    imported individually as necessary, anyone can extend the usability of this class by
+    implementing their own operator classes; additionally, operators can be scoped to their own
+    individual class, or they can be grouped together in a class with other related functions.
+
+    The static public method isn't the only way to go; you can obviously also create instances of
+    these operators to incorporate more complex logic and stateful content transitions. This route
+    would also allow you to define an abstract class from which future operations can extend
+ */
 /**
  * The main class, defines objects representing imaginary quadratic integers. 
  * The real part, and the real number to be multiplied by an imaginary number, 
@@ -712,7 +731,8 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
             return false;
         }
     }
-    
+
+    // todo: refactor content from this method into smaller private methods with descriptive names
     private static String preprocessNumberString(String stringToPreprocess) {
         String str = stringToPreprocess;
         str = str.replace(" ", "");
@@ -820,6 +840,10 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         if (str.length() == 0) {
             return new ImaginaryQuadraticInteger(0, 0, ring);
         }
+
+        // todo: the following two variables are not used
+        // todo: if there are side-effects to calling these methods, consider refactoring the code to be clearer
+        // todo: if there are not side effects and the values are not being used, then dead code should be removed
         String parsingString = preprocessNumberString(str);
         int presumedD = ring.negRad;
         return parseIQI(ring, str);
@@ -829,6 +853,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         if (str.length() == 0) {
             throw new NumberFormatException("Empty String is ambiguous, no ring specified.");
         }
+        // todo: unused variable
         String parsingString = preprocessNumberString(str);
         char currToken = str.charAt(0);
         switch (currToken) {
@@ -1128,6 +1153,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
      * part or the imaginary part of the product exceeds the range of the int 
      * data type. You may need long or even BigInteger for the calculation.
      */
+    // todo: extract into smaller methods
     public ImaginaryQuadraticInteger times(ImaginaryQuadraticInteger multiplicand) {
         if (this.imagPartMult == 0) {
             return multiplicand.times(this.realPartMult);
@@ -1209,6 +1235,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
      * part or the imaginary part of the division exceeds the range of the int 
      * data type.
      */
+    // todo: extract into smaller methods
     public ImaginaryQuadraticInteger divides(ImaginaryQuadraticInteger divisor) throws NotDivisibleException {
         if (((this.imagPartMult != 0) && (divisor.imagPartMult != 0)) && (this.imagQuadRing.negRad != divisor.imagQuadRing.negRad)) {
             if ((this.realPartMult == 0) && (divisor.realPartMult == 0)) {
@@ -1222,6 +1249,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         }
         long intermediateRealPart = (long) this.realPartMult * (long) divisor.realPartMult + (long) this.imagPartMult * (long) divisor.imagPartMult * (long) this.imagQuadRing.absNegRad;
         long intermediateImagPart = (long) this.imagPartMult * (long) divisor.realPartMult - (long) this.realPartMult * (long) divisor.imagPartMult;
+        // todo: unnecessary cast
         long intermediateDenom = (long) (divisor.norm() * (long) this.denominator * (long) divisor.denominator);
         long realCutDown = NumberTheoreticFunctionsCalculator.euclideanGCD(intermediateRealPart, intermediateDenom);
         long imagCutDown = NumberTheoreticFunctionsCalculator.euclideanGCD(intermediateImagPart, intermediateDenom);
@@ -1235,6 +1263,8 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
             intermediateDenom /= imagCutDown;
         }
         boolean divisibleFlag;
+
+        // todo: refactor duplicated code into a common method (ctrl+F: REFERENCE_AABBCC)
         if (this.imagQuadRing.d1mod4) {
             divisibleFlag = (intermediateDenom == 1 || intermediateDenom == 2);
             if (intermediateDenom == 2) {
@@ -1274,6 +1304,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
      * part or the imaginary part of the division exceeds the range of the int 
      * data type.
      */
+    // todo: refactor method content into smaller methods
     public ImaginaryQuadraticInteger divides(int divisor) throws NotDivisibleException {
         if (divisor == 0) {
             throw new IllegalArgumentException("Division by 0 is not allowed.");
@@ -1298,6 +1329,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
             intermediateDenom *= -1;
         }
         boolean divisibleFlag;
+        // todo: REFERENCE_AABBCC
         if (this.imagQuadRing.d1mod4) {
             divisibleFlag = (intermediateDenom == 1 || intermediateDenom == 2);
             if (intermediateDenom == 2) {

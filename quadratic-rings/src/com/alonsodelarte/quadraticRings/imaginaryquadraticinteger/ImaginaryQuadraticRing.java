@@ -287,6 +287,7 @@ public class ImaginaryQuadraticRing {
         String IQRString;
         switch (this.negRad) {
             case -1:
+                // todo: In the CS world, we call these "Magic Strings" or "Magic Values". They're dangling values with context that isn't immediately apparent. Pulling these out into named constants can help eliminate this confusion
                 IQRString = "ZI";
                 break;
             case -3:

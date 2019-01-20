@@ -14,7 +14,11 @@
  * You should have received a copy of the GNU General Public License along with 
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package imaginaryquadraticinteger;
+package imaginaryquadraticinteger.Exceptions;
+
+import imaginaryquadraticinteger.AlgebraicInteger;
+import imaginaryquadraticinteger.ImaginaryQuadraticInteger;
+import imaginaryquadraticinteger.ImaginaryQuadraticRing;
 
 /**
  * An exception to indicate when the division of one algebraic integer by 
@@ -28,7 +32,7 @@ package imaginaryquadraticinteger;
  * exception implies the result of a division can be rounded to an algebraic 
  * integer nearby in the relevant ring.</p>
  * <p>At some point in the future I want to make this exception usable for any 
- * implementation of {@link AlgebraicInteger}, not just {@link 
+ * implementation of {@link AlgebraicInteger}, not just {@link
  * ImaginaryQuadraticInteger}.</p>
  * @author Alonso del Arte
  */
@@ -126,8 +130,8 @@ public class NotDivisibleException extends Exception {
     /**
      * Gets the algebraic integers which surround the algebraic number 
      * represented by ({@link #getResReFractNumer()} + 
-     * {@link getResImFractNumer()} * sqrt({@link getResFractNegRad()})) / 
-     * {@link getResFractDenom()}. WARNING: There is no overflow checking.
+     * {@link #getResImFractNumer()} * sqrt({@link #getResFractNegRad()})) /
+     * {@link #getResFractDenom()}. WARNING: There is no overflow checking.
      * @return An array of ImaginaryQuadraticInteger. Do not expect the integers 
      * to be in any particular order: I or anyone else working on this project 
      * in the future is free to change the implementation in the interest of 

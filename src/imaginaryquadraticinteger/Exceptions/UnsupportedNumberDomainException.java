@@ -14,12 +14,16 @@
  * You should have received a copy of the GNU General Public License along with 
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package imaginaryquadraticinteger;
+package imaginaryquadraticinteger.Exceptions;
+
+import imaginaryquadraticinteger.AlgebraicInteger;
+import imaginaryquadraticinteger.Exceptions.AlgebraicDegreeOverflowException;
+import imaginaryquadraticinteger.ImaginaryQuadraticInteger;
 
 /**
  * A runtime exception to indicate when the result of an arithmetic operation 
  * results in an algebraic integer which no currently available implementation 
- * of {@link AlgebraicInteger} can properly represent. However, if the result of 
+ * of {@link AlgebraicInteger} can properly represent. However, if the result of
  * the arithmetic operation is an algebraic integer of higher degree than any of 
  * the available implementations support, {@link 
  * AlgebraicDegreeOverflowException} should be used instead.
@@ -44,7 +48,7 @@ public class UnsupportedNumberDomainException extends RuntimeException {
      * Retrieves the two numbers that triggered this exception.
      * @return An array of two objects implementing the {@link AlgebraicInteger} 
      * interface. They could very well both be instances of the same class 
-     * (e.g., both {@link ImaginaryQuadraticInteger}), but they should come from 
+     * (e.g., both {@link ImaginaryQuadraticInteger}), but they should come from
      * different rings. These are just the numbers that were supplied to the 
      * constructor.
      */

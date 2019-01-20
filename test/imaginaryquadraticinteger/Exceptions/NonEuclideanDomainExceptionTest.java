@@ -14,11 +14,18 @@
  * You should have received a copy of the GNU General Public License along with 
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package imaginaryquadraticinteger;
+package imaginaryquadraticinteger.Exceptions;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import imaginaryquadraticinteger.ImaginaryQuadraticInteger;
+import imaginaryquadraticinteger.ImaginaryQuadraticRing;
+import imaginaryquadraticinteger.NumberTheoreticFunctionsCalculator;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * Tests for the NonEuclideanDomainException class. The purpose of this test 

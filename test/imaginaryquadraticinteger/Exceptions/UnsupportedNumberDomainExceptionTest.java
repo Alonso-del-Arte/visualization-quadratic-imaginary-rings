@@ -14,8 +14,13 @@
  * You should have received a copy of the GNU General Public License along with 
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package imaginaryquadraticinteger;
+package imaginaryquadraticinteger.Exceptions;
 
+import imaginaryquadraticinteger.AlgebraicInteger;
+import imaginaryquadraticinteger.Exceptions.UnsupportedNumberDomainException;
+import imaginaryquadraticinteger.ImaginaryQuadraticInteger;
+import imaginaryquadraticinteger.ImaginaryQuadraticRing;
+import imaginaryquadraticinteger.NumberTheoreticFunctionsCalculator;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;

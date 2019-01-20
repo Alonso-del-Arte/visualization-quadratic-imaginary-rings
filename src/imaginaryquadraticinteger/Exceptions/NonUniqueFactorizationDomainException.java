@@ -14,8 +14,10 @@
  * You should have received a copy of the GNU General Public License along with 
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package imaginaryquadraticinteger;
+package imaginaryquadraticinteger.Exceptions;
 
+import imaginaryquadraticinteger.ImaginaryQuadraticInteger;
+import imaginaryquadraticinteger.NumberTheoreticFunctionsCalculator;
 import java.util.ArrayList;
 import java.util.List;
 

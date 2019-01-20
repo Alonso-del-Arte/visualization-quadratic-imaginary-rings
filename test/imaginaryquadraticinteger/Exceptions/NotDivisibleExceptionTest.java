@@ -14,11 +14,19 @@
  * You should have received a copy of the GNU General Public License along with 
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package imaginaryquadraticinteger;
+package imaginaryquadraticinteger.Exceptions;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import imaginaryquadraticinteger.ImaginaryQuadraticInteger;
+import imaginaryquadraticinteger.ImaginaryQuadraticRing;
+import imaginaryquadraticinteger.ImaginaryQuadraticRingTest;
+import imaginaryquadraticinteger.NumberTheoreticFunctionsCalculator;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * Tests for the NotDivisibleException class. The purpose of this test class is 
@@ -114,7 +122,7 @@ public class NotDivisibleExceptionTest {
         double expResult, result;
         expResult = 1.0 / 4.0;
         result = notDivEisenstein.getNumericRealPart();
-        assertEquals(expResult, result, ImaginaryQuadraticRingTest.TEST_DELTA);
+        Assert.assertEquals(expResult, result, ImaginaryQuadraticRingTest.TEST_DELTA);
         expResult = 8.0 / 5.0;
         result = notDivGaussian.getNumericRealPart();
         assertEquals(expResult, result, ImaginaryQuadraticRingTest.TEST_DELTA);

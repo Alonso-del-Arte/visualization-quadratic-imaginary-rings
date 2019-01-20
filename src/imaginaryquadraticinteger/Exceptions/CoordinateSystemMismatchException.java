@@ -1,4 +1,4 @@
-package imaginaryquadraticinteger;
+package imaginaryquadraticinteger.Exceptions;
 
 @Deprecated
 @SuppressWarnings("all")

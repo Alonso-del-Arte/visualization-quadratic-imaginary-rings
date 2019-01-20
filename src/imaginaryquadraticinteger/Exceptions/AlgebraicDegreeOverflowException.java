@@ -14,14 +14,17 @@
  * You should have received a copy of the GNU General Public License along with 
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package imaginaryquadraticinteger;
+package imaginaryquadraticinteger.Exceptions;
+
+import imaginaryquadraticinteger.AlgebraicInteger;
+import imaginaryquadraticinteger.ImaginaryQuadraticInteger;
 
 /**
  * A runtime exception to indicate when the result of an arithmetic operation 
  * results in an algebraic integer of higher algebraic degree than the 
  * implementation of AlgebraicInteger was designed for. For example, the square 
  * root of 2 times the fifth root of 3 is an algebraic integer with minimal 
- * polynomial x^10 - 288. So an {@link AlgebraicInteger} implementation for 
+ * polynomial x^10 - 288. So an {@link AlgebraicInteger} implementation for
  * quadratic integers would be ill-suited to hold the result of the operation, 
  * as would an implementation that can handle algebraic integers up to algebraic 
  * degree 5. In such a case, it is appropriate to throw this exception. Note 
@@ -29,7 +32,7 @@ package imaginaryquadraticinteger;
  * sense as a runtime exception. If the result of an arithmetic operation is an 
  * algebraic integer of the same degree as the implementation can handle but the 
  * implementation can't represent that result for some other reason, {@link 
- * UnsupportedNumberDomainException} should be used instead; for example, in a 
+ * UnsupportedNumberDomainException} should be used instead; for example, in a
  * package that can handle imaginary quadratic integers but not real quadratic 
  * integers.
  * @author Alonso del Arte

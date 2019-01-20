@@ -1,6 +1,10 @@
-package imaginaryquadraticinteger;I HAVE DELETED THIS FILE FROM MY LOCAL COPY OF THE PROJECT BUT WILL KEEP THIS FILE HERE FOR HISTORICAL PURPOSES.
+/*
+  Keeping for historical purposes
+ */
+package imaginaryquadraticinteger;
     
 @Deprecated
+@SuppressWarnings("all")
 public class ImagQuadrIntDisplayComplexPlanePoint extends ImaginaryQuadraticInteger {
     
     protected int coordinateX;

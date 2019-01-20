@@ -16,6 +16,9 @@
  */
 package imaginaryquadraticinteger;
 
+import imaginaryquadraticinteger.Exceptions.AlgebraicDegreeOverflowException;
+import imaginaryquadraticinteger.Exceptions.NotDivisibleException;
+import imaginaryquadraticinteger.Exceptions.UnsupportedNumberDomainException;
 import java.text.DecimalFormatSymbols;
 import java.util.Objects;
 
@@ -940,7 +943,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
      * be from that ring. However, if the summand parameter is from a different 
      * ring and this this algebraic integer is purely real, the result will be 
      * given in the ring of the summand parameter.
-     * @throws AlgebraicDegreeOverflowException If the algebraic integers come 
+     * @throws AlgebraicDegreeOverflowException If the algebraic integers come
      * from different quadratic rings and both have nonzero imaginary parts, the 
      * result of the sum will be an algebraic integer of degree 4 and this 
      * runtime exception will be thrown.
@@ -1198,7 +1201,7 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
      * @throws AlgebraicDegreeOverflowException If the algebraic integers come 
      * from different quadratic rings, the result of the division will be an 
      * algebraic integer of degree 4 and this runtime exception will be thrown.
-     * @throws NotDivisibleException If the imaginary quadratic integer is not 
+     * @throws NotDivisibleException If the imaginary quadratic integer is not
      * divisible by the divisor, this checked exception will be thrown.
      * @throws IllegalArgumentException Division by 0 is not allowed, and will 
      * trigger this runtime exception.
@@ -1390,102 +1393,4 @@ public class ImaginaryQuadraticInteger implements AlgebraicInteger {
         }
         this.imagQuadRing = R;
     }
-    
-    /**
-     * The main entry point for the package. For now, it only starts {@link 
-     * RingWindowDisplay}. In a later version (no later than 1.0), it will be 
-     * able to accept command line arguments.
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        
-        RingWindowDisplay.startRingWindowDisplay(-1);
-        switch (args.length) {
-            case 0:
-                // RingWindowDisplay.startRingWindowDisplay(RingWindowDisplay.DEFAULT_RING_D);
-                break;
-            case 1:
-                switch (args[0]) {
-                    case "-v":
-                    case "-vers":
-                    case "-version":
-                    case "v":
-                    case "vers":
-                    case "version":
-                        System.out.println("Imaginary Quadratic Integer package\nVersion 0.95\n\u00A9 2018 Alonso del Arte");
-                        break;
-                    default:
-                        int ringChoice = RingWindowDisplay.DEFAULT_RING_D;
-                        try {
-                            ringChoice = Integer.parseInt(args[0]);
-                            if (ringChoice > 0) {
-                                System.out.print(ringChoice + " is not negative.");
-                                ringChoice *= -1;
-                                System.out.println(" Substituting " + ringChoice + ".");
-                            }
-                            while (!NumberTheoreticFunctionsCalculator.isSquareFree(ringChoice)) {
-                                System.out.print(ringChoice + " is not squarefree.");
-                                ringChoice--;
-                                System.out.println(" Substituting " + ringChoice + "...");
-                            }
-                            if (ringChoice < RingWindowDisplay.MINIMUM_RING_D) {
-                                System.out.print(ringChoice + " is less than " + RingWindowDisplay.MINIMUM_RING_D + ", which is the minimum for the Ring Viewer program.");
-                                ringChoice = RingWindowDisplay.DEFAULT_RING_D;
-                                System.out.println(" Substituting " + ringChoice + ".");
-                            }
-                        } catch (NumberFormatException nfe) {
-                            System.out.println(nfe.getMessage());
-                            System.out.println("Substituting " + ringChoice + ".");
-                        }
-                        RingWindowDisplay.startRingWindowDisplay(ringChoice);
-                }
-            /* If there are more than two parameters, only the first two 
-               parameters will be processed */
-            default:
-                int ringDiscr = RingWindowDisplay.DEFAULT_RING_D;
-                ImaginaryQuadraticRing ring;
-                ImaginaryQuadraticInteger number;
-                try {
-                    ringDiscr = Integer.parseInt(args[0]);
-                    while (!NumberTheoreticFunctionsCalculator.isSquareFree(ringDiscr)) {
-                        System.out.print(ringDiscr + " is not squarefree.");
-                        ringDiscr--;
-                        System.out.println(" Substituting " + ringDiscr + "...");
-                    }
-                    if (ringDiscr > 0) {
-                        System.out.println(ringDiscr + " is not negative.");
-                        ringDiscr *= -1;
-                        System.out.println(" Substituting " + ringDiscr + ".");
-                    }
-                } catch (NumberFormatException nfe) {
-                    System.out.println(nfe.getMessage());
-                    System.out.println("Substituting " + ringDiscr);
-                }
-                ring = new ImaginaryQuadraticRing(ringDiscr);
-                number = ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger(ring, args[1]);
-                System.out.print(number.toASCIIString());
-                if (ring.hasHalfIntegers()) {
-                    System.out.print(" = " + number.toASCIIStringAlt());
-                }
-                if (NumberTheoreticFunctionsCalculator.isIrreducible(number)) {
-                    System.out.print(" is irreducible ");
-                    if (NumberTheoreticFunctionsCalculator.isPrime(number)) {
-                        System.out.println(" and prime.");
-                    } else {
-                        System.out.println(" but not prime.");
-                    }
-                }
-                System.out.print("Conjugate is " + number.conjugate().toASCIIString());
-                if (ring.hasHalfIntegers()) {
-                    System.out.println(" = " + number.conjugate().toASCIIString() + ".");
-                } else {
-                    System.out.println(".");
-                }
-                System.out.println("Trace is " + number.trace());
-                System.out.println("Norm is " + number.norm());
-                System.out.println("Minimal polynomial is " + number.minPolynomialString());
-        }
-    
-    } 
-    
 }

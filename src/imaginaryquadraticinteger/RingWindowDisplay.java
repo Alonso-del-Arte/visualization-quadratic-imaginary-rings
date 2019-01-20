@@ -1,310 +1,229 @@
 /*
  * Copyright (C) 2019 Alonso del Arte
  *
- * This program is free software: you can redistribute it and/or modify it under 
- * the terms of the GNU General Public License as published by the Free Software 
- * Foundation, either version 3 of the License, or (at your option) any later 
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
  * version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
- * You should have received a copy of the GNU General Public License along with 
+ * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package imaginaryquadraticinteger;
 
+import static constants.Configuration.*;
+import static constants.Display.*;
+import static constants.ImaginaryQuadraticInteger.DEFAULT_RING_D;
+import static constants.ImaginaryQuadraticInteger.MINIMUM_RING_D;
+import static imaginaryquadraticinteger.ImaginaryQuadraticInteger.parseImaginaryQuadraticInteger;
+import static imaginaryquadraticinteger.NumberTheoreticFunctionsCalculator.isSquareFree;
+import static java.lang.Integer.parseInt;
+
 import clipboardops.ImageSelection;
 import fileops.FileChooserWithOverwriteGuard;
 import fileops.PNGFileFilter;
-
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Desktop;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.datatransfer.StringSelection;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import javax.swing.*;
-import javax.imageio.ImageIO;
-import javax.swing.filechooser.FileFilter;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+import javax.imageio.ImageIO;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.WindowConstants;
+import javax.swing.filechooser.FileFilter;
 
 /**
- * A Swing component in which to display diagrams of prime numbers in various 
+ * A Swing component in which to display diagrams of prime numbers in various
  * quadratic integer rings.
  * @author Alonso del Arte
  */
 public final class RingWindowDisplay extends JPanel implements ActionListener, MouseMotionListener {
-    
+
+    public static void startRingWindowDisplay(String argument) {
+        int displayOption = RingWindowDisplayOption.parse(argument);
+        startRingWindowDisplay(displayOption);
+    }
+
+    private static void startRingWindowDisplay(int ringChoice) {
+        ringChoice = RingWindowDisplayOption.sanitizeValue(ringChoice);
+
+        RingWindowDisplay rwd = new RingWindowDisplay(ringChoice);
+        rwd.setUpRingFrame();
+    }
+
+    public static void startRingWindowDisplay(String argumentA, String argumentB) {
+        int ringChoice = RingWindowDisplayOption.parse(argumentA);
+        ringChoice = RingWindowDisplayOption.sanitizeValue(ringChoice);
+
+        PrintOutputForRingChoice(ringChoice, argumentB);
+    }
+
+    private static void PrintOutputForRingChoice(int ringChoice, String argumentB) {
+        ImaginaryQuadraticRing ring = new ImaginaryQuadraticRing(ringChoice);
+        ImaginaryQuadraticInteger number = parseImaginaryQuadraticInteger(ring, argumentB);
+
+        System.out.print(number.toASCIIString());
+        if (ring.hasHalfIntegers()) {
+            System.out.print(" = " + number.toASCIIStringAlt());
+        }
+        if (NumberTheoreticFunctionsCalculator.isIrreducible(number)) {
+            System.out.print(" is irreducible ");
+            if (NumberTheoreticFunctionsCalculator.isPrime(number)) {
+                System.out.println(" and prime.");
+            } else {
+                System.out.println(" but not prime.");
+            }
+        }
+
+        System.out.print("Conjugate is " + number.conjugate().toASCIIString());
+        if (ring.hasHalfIntegers()) {
+            System.out.println(" = " + number.conjugate().toASCIIString() + ".");
+        } else {
+            System.out.println(".");
+        }
+        System.out.println("Trace is " + number.trace());
+        System.out.println("Norm is " + number.norm());
+        System.out.println("Minimal polynomial is " + number.minPolynomialString());
+    }
+
     /**
-     * The default number of pixels per unit interval. The protected variable 
-     * pixelsPerUnitInterval is initialized to this value.
+     * Constructor. Most of the work is setting the various instance fields to
+     * their default values. paintComponent() is not explicitly called.
+     * @param ringChoice The negative squarefree number to determine which
+     * diagram will be drawn first. If positive, it will quietly be changed to
+     * its additive inverse (e.g., 163 gets turned to -163), but if it's not
+     * squarefree, this constructor will just substitute -1.
      */
-    public static final int DEFAULT_PIXELS_PER_UNIT_INTERVAL = 40;
-    
+    public RingWindowDisplay(int ringChoice) {
+        ImaginaryQuadraticRing imR;
+        if (ringChoice > 0) {
+            ringChoice *= -1;
+        }
+        if (isSquareFree(ringChoice)) {
+            imR = new ImaginaryQuadraticRing(ringChoice);
+            discrHistory.add(ringChoice);
+        } else {
+            imR = new ImaginaryQuadraticRing(DEFAULT_RING_D);
+            discrHistory.add(DEFAULT_RING_D);
+        }
+        this.currHistoryIndex = 0;
+        this.setRing(imR);
+        this.mouseIQI = new ImaginaryQuadraticInteger(0, 0, imR);
+        this.setBackground(this.backgroundColor);
+        this.setPreferredSize(new Dimension(this.ringCanvasHorizMax, this.ringCanvasVerticMax));
+    }
+
+
     /**
-     * The minimum pixels per unit interval. Trying to set pixels per unit 
-     * interval below this value will cause an exception.
-     */
-    public static final int MINIMUM_PIXELS_PER_UNIT_INTERVAL = 2;
-    
-    /**
-     * The minimum pixels per unit interval for which the program will draw 
-     * grids.
-     */
-    private static final int MINIMUM_PIXELS_PER_UNIT_INTERVAL_TO_DRAW_GRIDS = 5;
-    
-    /**
-     * The maximum pixels per unit interval. Even on an 8K display, this value 
-     * might be much too large. Trying to set pixels per unit interval above 
-     * this value will cause an exception.
-     */
-    public static final int MAXIMUM_PIXELS_PER_UNIT_INTERVAL = 6400;
-    
-    /**
-     * The minimum horizontal pixel dimension for the canvas in which to draw 
-     * the diagram. This should be small even on moderately obsolete mobile 
-     * devices.
-     */
-    public static final int RING_CANVAS_HORIZ_MIN = 100;
-    
-    /**
-     * The minimum vertical pixel dimension for the canvas in which to draw the 
-     * diagram. This should be small even on moderately obsolete mobile devices.
-     */
-    public static final int RING_CANVAS_VERTIC_MIN = 178;
-    
-    /**
-     * The default horizontal pixel dimension for the canvas in which to draw 
-     * the diagram. This fills up most of the screen on a 1440 by 900 (16:10 
-     * aspect ration) display.
-     */
-    public static final int RING_CANVAS_DEFAULT_HORIZ_MAX = 1280;
-    
-    /**
-     * The default vertical pixel dimension for the canvas in which to draw the 
-     * diagram. This fills up most of the screen on a 1440 by 900 (16:10 aspect 
-     * ratio) display.
-     */
-    public static final int RING_CANVAS_DEFAULT_VERTIC_MAX = 720;
-    
-    /**
-     * The number to determine which imaginary quadratic integer ring diagram 
-     * will be shown at start-up. This constant corresponds to the ring of 
-     * Gaussian integers.
-     */
-    public static final int DEFAULT_RING_D = -1;
-    
-    /**
-     * The minimum integer the square root of which can be used to generate an 
-     * imaginary quadratic integer ring for the purpose of display in this ring 
-     * window. Although technically an ImaginaryQuadraticRing can be defined 
-     * with the square root of -2147483647 (which is a prime number), this would 
-     * quickly lead to arithmetic overflow problems. Hopefully this value of 
-     * 8191 (also a prime) is "small" enough not to cause arithmetic overflow 
-     * problems with the largest zoom out setting, but "large" enough to be of 
-     * no interest to most users of this program.
-     */
-    public static final int MINIMUM_RING_D = -8191;
-    
-    /**
-     * The default pixel radius for the dots in the diagram.
-     */
-    public static final int DEFAULT_DOT_RADIUS = 5;
-    
-    /**
-     * The minimum pixel radius for the dots in the diagram.
-     */
-    public static final int MINIMUM_DOT_RADIUS = 1;
-    
-    /**
-     * The maximum pixel radius for the dots in the diagram.
-     */
-    public static final int MAXIMUM_DOT_RADIUS = 128;
-    
-    /**
-     * The usual step by which to increment or decrement pixels by unit 
-     * interval. This step can be increased or decreased, either through the 
-     * menu or with a keyboard shortcut.
-     */
-    public static final int DEFAULT_ZOOM_INTERVAL = 5;
-    
-    /**
-     * The smallest step by which to increment or decrement pixels by unit 
-     * interval. Once this step is reached, the relevant menu item is disabled 
-     * and the corresponding keyboard shortcut is ignored.
-     */
-    public static final int MINIMUM_ZOOM_INTERVAL = 1;
-    
-    /**
-     * The largest step by which to increment or decrement pixels by unit 
-     * interval. Once this step is reached, the relevant menu item is disabled 
-     * and the corresponding keyboard shortcut is ignored.
-     */
-    public static final int MAXIMUM_ZOOM_INTERVAL = 48;
-    
-    /**
-     * The default background color when the program starts. In a future 
-     * version, there will be a dialog accessed through a menu that will enable 
-     * the user to change this color. For now, the only way to change it is by 
-     * changing this constant.
-     */
-    public static final Color DEFAULT_CANVAS_BACKGROUND_COLOR = new Color(2107440); // A dark blue
-    
-    /**
-     * The default color for the "half-integer" grid. In a future version, there 
-     * will be a dialog accessed through a menu that will enable the user to 
-     * change this color. This setting is only relevant when the program is 
-     * displaying a diagram with "half-integers" at a zoom level sufficient to 
-     * cause the drawing of grid lines.
-     */
-    public static final Color DEFAULT_HALF_INTEGER_GRID_COLOR = Color.DARK_GRAY;
-    
-    /**
-     * The default color for the "full" integer grid. In a future version, there 
-     * will be a dialog accessed through a menu that will enable the user to 
-     * change this color. This setting is only relevant when the program is 
-     * displaying a diagram with at a zoom level sufficient to cause the drawing 
-     * of grid lines.
-     */
-    public static final Color DEFAULT_INTEGER_GRID_COLOR = Color.BLACK;
-    
-    /**
-     * The default color for 0.
-     */
-    public static final Color DEFAULT_ZERO_COLOR = Color.BLACK;
-    
-    /**
-     * The default color for units. In <b>Z</b>[<i>i</i>], this would include 
-     * <i>i</i> and -<i>i</i>. In <b>Z</b>[&omega;], this would include &omega;, 
-     * 1 + &omega;, -1 - &omega; and -&omega;. In all rings, this includes 1 and 
-     * -1.
-     */
-    public static final Color DEFAULT_UNIT_COLOR = Color.WHITE;
-    
-    /**
-     * The default color for primes believed to be inert. If a prime does split 
-     * but its prime factors are not in the current diagram view, the program is 
-     * unaware of them. Though I have yet to think of a single example where it 
-     * might actually be the case that the program erroneously identifies a 
-     * prime as inert.
-     */
-    public static final Color DEFAULT_INERT_PRIME_COLOR = Color.CYAN;
-    
-    /**
-     * The default color for primes confirmed split. If a prime's splitting 
-     * factors are in the current diagram view, the program uses this color for 
-     * the split prime. For example, if the program is displaying a diagram of 
-     * <b>Z</b>[&omega;] and -7/2 + (&radic;-3)/2 (which has norm 13) is in 
-     * view, then 13 is confirmed split and colored accordingly if it's in view. 
-     * Note, however, that, given a prime <i>p</i> &equiv; 2 mod 3, the number 
-     * -<i>p</i>/2 + (<i>p</i>&radic;-3)/2 is not a splitting factor of 
-     * <i>p</i>, since it is <i>p</i>&omega; and &omega; is a unit. Therefore 
-     * <i>p</i> should be colored with the inert prime color.
-     */
-    public static final Color DEFAULT_SPLIT_PRIME_COLOR = Color.BLUE;
-    
-    /**
-     * The default color for primes that are ramified. Regardless of the current 
-     * diagram view, the program checks if gcd(<i>p</i>, <i>d</i>) > 1. So, for 
-     * example, if the program is displaying a diagram of <b>Z</b>[&radic;-5], 
-     * then 5 will be shown in this color if it's in view.
-     */
-    public static final Color DEFAULT_RAMIFIED_PRIME_COLOR = Color.GREEN;
-    
-    /**
-     * How wide to make the readouts.
-     */
-    public static final int DEFAULT_READOUT_FIELD_COLUMNS = 20;
-    
-    /**
-     * The maximum number of previous discriminants the program will remember 
-     * for history in any given run.
-     */
-    public static final int MAXIMUM_HISTORY_ITEMS = 128;
-    
-    /**
-     * The actual pixels per unit interval setting, should be initialized to 
-     * DEFAULT_PIXELS_PER_UNIT_INTERVAL in the constructor. Use 
-     * setPixelsPerUnitInterval(int pixelLength) to change, making sure 
-     * pixelLength is greater than or equal to MINIMUM_PIXELS_PER_UNIT_INTERVAL 
+     * The actual pixels per unit interval setting, should be initialized to
+     * DEFAULT_PIXELS_PER_UNIT_INTERVAL in the constructor. Use
+     * setPixelsPerUnitInterval(int pixelLength) to change, making sure
+     * pixelLength is greater than or equal to MINIMUM_PIXELS_PER_UNIT_INTERVAL
      * but less than or equal to MAXIMUM_PIXELS_PER_UNIT_INTERVAL.
      */
-    protected int pixelsPerUnitInterval;
-    
+    protected int pixelsPerUnitInterval = DEFAULT_PIXELS_PER_UNIT_INTERVAL;
+
     /**
-     * The actual pixels per basic imaginary interval setting. This setting 
+     * The actual pixels per basic imaginary interval setting. This setting
      * depends on pixelsPerUnitInterval.
      */
     protected int pixelsPerBasicImaginaryInterval;
-    
+
     /**
      * The ring of the currently displayed diagram.
      */
     protected ImaginaryQuadraticRing diagramRing;
-    
+
     /**
-     * The imaginary quadratic integer corresponding to the current mouse 
+     * The imaginary quadratic integer corresponding to the current mouse
      * position, if readouts are enabled.
      */
     private ImaginaryQuadraticInteger mouseIQI;
-        
+
     /**
-     * When diagramRing.d1mod4 is true, some users may prefer to see 
-     * "half-integers" notated with "theta" notation rather than fractions with 
-     * 2s for denominators. With this preference turned on and <i>d</i> = 
-     * &minus;3, &omega; will be used rather than &theta;. Remember that &omega; 
+     * When diagramRing.d1mod4 is true, some users may prefer to see
+     * "half-integers" notated with "theta" notation rather than fractions with
+     * 2s for denominators. With this preference turned on and <i>d</i> =
+     * &minus;3, &omega; will be used rather than &theta;. Remember that &omega;
      * = &minus;1/2 + (&radic;&minus;3)/2 and &theta; = 1/2 + (&radic;d)/2.
      */
-    private boolean preferenceForThetaNotation;
-    
-    private int ringCanvasHorizMax;
-    private int ringCanvasVerticMax;
-    
+    private boolean preferenceForThetaNotation = false;
+
+    private int ringCanvasHorizMax = RING_CANVAS_DEFAULT_HORIZ_MAX;
+    private int ringCanvasVerticMax = RING_CANVAS_DEFAULT_VERTIC_MAX;
+
+    // this.zeroCentered = true;
+
+    // this.zeroInView = true;
     /**
-     * The radius of the dots in the diagram. This is initialized to {@link 
-     * #DEFAULT_DOT_RADIUS}. The dot radius must be at least {@link 
-     * #MINIMUM_DOT_RADIUS} but may not be more than {@link 
-     * #MAXIMUM_DOT_RADIUS}.
+     * The radius of the dots in the diagram. This is initialized to {@link
+     * constants.Display#DEFAULT_DOT_RADIUS}. The dot radius must be at least {@link
+     * constants.Display#MINIMUM_DOT_RADIUS} but may not be more than {@link
+     * constants.Display#MAXIMUM_DOT_RADIUS}.
      */
-    private int dotRadius;
-    
-    private int zoomInterval;
-    
-    private Color backgroundColor, halfIntegerGridColor, integerGridColor;
-    private Color zeroColor, unitColor, inertPrimeColor, splitPrimeColor, ramifiedPrimeColor;
-    
-    private int zeroCoordX, zeroCoordY;
+    private int dotRadius = DEFAULT_DOT_RADIUS;
+
+    private int zoomInterval = DEFAULT_ZOOM_INTERVAL;
+
+    private Color backgroundColor = DEFAULT_CANVAS_BACKGROUND_COLOR, halfIntegerGridColor = DEFAULT_HALF_INTEGER_GRID_COLOR, integerGridColor = DEFAULT_INTEGER_GRID_COLOR;
+    private Color zeroColor = DEFAULT_ZERO_COLOR, unitColor = DEFAULT_UNIT_COLOR, inertPrimeColor = DEFAULT_INERT_PRIME_COLOR, splitPrimeColor = DEFAULT_SPLIT_PRIME_COLOR, ramifiedPrimeColor = DEFAULT_RAMIFIED_PRIME_COLOR;
+
+    private int zeroCoordX = (int) Math.floor(this.ringCanvasHorizMax/2), zeroCoordY = (int) Math.floor(this.ringCanvasVerticMax/2);
     
     /* For when the program has the ability to display diagrams that don't 
        necessarily have 0 in the center. */
     // private boolean zeroCentered, zeroInView;
-    
+
     private JFrame ringFrame;
-    
+
     private JMenuItem increaseDMenuItem, decreaseDMenuItem;
     private JMenuItem prevDMenuItem, nextDMenuItem;
     private JMenuItem zoomInMenuItem, zoomOutMenuItem;
     private JMenuItem decreaseZoomIntervalMenuItem, increaseZoomIntervalMenuItem;
     private JMenuItem decreaseDotRadiusMenuItem, increaseDotRadiusMenuItem;
     private JCheckBoxMenuItem preferThetaNotationMenuItem, toggleReadOutsEnabledMenuItem;
-    
+
     private JTextField algIntReadOut, algIntTraceReadOut, algIntNormReadOut, algIntPolReadOut;
-    
+
     /**
-     * Keeps track of whether or not the user has saved a diagram before. 
+     * Keeps track of whether or not the user has saved a diagram before.
      * Applies only during the current session.
      */
     private boolean haveSavedBefore;
-    
+
     /**
-     * Points to the directory where the user has previously saved a diagram to 
-     * in the current session. Probably empty or null if haveSavedBefore is 
+     * Points to the directory where the user has previously saved a diagram to
+     * in the current session. Probably empty or null if haveSavedBefore is
      * false.
      */
     private String prevSavePathname;
@@ -312,15 +231,15 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     /**
      * The history list, with which to enable to user to view previous diagrams.
      */
-    private final List<Integer> discrHistory;
-    
+    private final List<Integer> discrHistory = new ArrayList<>();
+
     /**
      * Where we are at in the history list.
      */
     private short currHistoryIndex;
-    
+
     /**
-     * Draws the grids. Should only be called if the points are spaced far apart 
+     * Draws the grids. Should only be called if the points are spaced far apart
      * enough for the grids to be visible.
      * @param graphicsForGrids The Graphics object supplied by the caller.
      */
@@ -362,7 +281,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                     currReflectPixelPos -= this.pixelsPerUnitInterval;
                 }
             }
-        } 
+        }
         // Draw horizontal lines of integer grid
         withinBoundaries = true;
         graphicsForGrids.setColor(this.integerGridColor);
@@ -393,53 +312,53 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             }
         }
     }
-    
+
     /**
-     * Draws the points. In the original implementation, this tested the 
-     * primality of the norms of the imaginary quadratic integers with nonzero 
-     * imaginary parts. However, that was not quite correct in that it skipped 
-     * over primes that are real integer multiples of &omega; in 
-     * <b>Z</b>[&omega;]. So I changed it to do primality test on the imaginary 
-     * quadratic integers themselves, but that caused a slight delay for the 
-     * <b>Z</b>[&omega;] diagram at 2 pixels per unit interval. So now the 
-     * program is back to doing primality testing on the norms of the numbers 
-     * rather than the numbers themselves, and there is a special pass for the 
+     * Draws the points. In the original implementation, this tested the
+     * primality of the norms of the imaginary quadratic integers with nonzero
+     * imaginary parts. However, that was not quite correct in that it skipped
+     * over primes that are real integer multiples of &omega; in
+     * <b>Z</b>[&omega;]. So I changed it to do primality test on the imaginary
+     * quadratic integers themselves, but that caused a slight delay for the
+     * <b>Z</b>[&omega;] diagram at 2 pixels per unit interval. So now the
+     * program is back to doing primality testing on the norms of the numbers
+     * rather than the numbers themselves, and there is a special pass for the
      * aforementioned primes.
      * @param graphicsForPoints The Graphics object supplied by the caller.
      */
     private void drawPoints(Graphics graphicsForPoints) {
-        
+
         int currPointX, currPointY;
         int currNegPointX, currNegPointY;
-        
+
         int dotDiameter = 2 * this.dotRadius;
-        
+
         int maxX = (int) Math.floor((this.ringCanvasHorizMax - this.zeroCoordX)/this.pixelsPerUnitInterval);
         int maxY;
         int verticalGridDistance = this.pixelsPerBasicImaginaryInterval;
-        
+
         ImaginaryQuadraticInteger currIQI;
-        
+
         if (this.diagramRing.d1mod4) {
             maxY = (int) Math.floor((this.ringCanvasVerticMax - this.zeroCoordY)/(2 * this.pixelsPerBasicImaginaryInterval));
             verticalGridDistance *= 2;
         } else {
             maxY = (int) Math.floor((this.ringCanvasVerticMax - this.zeroCoordY)/this.pixelsPerBasicImaginaryInterval);
         }
-        
+
         // The central point, 0
         currPointX = this.zeroCoordX;
         currPointY = this.zeroCoordY;
         graphicsForPoints.setColor(zeroColor);
         graphicsForPoints.fillOval(currPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
-        
+
         // The purely real unit points, -1 and 1
         currNegPointX = currPointX - this.pixelsPerUnitInterval;
         currPointX += this.pixelsPerUnitInterval;
         graphicsForPoints.setColor(unitColor);
         graphicsForPoints.fillOval(currPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
         graphicsForPoints.fillOval(currNegPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
-        
+
         // The even primes, -2 and 2
         currNegPointX -= this.pixelsPerUnitInterval;
         currPointX += this.pixelsPerUnitInterval;
@@ -472,7 +391,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             default:
                 throw new RuntimeException("Unexpected problem computing symbolKronecker(" + diagramRing.negRad + ", " + 2 + ") = " + symbol);
         }
-        
+
         // Place "nibs" back at -1 and 1
         currNegPointX += this.pixelsPerUnitInterval;
         currPointX -= this.pixelsPerUnitInterval;
@@ -504,7 +423,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                 }
             }
         }
-        
+
         // The purely imaginary integer points other than 0
         if (this.diagramRing.negRad == -1) {
             // Take care to color the units in Z[i]
@@ -547,7 +466,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                 }
             }
         }
-        
+
         // Now the complex integer points, but not the "half-integers" yet
         long currSplitPrime;
         int currSplitPrimePointX, currNegSplitPrimePointX;
@@ -578,11 +497,11 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                         graphicsForPoints.fillOval(this.zeroCoordX - this.dotRadius, currSplitPrimePointX - this.dotRadius, dotDiameter, dotDiameter);
                         graphicsForPoints.fillOval(this.zeroCoordX - this.dotRadius, currNegSplitPrimePointX - this.dotRadius, dotDiameter, dotDiameter);
                     }
-                    
+
                 }
             }
         }
-        
+
         // Last but not least, the "half-integers"
         if (this.diagramRing.d1mod4) {
             int halfUnitInterval = pixelsPerUnitInterval;
@@ -596,8 +515,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             currNegPointX = this.zeroCoordX - halfUnitInterval;
             currPointY = this.zeroCoordY + this.pixelsPerBasicImaginaryInterval;
             currNegPointY = this.zeroCoordY - this.pixelsPerBasicImaginaryInterval;
-            /* Take care of the other units among the Eisenstein integers. Also 
-               primes of the form p * omega, where p is a purely real prime 
+            /* Take care of the other units among the Eisenstein integers. Also
+               primes of the form p * omega, where p is a purely real prime
                satisfying p = 2 mod 3 */
             if (this.diagramRing.negRad == -3) {
                 // The complex units, like omega
@@ -616,7 +535,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                 graphicsForPoints.fillOval(currPointX - this.dotRadius, currNegPointY - this.dotRadius, dotDiameter, dotDiameter);
                 graphicsForPoints.fillOval(currNegPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
                 graphicsForPoints.fillOval(currNegPointX - this.dotRadius, currNegPointY - this.dotRadius, dotDiameter, dotDiameter);
-                // And then p * omega from p = 5 on, and complex associates 
+                // And then p * omega from p = 5 on, and complex associates
                 for (int auxX = 5; auxX < halfMaxX; auxX += 6) {
                     currPointX = this.zeroCoordX + (auxX * halfUnitInterval);
                     currNegPointX = this.zeroCoordX - (auxX * halfUnitInterval);
@@ -656,16 +575,16 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                 }
             }
         }
-        
+
     }
 
     /**
-     * Change how many pixels there are per unit interval. Also concomitantly 
+     * Change how many pixels there are per unit interval. Also concomitantly
      * changes how many pixels there are per basic imaginary interval.
-     * @param pixelLength An integer greater than or equal to 
-     * MINIMUM_PIXELS_PER_UNIT_INTERVAL but less than or equal to 
+     * @param pixelLength An integer greater than or equal to
+     * MINIMUM_PIXELS_PER_UNIT_INTERVAL but less than or equal to
      * MAXIMUM_PIXELS_PER_UNIT_INTERVAL.
-     * @throws IllegalArgumentException If pixelLength is outside the range 
+     * @throws IllegalArgumentException If pixelLength is outside the range
      * specified above.
      */
     public void setPixelsPerUnitInterval(int pixelLength) {
@@ -682,17 +601,17 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         }
         this.pixelsPerBasicImaginaryInterval = (int) Math.floor(imagInterval);
     }
-    
+
     /**
-     * Function to change the size of the canvas on which the ring diagrams are 
-     * drawn. I have not completely thought this one through, and I certainly 
+     * Function to change the size of the canvas on which the ring diagrams are
+     * drawn. I have not completely thought this one through, and I certainly
      * haven't tested it.
-     * @param newHorizMax The new width of the ring window. This needs to be at 
+     * @param newHorizMax The new width of the ring window. This needs to be at
      * least equal to RING_CANVAS_HORIZ_MIN.
-     * @param newVerticMax The new height of the ring window. This needs to be 
+     * @param newVerticMax The new height of the ring window. This needs to be
      * at least equal to RING_CANVAS_VERTIC_MIN.
-     * @throws IllegalArgumentException If either newHorizMax is less than 
-     * RING_CANVAS_HORIZ_MIN or newVerticMax is less than 
+     * @throws IllegalArgumentException If either newHorizMax is less than
+     * RING_CANVAS_HORIZ_MIN or newVerticMax is less than
      * RING_CANVAS_VERTIC_MIN.
      */
     public void changeRingWindowDimensions(int newHorizMax, int newVerticMax) {
@@ -702,38 +621,39 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         this.ringCanvasHorizMax = newHorizMax;
         this.ringCanvasVerticMax = newVerticMax;
     }
-    
+
     /**
      * Function to change the background color. I have not tested this one yet.
-     * @param newBackgroundColor Preferably a color that will contrast nicely 
+     * @param newBackgroundColor Preferably a color that will contrast nicely
      * with the foreground points but which the grids can blend into.
      */
     public void changeBackgroundColor(Color newBackgroundColor) {
         this.backgroundColor = newBackgroundColor;
     }
-    
+
     /**
      * Function to change the grid colors.
-     * @param newHalfIntegerGridColor Applicable only when 
- this.diagramRing.d1mod4 is true. In choosing this color, keep in mind 
+     * @param newHalfIntegerGridColor Applicable only when
+ this.diagramRing.d1mod4 is true. In choosing this color, keep in mind
  that, when applicable, the "half-integer" grid is drawn first.
-     * @param newIntegerGridColor In choosing this color, keep in mind that, 
-     * when applicable, the "full" integer grid is drawn second, after the 
+     * @param newIntegerGridColor In choosing this color, keep in mind that,
+     * when applicable, the "full" integer grid is drawn second, after the
      * "half-integer" grid.
      */
     public void changeGridColors(Color newHalfIntegerGridColor, Color newIntegerGridColor) {
         this.halfIntegerGridColor = newHalfIntegerGridColor;
         this.integerGridColor = newIntegerGridColor;
     }
-     /**
+
+    /**
      * Function to change the colors of the points.
      * @param newZeroColor The color for the point 0.
-     * @param newUnitColor The color for the units. In most imaginary quadratic 
+     * @param newUnitColor The color for the units. In most imaginary quadratic
      * rings, this color will only be used for -1 and 1.
-     * @param newInertPrimeColor The color for inert primes, or at least primes 
+     * @param newInertPrimeColor The color for inert primes, or at least primes
      * having no splitting or ramifying factors in view.
      * @param newSplitPrimeColor The color for confirmed split primes.
-     * @param newRamifiedPrimeColor The color for primes that are factors of the 
+     * @param newRamifiedPrimeColor The color for primes that are factors of the
      * discriminant.
      */
     public void changePointColors(Color newZeroColor, Color newUnitColor, Color newInertPrimeColor, Color newSplitPrimeColor, Color newRamifiedPrimeColor) {
@@ -743,11 +663,10 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         this.splitPrimeColor = newSplitPrimeColor;
         this.ramifiedPrimeColor = newRamifiedPrimeColor;
     }
-   
     /**
      * Function to change the dot radius.
      * @param newDotRadius Needs to be at least MINIMUM_DOT_RADIUS pixels.
-     * @throws IllegalArgumentException If newDotRadius is less than 
+     * @throws IllegalArgumentException If newDotRadius is less than
      * MINIMUM_DOT_RADIUS.
      */
     public void changeDotRadius(int newDotRadius) {
@@ -773,11 +692,11 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         }
         this.dotRadius = newDotRadius;
     }
-    
+
     /**
      * Function to change the zoom interval.
-     * @param newZoomInterval Needs to be at least MINIMUM_ZOOM_INTERVAL pixels. 
-     * @throws IllegalArgumentException If newZoomInterval is less than 
+     * @param newZoomInterval Needs to be at least MINIMUM_ZOOM_INTERVAL pixels.
+     * @throws IllegalArgumentException If newZoomInterval is less than
      * MINIMUM_ZOOM_INTERVAL.
      */
     public void changeZoomInterval(int newZoomInterval) {
@@ -802,9 +721,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         }
         this.zoomInterval = newZoomInterval;
     }
-    
+
     /**
-     * Function to change the coordinates of the point 0. I have not yet 
+     * Function to change the coordinates of the point 0. I have not yet
      * implemented a meaningful use for this function.
      * @param newCoordX The new x-coordinate for 0.
      * @param newCoordY The new y-coordinate for 0.
@@ -815,10 +734,10 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         // zeroCentered = (this.zeroCoordX == (int) Math.floor(this.ringCanvasHorizMax/2) && this.zeroCoordY == (int) Math.floor(this.ringCanvasVerticMax/2));
         // zeroInView = ((this.zeroCoordX > -1) && (this.zeroCoordY > -1) && (this.zeroCoordX <= this.ringCanvasHorizMax) && (this.zeroCoordY <= this.ringCanvasVerticMax));
     }
-    
+
     /**
-     * Paints the canvas, by delegating to private procedures to draw the grids 
-     * and the points. However, if the points are too close together, the grids 
+     * Paints the canvas, by delegating to private procedures to draw the grids
+     * and the points. However, if the points are too close together, the grids
      * will not be drawn.
      * @param g The Graphics object supplied by the caller.
      */
@@ -830,9 +749,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         }
         drawPoints(g);
     }
-    
+
     /**
-     * Function to determine mouse position on the diagram and update readouts 
+     * Function to determine mouse position on the diagram and update readouts
      * accordingly.
      * @param mauv A MouseEvent object with the relevant information.
      */
@@ -867,9 +786,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             algIntPolReadOut.setText(mouseIQI.minPolynomialString());
         }
     }
-    
+
     /**
-     * No implementation for time being. Hope to add the capability to drag the 
+     * No implementation for time being. Hope to add the capability to drag the
      * diagram in a future version.
      * @param mauv Mouse event to respond to.
      */
@@ -877,9 +796,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     public void mouseDragged(MouseEvent mauv) {
         // IMPLEMENTATION PLACEHOLDER
     }
-    
+
     /**
-     * Prompts the user for a filename and saves the currently displayed diagram 
+     * Prompts the user for a filename and saves the currently displayed diagram
      * with that filename as a Portable Network Graphics (PNG) file.
      */
     public void saveDiagramAs() {
@@ -923,14 +842,14 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                 JOptionPane.showMessageDialog(ringFrame, notificationString);
         }
     }
-    
+
     private void switchToRing(int d) {
         ImaginaryQuadraticRing imagRing = new ImaginaryQuadraticRing(d);
         ringFrame.setTitle("Ring Diagram for " + imagRing.toString());
         setRing(imagRing);
         repaint();
     }
-    
+
     /**
      * Function to update the history of previously viewed diagrams.
      * @param d The discriminant to add to the history list.
@@ -954,12 +873,12 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             discrHistory.remove(0); // Remove the first item
         }
     }
-    
+
     /**
-     * Function to ask user to enter a new, negative, squarefree integer for the 
-     * discriminant of a ring to diagram primes in. If the user enters a 
-     * positive integer, the number will be multiplied by -1. And if that number 
-     * is not squarefree, the function looks for the next lower squarefree 
+     * Function to ask user to enter a new, negative, squarefree integer for the
+     * discriminant of a ring to diagram primes in. If the user enters a
+     * positive integer, the number will be multiplied by -1. And if that number
+     * is not squarefree, the function looks for the next lower squarefree
      * number, taking care not to go below MINIMUM_RING_D.
      */
     public void chooseDiscriminant() {
@@ -968,7 +887,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         int discr;
         boolean repaintNeeded;
         try {
-            discr = Integer.parseInt(userChoice);
+            discr = parseInt(userChoice);
         } catch (NumberFormatException nfe) {
             discr = this.diagramRing.negRad;
         }
@@ -978,7 +897,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         if (discr < MINIMUM_RING_D) {
             discr = MINIMUM_RING_D;
         }
-        while (!NumberTheoreticFunctionsCalculator.isSquareFree(discr) && discr > MINIMUM_RING_D) {
+        while (!isSquareFree(discr) && discr > MINIMUM_RING_D) {
             discr--;
         }
         repaintNeeded = (discr != this.diagramRing.negRad);
@@ -1002,13 +921,13 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
 
     /**
-     * Function to choose for discriminant the next higher negative squarefree 
-     * integer. If this brings us up to -1, then the "Increase discriminant" 
+     * Function to choose for discriminant the next higher negative squarefree
+     * integer. If this brings us up to -1, then the "Increase discriminant"
      * menu item is disabled.
      */
     public void incrementDiscriminant() {
         int discr = this.diagramRing.negRad + 1;
-        while (!NumberTheoreticFunctionsCalculator.isSquareFree(discr) && discr < -1) {
+        while (!isSquareFree(discr) && discr < -1) {
             discr++;
         }
         if (discr == -1) {
@@ -1022,13 +941,13 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
 
     /**
-     * Function to choose for discriminant the next lower negative squarefree 
-     * integer. If this brings us down to MINIMUM_RING_D, then the "Decrease 
+     * Function to choose for discriminant the next lower negative squarefree
+     * integer. If this brings us down to MINIMUM_RING_D, then the "Decrease
      * discriminant" menu item is disabled.
      */
     public void decrementDiscriminant() {
         int discr = this.diagramRing.negRad - 1;
-        while (!NumberTheoreticFunctionsCalculator.isSquareFree(discr) && discr > (Integer.MIN_VALUE + 1)) {
+        while (!isSquareFree(discr) && discr > (Integer.MIN_VALUE + 1)) {
             discr--;
         }
         if (discr == MINIMUM_RING_D) {
@@ -1040,7 +959,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         switchToRing(discr);
         updateDiscriminantHistory(discr);
     }
-    
+
     /**
      * Bring up the previously displayed diagram.
      */
@@ -1068,9 +987,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             prevDMenuItem.setEnabled(true);
         }
     }
-    
+
     /**
-     * Copies the readouts of the algebraic integer, trace, norm and polynomial 
+     * Copies the readouts of the algebraic integer, trace, norm and polynomial
      * to the system clipboard as plain text.
      */
     public void copyReadoutsToClipboard() {
@@ -1082,9 +1001,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         StringSelection strSel = new StringSelection(agregReadouts);
         this.getToolkit().getSystemClipboard().setContents(strSel, strSel);
     }
-    
+
     /**
-     * Copies the currently displayed diagram to the clipboard as a {@link 
+     * Copies the currently displayed diagram to the clipboard as a {@link
      * BufferedImage}, of type {@link BufferedImage#TYPE_INT_RGB}.
      */
     public void copyDiagramToClipboard() {
@@ -1094,9 +1013,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         ImageSelection imgSel = new ImageSelection(diagram);
         this.getToolkit().getSystemClipboard().setContents(imgSel, imgSel);
     }
-    
+
     /**
-     * Checks whether the Zoom in and Zoom out menu items are enabled or not, 
+     * Checks whether the Zoom in and Zoom out menu items are enabled or not,
      * and whether they should be, enabling them or disabling them as needed.
      */
     private void checkViewMenuEnablements() {
@@ -1113,9 +1032,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             this.zoomOutMenuItem.setEnabled(true);
         }
     }
-    
+
     /**
-     * Zooms in on the diagram. This is done by reducing pixelsPerUnitInterval 
+     * Zooms in on the diagram. This is done by reducing pixelsPerUnitInterval
      * by zoomInterval and calling repaint().
      */
     public void zoomIn() {
@@ -1131,9 +1050,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             this.zoomOutMenuItem.setEnabled(true);
         }
     }
-    
+
     /**
-     * Zooms out on the diagram. This is done by increasing 
+     * Zooms out on the diagram. This is done by increasing
      * pixelsPerUnitInterval by zoomInterval and calling repaint().
      */
     public void zoomOut() {
@@ -1149,20 +1068,20 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             this.zoomInMenuItem.setEnabled(true);
         }
     }
-    
+
     /**
-     * Just a little message dialog to let the user know what the zoom interval 
+     * Just a little message dialog to let the user know what the zoom interval
      * is now.
      */
     private void informZoomIntervalChange() {
         String notificationString = "Zoom interval is now " + this.zoomInterval + ".\nThere are " + this.pixelsPerUnitInterval + " pixels per unit interval.";
         JOptionPane.showMessageDialog(ringFrame, notificationString);
     }
-    
+
     /**
-     * Decreases the zoom interval. The zoom interval is decremented by 1, 
-     * taking care that it does not become less than {@link 
-     * #MINIMUM_ZOOM_INTERVAL MINIMUM_ZOOM_INTERVAL}.
+     * Decreases the zoom interval. The zoom interval is decremented by 1,
+     * taking care that it does not become less than {@link
+     * constants.Display#MINIMUM_ZOOM_INTERVAL MINIMUM_ZOOM_INTERVAL}.
      */
     public void decreaseZoomInterval() {
         int newZoomInterval = this.zoomInterval - 1;
@@ -1184,9 +1103,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
 
     /**
-     * Increases the zoom interval. The zoom interval is incremented by 1, 
-     * taking care that it does not become more than {@link 
-     * #MAXIMUM_ZOOM_INTERVAL MAXIMUM_ZOOM_INTERVAL}.
+     * Increases the zoom interval. The zoom interval is incremented by 1,
+     * taking care that it does not become more than {@link
+     * constants.Display#MAXIMUM_ZOOM_INTERVAL MAXIMUM_ZOOM_INTERVAL}.
      */
     public void increaseZoomInterval() {
         int newZoomInterval = this.zoomInterval + 1;
@@ -1208,9 +1127,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
 
     /**
-     * Decreases the dot radius for 0, units and primes on the diagram. The dot 
-     * radius is decreased by 1 pixel, taking care that it does not become less 
-     * than {@link #MINIMUM_DOT_RADIUS MINIMUM_DOT_RADIUS}.
+     * Decreases the dot radius for 0, units and primes on the diagram. The dot
+     * radius is decreased by 1 pixel, taking care that it does not become less
+     * than {@link constants.Display#MINIMUM_DOT_RADIUS MINIMUM_DOT_RADIUS}.
      */
     public void decreaseDotRadius() {
         int newDotRadius = this.dotRadius - 1;
@@ -1227,9 +1146,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     }
 
     /**
-     * Increases the dot radius for 0, units and primes on the diagram. The dot 
-     * radius is increased by 1 pixel, taking care that it does not become more 
-     * than {@link #MAXIMUM_DOT_RADIUS MAXIMUM_DOT_RADIUS}.
+     * Increases the dot radius for 0, units and primes on the diagram. The dot
+     * radius is increased by 1 pixel, taking care that it does not become more
+     * than {@link constants.Display#MAXIMUM_DOT_RADIUS MAXIMUM_DOT_RADIUS}.
      */
     public void increaseDotRadius() {
         int newDotRadius = this.dotRadius + 1;
@@ -1244,14 +1163,14 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             this.decreaseDotRadiusMenuItem.setEnabled(true);
         }
     }
-    
+
     /**
-     * Resets pixels per unit interval, dot radius and zoom interval. This does 
-     * not change the discriminant, nor whether or not readouts are updated, nor 
+     * Resets pixels per unit interval, dot radius and zoom interval. This does
+     * not change the discriminant, nor whether or not readouts are updated, nor
      * the preference for theta notation.
      */
     public void resetViewDefaults() {
-        /* Since the program does not yet allow the user to change colors, the 
+        /* Since the program does not yet allow the user to change colors, the
            following three lines are for now unnecessary.
         changeBackgroundColor(DEFAULT_CANVAS_BACKGROUND_COLOR);
         changeGridColors(DEFAULT_HALF_INTEGER_GRID_COLOR, DEFAULT_INTEGER_GRID_COLOR);
@@ -1276,18 +1195,18 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             this.decreaseDotRadiusMenuItem.setEnabled(true);
         }
     }
-    
+
     /**
-     * Enable or disable the use of theta notation in the readout field for 
+     * Enable or disable the use of theta notation in the readout field for
      * integer when the discriminant is congruent to 1 modulo 4. Of course the
      * updating of readouts has to be enabled for this to be any of consequence.
      */
     public void toggleThetaNotation() {
         this.preferenceForThetaNotation = this.preferThetaNotationMenuItem.isSelected();
     }
-    
+
     /**
-     * Enable or disable updating of the readout fields for integer, trace, norm 
+     * Enable or disable updating of the readout fields for integer, trace, norm
      * and polynomial.
      */
     public void toggleReadOutsEnabled() {
@@ -1297,10 +1216,10 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             this.removeMouseMotionListener(this);
         }
     }
-    
+
     /**
-     * Uses the default Web browser to show the user manual. If the default 
-     * browser is not available for whatever reason, a message to that effect is 
+     * Uses the default Web browser to show the user manual. If the default
+     * browser is not available for whatever reason, a message to that effect is
      * shown in a dialog box and/or on the console.
      */
     public void showUserManual() {
@@ -1321,9 +1240,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
             System.err.println(noDesktopMessage);
         }
     }
-    
+
     /**
-     * Shows the About box, a simple MessageDialog from JOptionPage. If 
+     * Shows the About box, a simple MessageDialog from JOptionPage. If
      * available, writes the same information to the console.
      */
     public void showAboutBox() {
@@ -1331,9 +1250,9 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         JOptionPane.showMessageDialog(this.ringFrame, aboutMessage);
         System.out.println(aboutMessage);
     }
-    
+
     /**
-     * Function to handle menu events. Unrecognized commands will be printed to 
+     * Function to handle menu events. Unrecognized commands will be printed to
      * the console with a message to that effect.
      * @param ae Object giving information about the menu item selected.
      */
@@ -1424,7 +1343,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         }
         this.pixelsPerBasicImaginaryInterval = (int) Math.floor(imagInterval);
     }
-   
+
     /**
      * Sets up the JFrame in which the various ring diagrams will be drawn.
      */
@@ -1522,7 +1441,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         THIS IS FOR WHEN I GET AROUND TO ADDING THE CAPABILITY TO CHANGE GRID, POINT COLORS
         ringWindowMenuItem = new JMenuItem("Preferences...");
         ringWindowMenuItem.getAccessibleContext().setAccessibleDescription("Bring up a dialogue to adjust preferences");
-        ringWindowMenu.add(ringWindowMenuItem); 
+        ringWindowMenu.add(ringWindowMenuItem);
     */
         ringWindowMenu = new JMenu("View");
         ringWindowMenu.setMnemonic(KeyEvent.VK_V);
@@ -1674,62 +1593,5 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         ringFrame.pack();
         ringFrame.setVisible(true);
     }
-    
-    /**
-     * Constructor. Most of the work is setting the various instance fields to 
-     * their default values. paintComponent() is not explicitly called.
-     * @param ringChoice The negative squarefree number to determine which 
-     * diagram will be drawn first. If positive, it will quietly be changed to 
-     * its additive inverse (e.g., 163 gets turned to -163), but if it's not 
-     * squarefree, this constructor will just substitute -1.
-     */
-    public RingWindowDisplay(int ringChoice) {
-        ImaginaryQuadraticRing imR;
-        this.pixelsPerUnitInterval = DEFAULT_PIXELS_PER_UNIT_INTERVAL;
-        this.ringCanvasHorizMax = RING_CANVAS_DEFAULT_HORIZ_MAX;
-        this.ringCanvasVerticMax = RING_CANVAS_DEFAULT_VERTIC_MAX;
-        this.backgroundColor = DEFAULT_CANVAS_BACKGROUND_COLOR;
-        this.halfIntegerGridColor = DEFAULT_HALF_INTEGER_GRID_COLOR;
-        this.integerGridColor = DEFAULT_INTEGER_GRID_COLOR;
-        this.zeroColor = DEFAULT_ZERO_COLOR;
-        this.unitColor = DEFAULT_UNIT_COLOR;
-        this.inertPrimeColor = DEFAULT_INERT_PRIME_COLOR;
-        this.splitPrimeColor = DEFAULT_SPLIT_PRIME_COLOR;
-        this.ramifiedPrimeColor = DEFAULT_RAMIFIED_PRIME_COLOR;
-        this.zeroCoordX = (int) Math.floor(this.ringCanvasHorizMax/2);
-        this.zeroCoordY = (int) Math.floor(this.ringCanvasVerticMax/2);
-        // this.zeroCentered = true;
-        // this.zeroInView = true;
-        this.dotRadius = DEFAULT_DOT_RADIUS;
-        this.zoomInterval = DEFAULT_ZOOM_INTERVAL;
-        this.preferenceForThetaNotation = false;
-        this.discrHistory = new ArrayList<>();
-        if (ringChoice > 0) {
-            ringChoice *= -1;
-        }
-        if (NumberTheoreticFunctionsCalculator.isSquareFree(ringChoice)) {
-            imR = new ImaginaryQuadraticRing(ringChoice);
-            discrHistory.add(ringChoice);
-        } else {
-            imR = new ImaginaryQuadraticRing(DEFAULT_RING_D);
-            discrHistory.add(DEFAULT_RING_D);
-        }
-        this.currHistoryIndex = 0;
-        this.setRing(imR);
-        this.mouseIQI = new ImaginaryQuadraticInteger(0, 0, imR);
-        this.setBackground(this.backgroundColor);
-        this.setPreferredSize(new Dimension(this.ringCanvasHorizMax, this.ringCanvasVerticMax)); 
-    }
-    
-    public static void startRingWindowDisplay(int ringChoice) {
-        if (ringChoice > -1) {
-            ringChoice *= -1;
-        }
-        if (!NumberTheoreticFunctionsCalculator.isSquareFree(ringChoice)) {
-            ringChoice = DEFAULT_RING_D;
-        }
-        RingWindowDisplay rwd = new RingWindowDisplay(ringChoice);
-        rwd.setUpRingFrame();
-    }
-    
+
 }

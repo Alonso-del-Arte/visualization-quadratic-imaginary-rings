@@ -16,12 +16,18 @@
  */
 package imaginaryquadraticinteger;
 
+import imaginaryquadraticinteger.Exceptions.AlgebraicDegreeOverflowException;
+import imaginaryquadraticinteger.Exceptions.AlgebraicDegreeOverflowExceptionTest;
+import imaginaryquadraticinteger.Exceptions.NotDivisibleException;
+import imaginaryquadraticinteger.Exceptions.UnsupportedNumberDomainException;
 import java.text.DecimalFormatSymbols;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Random;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import static constants.ImaginaryQuadraticInteger.MINIMUM_RING_D;
 import static org.junit.Assert.*;
 
 /**
@@ -96,7 +102,7 @@ public class ImaginaryQuadraticIntegerTest {
     @BeforeClass
     public static void setUpClass() {
         int maxAB;
-        int randomDiscr = NumberTheoreticFunctionsCalculator.randomNegativeSquarefreeNumber(RingWindowDisplay.MINIMUM_RING_D);
+        int randomDiscr = NumberTheoreticFunctionsCalculator.randomNegativeSquarefreeNumber(MINIMUM_RING_D);
         if (randomDiscr > -5) {
             randomDiscr = -5; // This is just in case we get -3 or -1, which we are already testing for and which require special treatment in some of the tests.
         }

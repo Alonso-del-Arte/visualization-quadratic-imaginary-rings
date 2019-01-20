@@ -18,6 +18,8 @@ package imaginaryquadraticinteger;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import static constants.ImaginaryQuadraticInteger.MINIMUM_RING_D;
 import static org.junit.Assert.*;
 
 /**
@@ -55,7 +57,7 @@ public class ImaginaryQuadraticRingTest {
      */
     @BeforeClass
     public static void setUpClass() {
-        randomDiscr = NumberTheoreticFunctionsCalculator.randomNegativeSquarefreeNumber(RingWindowDisplay.MINIMUM_RING_D);
+        randomDiscr = NumberTheoreticFunctionsCalculator.randomNegativeSquarefreeNumber(MINIMUM_RING_D);
         if (randomDiscr > -5) {
             randomDiscr = -5; // This is just in case we get -3 or -1, which we are already testing for and which require special treatment in some of the tests.
         }

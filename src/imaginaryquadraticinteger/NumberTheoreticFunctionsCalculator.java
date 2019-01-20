@@ -16,6 +16,10 @@
  */
 package imaginaryquadraticinteger;
 
+import imaginaryquadraticinteger.Exceptions.AlgebraicDegreeOverflowException;
+import imaginaryquadraticinteger.Exceptions.NonEuclideanDomainException;
+import imaginaryquadraticinteger.Exceptions.NonUniqueFactorizationDomainException;
+import imaginaryquadraticinteger.Exceptions.NotDivisibleException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -319,7 +323,7 @@ public class NumberTheoreticFunctionsCalculator {
     /**
      * Determines whether a given number, not necessarily purely real, is prime 
      * or not. Note that an early version of this function would throw 
-     * {@link NonUniqueFactorizationDomainException} if called upon a purely 
+     * {@link NonUniqueFactorizationDomainException} if called upon a purely
      * real integer in a non-UFD. That is no longer the case.
      * @param num The number for which to make the determination.
      * @return true if the number is prime, false otherwise. For example, 1 + i,
@@ -403,7 +407,7 @@ public class NumberTheoreticFunctionsCalculator {
      * overflows, so imaginary quadratic integer objects with erroneously 
      * negative norms would be erroneously sorted before units.
      */
-    static List<ImaginaryQuadraticInteger> sortListIQIByNorm(List<ImaginaryQuadraticInteger> listIQI) {
+    public static List<ImaginaryQuadraticInteger> sortListIQIByNorm(List<ImaginaryQuadraticInteger> listIQI) {
         boolean swapFlag;
         ImaginaryQuadraticInteger a, b;
         List<ImaginaryQuadraticInteger> nums = new ArrayList<>();
@@ -780,14 +784,14 @@ public class NumberTheoreticFunctionsCalculator {
      * @param b One of the two imaginary quadratic integers. Need not have 
      * smaller norm than the other.
      * @return The GCD.
-     * @throws AlgebraicDegreeOverflowException If the imaginary quadratic 
+     * @throws AlgebraicDegreeOverflowException If the imaginary quadratic
      * integers come from different quadratic rings, the GCD might be a number 
      * from a ring of degree 4 or higher. This may or may not be the case (quite 
      * likely the two imaginary quadratic integers will be coprime and so the 
      * answer is just good old 1); the function assumes that the GCD can't be 
      * calculated using the Euclidean algorithm and throws this runtime 
      * exception.
-     * @throws NonEuclideanDomainException If the imaginary quadratic integers 
+     * @throws NonEuclideanDomainException If the imaginary quadratic integers
      * come from any imaginary quadratic ring other than <b>Z</b>[<i>i</i>], 
      * <b>Z</b>[&radic;-2], <b>Z</b>[&omega;], 
      * <i>O</i><sub><b>Q</b>(&radic;-7)</sub> or 

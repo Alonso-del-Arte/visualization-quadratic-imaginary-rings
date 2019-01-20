@@ -33,27 +33,27 @@
  * <li>{@link imaginaryquadraticinteger.RingWindowDisplay} is a Swing component 
  * in which to display diagrams of prime numbers in various quadratic integer 
  * rings.</li>
- * <li>{@link imaginaryquadraticinteger.AlgebraicDegreeOverflowException} 
+ * <li>{@link imaginaryquadraticinteger.Exceptions.AlgebraicDegreeOverflowException}
  * defines an exception to be thrown when an arithmetic operation results in an 
  * algebraic integer of higher algebraic degree than the implementation of 
  * AlgebraicInteger can handle. This exception is general enough to work with 
  * any implementation of AlgebraicInteger.</li>
- * <li>{@link imaginaryquadraticinteger.NotDivisibleException} defines an 
+ * <li>{@link imaginaryquadraticinteger.Exceptions.NotDivisibleException} defines an
  * exception to be thrown when the result of dividing one imaginary quadratic 
  * integer by another results in an algebraic number that is not an algebraic 
  * integer. At some point in the future I want to make this exception usable for 
  * any implementation of AlgebraicInteger, not just 
  * ImaginaryQuadraticInteger. This exception should not be used in cases when 
  * AlgebraicDegreeOverflowException would be more appropriate.</li>
- * <li>{@link imaginaryquadraticinteger.NonEuclideanDomainException} defines an 
+ * <li>{@link imaginaryquadraticinteger.Exceptions.NonEuclideanDomainException} defines an
  * exception to be thrown when an Euclidean GCD function is called on numbers 
  * that are not from an Euclidean domain. For now this exception is also limited 
  * to ImaginaryQuadraticInteger.</li>
- * <li>{@link imaginaryquadraticinteger.NonUniqueFactorizationDomainException} 
+ * <li>{@link imaginaryquadraticinteger.Exceptions.NonUniqueFactorizationDomainException}
  * defines an exception to be thrown when a prime factorization function is 
  * called on a number that is not from a unique factorization domain. For now 
  * this exception is also limited to ImaginaryQuadraticInteger.</li>
- * <li>{@link imaginaryquadraticinteger.UnsupportedNumberDomainException} 
+ * <li>{@link imaginaryquadraticinteger.Exceptions.UnsupportedNumberDomainException}
  * defines an exception to be thrown when an arithmetic operation results in an 
  * algebraic integer that no available implementation of AlgebraicInteger can 
  * handle. For example, the multiplication of two purely imaginary quadratic 

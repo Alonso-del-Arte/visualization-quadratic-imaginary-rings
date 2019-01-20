@@ -16,6 +16,9 @@
  */
 package imaginaryquadraticinteger;
 
+import imaginaryquadraticinteger.Exceptions.AlgebraicDegreeOverflowException;
+import imaginaryquadraticinteger.Exceptions.NonEuclideanDomainException;
+import imaginaryquadraticinteger.Exceptions.NonUniqueFactorizationDomainException;
 import java.util.List;
 import java.util.ArrayList;
 import org.junit.BeforeClass;

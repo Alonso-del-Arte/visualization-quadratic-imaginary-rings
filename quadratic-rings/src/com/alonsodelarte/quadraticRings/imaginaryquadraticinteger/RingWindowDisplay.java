@@ -83,6 +83,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         rwd.setUpRingFrame();
     }
 
+    // todo: this method's arguments should be named better
     public static void startRingWindowDisplay(String argumentA, String argumentB) {
         int ringChoice = RingWindowDisplayOption.parse(argumentA);
         ringChoice = RingWindowDisplayOption.sanitizeValue(ringChoice);
@@ -90,6 +91,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         PrintOutputForRingChoice(ringChoice, argumentB);
     }
 
+    // todo: argumentB is not a good name for the second parameter of this method
+    // todo: break logical functionality into methods
     private static void PrintOutputForRingChoice(int ringChoice, String argumentB) {
         ImaginaryQuadraticRing ring = new ImaginaryQuadraticRing(ringChoice);
         ImaginaryQuadraticInteger number = parseImaginaryQuadraticInteger(ring, argumentB);

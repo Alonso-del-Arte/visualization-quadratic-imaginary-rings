@@ -11,6 +11,7 @@ import com.alonsodelarte.quadraticRings.imaginaryquadraticinteger.RingWindowDisp
 @SuppressWarnings("WeakerAccess")
 public class Application {
 
+    // todo: these values, as well as the methods they correspond to, should be renamed so as to be more descriptive of their purpose and use
     private enum LaunchOption {
         DO_NOTHING,
         VERSION,
@@ -38,8 +39,7 @@ public class Application {
             case 0: return LaunchOption.DO_NOTHING;
             case 1: return parseSingleArgument(arguments[0]);
 
-            // If there are more than two parameters, only the first two parameters will be processed
-            default: return LaunchOption.LAUNCH_B;
+            default: return LaunchOption.LAUNCH_B; // If there are more than two parameters, only the first two parameters will be processed
         }
     }
 

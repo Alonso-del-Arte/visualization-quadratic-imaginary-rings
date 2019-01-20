@@ -48,7 +48,7 @@ public class Sanitizers {
     public static int guaranteeGreaterThanMinimum(int value) {
         int sanitizedValue = value;
 
-        if (sanitizedValue < DEFAULT_RING_D) {
+        if (sanitizedValue < MINIMUM_RING_D) {
             sanitizedValue = DEFAULT_RING_D;
         }
 

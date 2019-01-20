@@ -25,10 +25,10 @@ public class Application {
 
     public static void launchApplication(String... arguments) {
         switch(parseArguments(arguments)) {
-            case DO_NOTHING: doNothing();
-            case VERSION: version();
-            case LAUNCH_A: standardLaunch(arguments[0]);
-            case LAUNCH_B: alternateLaunch(arguments[0], arguments[1]);
+            case DO_NOTHING: doNothing(); break;
+            case VERSION: version(); break;
+            case LAUNCH_A: standardLaunch(arguments[0]); break;
+            case LAUNCH_B: alternateLaunch(arguments[0], arguments[1]); break;
         }
     }
 
@@ -48,6 +48,7 @@ public class Application {
             case "-v":
             case "-vers":
             case "-version":
+            case "--version":
             case "v":
             case "vers":
             case "version": return LaunchOption.VERSION;

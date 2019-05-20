@@ -1,4 +1,4 @@
-Version 0.95 of the overall program, Version 0.97 of RingWindowDisplay. To execute this program, download the executable JAR file to a computer that has Java on it (at least the Java Runtime Environment. To compile the program from the source code, you will need the Java Development Kit
+Version 0.95 of the overall program, Version 0.97 of RingWindowDisplay. To execute this program, download the executable JAR file to a computer that has Java on it (at least the Java Runtime Environment). To compile the program from the source code, you will need the Java Development Kit for Java 8 or later.
 
 Note: this JAR does not include the Scala classes `ImagQuadInt`, `ImagQuadRing` nor `NTFC`.
 
@@ -16,17 +16,17 @@ File -> Save diagram as... (Ctrl-Shift-S or Command-Shift-S) Saves the currently
 
 File -> Quit (Ctrl-Q or Command-Q) Exits the program. There is no request for confirmation.
 
-Edit -> Choose discriminant... (Ctrl-D or Command-D) Brings up a text box asking user to enter a negative, squarefree integer. But you can enter a positive integer and the program will quietly multiply it by -1. And if that number is not squarefree, the program will simply move on to the next lower squarefree number (or to -1 in the case of -67108864).
+Edit -> Choose discriminant... (Ctrl-D or Command-D) Brings up a text box asking user to enter a negative, squarefree integer. But you can enter a positive integer and the program will quietly multiply it by -1. And if that number is not squarefree, the program will simply move on to the next lower squarefree number (or to -1 in the case of -8191).
 
 Technically "discriminant" is not the right term. What is meant is the variable usually designated d, which is equal to the discriminant only when it is congruent to 1 modulo 4 (otherwise the disciminant is actually 4d).
 
 Edit -> Increment discriminant (Ctrl-Up arrow or Command-Y). Changes d to the next higher negative, squarefree integer. Disabled when d = -1.
 
-Edit -> Decrement discriminant (Ctrl-Down arrow or Command-B). Changes d to the next lower negative, squarefree integer. Disabled when d = -67108863 (this is a somewhat arbitrary value chosen to avoid arithmetic overflow problems).
+Edit -> Decrement discriminant (Ctrl-Down arrow or Command-B). Changes d to the next lower negative, squarefree integer. Disabled when d = -8191 (this is a somewhat arbitrary value chosen to avoid arithmetic overflow problems).
 
 Edit -> Copy readouts to clipboard (Ctrl-Shift-C or Command-Shift-C). This copies the readouts about a given imaginary quadratic integer to the clipboard.
 
-Edit -> Copy diagram to clipboard (Ctrl-Alt-C or Command-Option-C) NOT YET IMPLEMENTED AS OF VERSION 0.9.
+Edit -> Copy diagram to clipboard (Ctrl-Alt-C or Command-Option-C) This copies the diagram to the clipboard in a format that can then be accessed in an image editing program like Adobe Photoshop. Depending on your system, this operation may take up to 10 seconds the first time, and as much as 2 seconds on subsequent copies. I need to do some testing and research to determine if there is something I can do to speed up this operation.
 
 View -> Zoom in (Ctrl-Number pad plus) Zooms in by increasing pixels per unit interval by the specified zoom interval (initially 5 pixels), drawing the dots representing numbers further apart.
 
@@ -45,5 +45,7 @@ View -> Reset view defaults (F7) Resets pixels per unit interval, dot radius and
 View -> Use theta notation in readouts (T) Unchecked by default.
 
 View -> Update readouts (F2 on Windows or R on Mac OS X) Unchecked by default; in a future version I might change it so it's checked by default.
+
+Help -> User manual... Opens this page in the default Web browser. If there is no Internet connection or the default Web browser is not available for whatever reason, a message is displayed to that effect.
 
 Help -> About... Shows the about box with the version number and copyright notice.

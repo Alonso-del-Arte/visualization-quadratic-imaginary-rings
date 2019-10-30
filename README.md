@@ -1,3 +1,5 @@
+This project has been folded into the Algebraic Integer Calculator project. This repository will be kept for historical purposes.
+
 NebBeans users, it would be a good idea to rename `dist-jar` just `dist`, `code-source` to `src` and `unit-testing` to `test`. IntelliJ users can simply mark the source and test folders accordingly. Whatever the IDE, you'll probably have to connect JUnit somehow.
 
 For an executable of this program, go to the `dist-jar` folder, which contains an executable JAR file and a ReadMe explaining the menu commands and keyboard shortcuts.

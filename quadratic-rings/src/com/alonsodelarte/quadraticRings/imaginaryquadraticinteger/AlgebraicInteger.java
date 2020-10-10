@@ -33,6 +33,10 @@ package com.alonsodelarte.quadraticRings.imaginaryquadraticinteger;
  * the implementer.</p>
  * @author Alonso del Arte
  */
+/*
+    I think this part component of your architecture can be removed, or some of the responsibilities
+    can be re-thought out, per my comments in the class which implements this interface.
+ */
 public interface AlgebraicInteger {
     
     /**

@@ -69,6 +69,18 @@ import org.slf4j.LoggerFactory;
  * quadratic integer rings.
  * @author Alonso del Arte
  */
+/*
+    JavaDocs are great and can allow you to easily generate massive amounts of documentation, but an
+    even better way to document your code is by leveraging the tools made available to us through
+    OOP. By making sure to use verbose names for properties and methods, as well as remembering to
+    keep the responsibility of a method to a single thing, you can create code that reads easily
+    enough that JavaDocs are virtually unneeded. Additionally, expending significant time creating
+    well-thought out JavaDocs may create a tendency to keep code as-is, rather than updating it as
+    the needs of a program change, thus necessitating a redraft of those documents. Plus, the IDEs
+    we use make it easy to refactor names of variables, method signatures, etc without much
+    headache. And since outdated comments don't cause compile errors, it's difficult to distinguish
+    right away whether a comment is still valid or if it's become outdated.
+ */
 public final class RingWindowDisplay extends JPanel implements ActionListener, MouseMotionListener {
 
     public static void startRingWindowDisplay(String argument) {
@@ -83,6 +95,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         rwd.setUpRingFrame();
     }
 
+    // todo: this method's arguments should be named better
     public static void startRingWindowDisplay(String argumentA, String argumentB) {
         int ringChoice = RingWindowDisplayOption.parse(argumentA);
         ringChoice = RingWindowDisplayOption.sanitizeValue(ringChoice);
@@ -90,6 +103,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         PrintOutputForRingChoice(ringChoice, argumentB);
     }
 
+    // todo: argumentB is not a good name for the second parameter of this method
+    // todo: break logical functionality into methods
     private static void PrintOutputForRingChoice(int ringChoice, String argumentB) {
         ImaginaryQuadraticRing ring = new ImaginaryQuadraticRing(ringChoice);
         ImaginaryQuadraticInteger number = parseImaginaryQuadraticInteger(ring, argumentB);
@@ -487,6 +502,8 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                     graphicsForPoints.fillOval(currNegPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
                     graphicsForPoints.fillOval(currNegPointX - this.dotRadius, currNegPointY - this.dotRadius, dotDiameter, dotDiameter);
                     currSplitPrime = currIQI.norm();
+
+                    // todo: refactor duplicated code into method (duplication at ctrl+F: REFERENCE_A1B1C1)
                     if (currSplitPrime <= maxX) {
                         currSplitPrimePointX = this.zeroCoordX + ((int) currSplitPrime * this.pixelsPerUnitInterval);
                         currNegSplitPrimePointX = this.zeroCoordX - ((int) currSplitPrime * this.pixelsPerUnitInterval);
@@ -567,6 +584,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                         graphicsForPoints.fillOval(currNegPointX - this.dotRadius, currPointY - this.dotRadius, dotDiameter, dotDiameter);
                         graphicsForPoints.fillOval(currNegPointX - this.dotRadius, currNegPointY - this.dotRadius, dotDiameter, dotDiameter);
                         currSplitPrime = currIQI.norm();
+                        // todo: REFERENCE_A1B1C1
                         if (currSplitPrime <= maxX) {
                             currSplitPrimePointX = this.zeroCoordX + ((int) currSplitPrime * this.pixelsPerUnitInterval);
                             currNegSplitPrimePointX = this.zeroCoordX - ((int) currSplitPrime * this.pixelsPerUnitInterval);
@@ -1238,6 +1256,16 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
                 System.err.println(problemMessage);
             }
         } else {
+            /*
+                There is a lot of string manipulation in this project. For the amount of dynamic
+                content being injected into them, it will make messages easier to read by using
+                string interpolation. The java.lang.String.format method provides a way to template
+                strings and inject variable data as a variadic argument; similarly, loggers
+                enabled by the slf4j library can log more specific information about when and where
+                information is being logged and can also leverage templating (even easier than
+                String.format())
+             */
+            // todo: check out the String.format() method as well as the Logger provided by the slf4j library
             String noDesktopMessage = "Sorry, unable to open URL\n<" + urlStr + ">\nDefault Web browser is not available from this program.";
             JOptionPane.showMessageDialog(this.ringFrame, noDesktopMessage);
             System.err.println(noDesktopMessage);
@@ -1259,6 +1287,12 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
      * the console with a message to that effect.
      * @param ae Object giving information about the menu item selected.
      */
+    /*
+        Switches go great with Enums--they give you code completion in your IDE and they prevent sometimes
+        challenging-to-debug issues that stem from typos, text transforms/capitalization, etc.
+     */
+    // todo: update logic to use an enum to strongly type your finite list of possible actions
+    // todo: consider refactoring related responsibilities into own class
     @Override
     public void actionPerformed(ActionEvent ae) {
         String cmd = ae.getActionCommand();
@@ -1350,6 +1384,13 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
     /**
      * Sets up the JFrame in which the various ring diagrams will be drawn.
      */
+    /*
+        HOLY COW. This method is super crazy long. This is a prime example of code that can be
+        refactored so as to be more verbose and descriptive. Many connected operations can be
+        extracted into methods; control-flow can likely be optimized to make this chunk of
+        functionality significantly more readable.
+     */
+    // todo: break logical functionality into methods
     private void setUpRingFrame() {
         ringFrame = new JFrame("Ring Diagram for " + this.diagramRing.toString());
         haveSavedBefore = false;
@@ -1440,6 +1481,7 @@ public final class RingWindowDisplay extends JPanel implements ActionListener, M
         copyDiagramToClipboardMenuItem.setActionCommand("copyDiagram");
         copyDiagramToClipboardMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, maskCtrlCommand + Event.ALT_MASK));
         copyDiagramToClipboardMenuItem.addActionListener(this);
+        // todo: remove commented out code
     /*    ringWindowMenu.addSeparator();
         THIS IS FOR WHEN I GET AROUND TO ADDING THE CAPABILITY TO CHANGE GRID, POINT COLORS
         ringWindowMenuItem = new JMenuItem("Preferences...");

@@ -184,6 +184,7 @@ public class ImageSelectionTest {
     /**
      * Test of hasOwnership method, of class ImageSelection.
      */
+    // todo: Resolve failing unit test
     @Test
     public void testHasOwnership() {
         System.out.println("hasOwnership");
